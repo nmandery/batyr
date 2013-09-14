@@ -1,5 +1,9 @@
 #include "broker.h"
 
+#include <thread>
+#include <functional>
+
+
 using namespace GeoPoll;
 
 
@@ -25,11 +29,17 @@ Broker::addListener(std::shared_ptr<Geopoll::BaseListener> listener_ptr)
 
 
 void
-Broker::start()
+Broker::run()
 {
     // start all listeners
     for(auto ilistener = listeners.begin(); ilistener != listeners.end() ; ++ilistener) {
-        (*ilistener)->start();
+        // TODO: run listeners in seperate threads
+        // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
+        std::thread lThread(
+            std::bind(&Geopoll::BaseListener::run, (*ilistener))
+            );
+        lThread.detach();
+        //(*ilistener)->run();
     }
 }
 

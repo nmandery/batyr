@@ -3,6 +3,8 @@
 
 #include "Poco/Logger.h"
 
+#include <mutex>
+
 #include "baselistener.h"
 
 namespace Geopoll {
@@ -12,12 +14,14 @@ namespace Geopoll {
         protected:
             Poco::Logger & logger;
 
+            std::mutex runMutex;
+
         public:
 
             HttpListener();
             ~HttpListener();
 
-            void start();
+            void run();
             void stop();
     };
 

@@ -23,7 +23,7 @@ namespace GeoPoll {
             ~Broker();
 
             void addListener( std::shared_ptr<Geopoll::BaseListener> );
-            void start();
+            void run();
             void stop();
     };
 

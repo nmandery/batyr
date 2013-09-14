@@ -1,7 +1,7 @@
 #ifndef __geopoll_baselistener_h__
 #define __geopoll_baselistener_h__
 
-#include "Poco/Logger.h"
+#include <Poco/Logger.h>
 
 #include <memory>
 
@@ -17,8 +17,12 @@ namespace Geopoll {
             BaseListener();
             ~BaseListener();
 
-            virtual void start() {};
             virtual void stop() {};
+
+            /** execute the listener. this method will block and should be
+             * executed in a seperate thread
+             */
+            virtual void run() {};
     };
 
 };

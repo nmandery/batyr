@@ -33,7 +33,10 @@ endif ()
 
 
 find_library(POCO_FOUNDATION PocoFoundation)
+find_library(POCO_NET PocoNet)
+find_library(POCO_UTIL PocoUtil)
+find_package( Threads )
 
 ADD_EXECUTABLE(geopoll ${ServerSources})
-target_link_libraries(geopoll ${POCO_FOUNDATION})
+target_link_libraries(geopoll ${POCO_FOUNDATION} ${POCO_UTIL} ${POCO_NET} ${CMAKE_THREAD_LIBS_INIT})  
 
