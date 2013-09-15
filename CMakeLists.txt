@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 project (batyr)
-FILE(GLOB ServerSources src/*.cpp src/*/*.cpp)
+FILE(GLOB ServerSources src/server/*.cpp src/server/*/*.cpp)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
