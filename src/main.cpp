@@ -1,7 +1,7 @@
 #include "server.h"
 
 
-using namespace Geopoll;
+using namespace Batyr;
 
 
 int

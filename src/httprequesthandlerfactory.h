@@ -1,12 +1,12 @@
-#ifndef __geopoll_httprequesthandlerfactory_h__
-#define __geopoll_httprequesthandlerfactory_h__
+#ifndef __batyr_httprequesthandlerfactory_h__
+#define __batyr_httprequesthandlerfactory_h__
 
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include "Poco/Logger.h"
 
-namespace Geopoll {
+namespace Batyr {
 
     class HTTPRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
     {
@@ -21,4 +21,4 @@ namespace Geopoll {
 
 };
 
-#endif // __geopoll_httprequesthandlerfactory_h__
+#endif // __batyr_httprequesthandlerfactory_h__

@@ -1,5 +1,5 @@
-#ifndef __geopoll_config_h__
-#define __geopoll_config_h__
+#ifndef __batyr_config_h__
+#define __batyr_config_h__
 
 #include "macros.h"
 
@@ -10,7 +10,7 @@
 #define VERSION_FULL STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
 
 
-#define APP_NAME_SERVER         "geopoll"
+#define APP_NAME_SERVER         "batyr"
 #define APP_NAME_SERVER_FULL    APP_NAME_SERVER " v" VERSION_FULL
 
-#endif // __geopoll_config_h__
+#endif // __batyr_config_h__

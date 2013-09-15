@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 
-project (geopoll)
+project (batyr)
 FILE(GLOB ServerSources src/*.cpp src/*/*.cpp)
 
 
@@ -38,12 +38,12 @@ find_library(POCO_UTIL PocoUtil)
 find_package( Threads REQUIRED)
 find_package( ZeroMQ REQUIRED)
 
-ADD_EXECUTABLE(geopoll ${ServerSources})
-target_link_libraries(geopoll ${POCO_FOUNDATION} )  
-target_link_libraries(geopoll ${POCO_UTIL} )  
-target_link_libraries(geopoll ${POCO_NET} )  
-target_link_libraries(geopoll ${CMAKE_THREAD_LIBS_INIT} )  
-target_link_libraries(geopoll ${ZeroMQ_LIBRARIES})  
+ADD_EXECUTABLE(batyrd ${ServerSources})
+target_link_libraries(batyrd ${POCO_FOUNDATION} )
+target_link_libraries(batyrd ${POCO_UTIL} )
+target_link_libraries(batyrd ${POCO_NET} )
+target_link_libraries(batyrd ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(batyrd ${ZeroMQ_LIBRARIES})
 
 
-# vim: ft=text
+# vim: ft=cmake

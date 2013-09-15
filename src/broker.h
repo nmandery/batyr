@@ -1,5 +1,5 @@
-#ifndef __geopoll_broker_h__
-#define __geopoll_broker_h__
+#ifndef __batyr_broker_h__
+#define __batyr_broker_h__
 
 #include <Poco/Logger.h>
 #include <zmq.hpp>
@@ -16,7 +16,7 @@ namespace GeoPoll {
 
         protected:
             Poco::Logger & logger;
-            std::vector< std::shared_ptr<Geopoll::BaseListener> > listeners;
+            std::vector< std::shared_ptr<Batyr::BaseListener> > listeners;
             
             zmq::context_t * zmq_cx;
 
@@ -25,11 +25,11 @@ namespace GeoPoll {
             Broker();
             ~Broker();
 
-            void addListener( std::shared_ptr<Geopoll::BaseListener> );
+            void addListener( std::shared_ptr<Batyr::BaseListener> );
             void run();
             void stop();
     };
 
 };
 
-#endif // __geopoll_broker_h__
+#endif // __batyr_broker_h__

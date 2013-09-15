@@ -1,5 +1,5 @@
-#ifndef __geopoll_httprequest_createhandler_h__
-#define __geopoll_httprequest_createhandler_h__
+#ifndef __batyr_httprequest_createhandler_h__
+#define __batyr_httprequest_createhandler_h__
 
 
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -7,7 +7,7 @@
 #include <Poco/Net/HTTPServerResponse.h>
 
 
-namespace Geopoll 
+namespace Batyr 
 {
 namespace HttpRequest 
 {
@@ -21,4 +21,4 @@ namespace HttpRequest
 };
 };
 
-#endif // __geopoll_httprequest_createhandler_h__
+#endif // __batyr_httprequest_createhandler_h__

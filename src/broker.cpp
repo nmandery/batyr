@@ -33,7 +33,7 @@ Broker::~Broker()
 
 
 void
-Broker::addListener(std::shared_ptr<Geopoll::BaseListener> listener_ptr)
+Broker::addListener(std::shared_ptr<Batyr::BaseListener> listener_ptr)
 {
     listeners.push_back(listener_ptr);
 }
@@ -47,7 +47,7 @@ Broker::run()
         // TODO: run listeners in seperate threads
         // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
         std::thread lThread(
-            std::bind(&Geopoll::BaseListener::run, (*ilistener))
+            std::bind(&Batyr::BaseListener::run, (*ilistener))
             );
         lThread.detach();
         //(*ilistener)->run();

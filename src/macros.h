@@ -1,5 +1,5 @@
-#ifndef __geopoll_macros_h__
-#define __geopoll_macros_h__
+#ifndef __batyr_macros_h__
+#define __batyr_macros_h__
 
 
 // these two macros convert macro values to strings
@@ -7,4 +7,4 @@
 #define STRINGIFY(x)    STRINGIFY2(x)
 
 
-#endif // __geopoll_macros_h__
+#endif // __batyr_macros_h__

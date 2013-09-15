@@ -4,7 +4,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>
 
-using namespace Geopoll::HttpRequest;
+using namespace Batyr::HttpRequest;
 
 void
 NotFoundHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)

@@ -12,7 +12,7 @@
 #include "broker.h"
 
 
-using namespace Geopoll;
+using namespace Batyr;
 
 
 int
@@ -24,7 +24,7 @@ Server::main(const std::vector<std::string> & args)
     try {
         GeoPoll::Broker broker;
 
-        auto httplistener_ptr = std::make_shared<Geopoll::HttpListener>();
+        auto httplistener_ptr = std::make_shared<Batyr::HttpListener>();
         broker.addListener(httplistener_ptr);
         broker.run();
 

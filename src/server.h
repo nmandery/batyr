@@ -1,12 +1,12 @@
-#ifndef __geopoll_server_h__
-#define __geopoll_server_h__
+#ifndef __batyr_server_h__
+#define __batyr_server_h__
 
 #include <Poco/Util/ServerApplication.h>
 
 #include <string>
 #include <vector>
 
-namespace Geopoll {
+namespace Batyr {
 
     class Server : public Poco::Util::ServerApplication
     {
@@ -19,4 +19,4 @@ namespace Geopoll {
 
 };
 
-#endif // __geopoll_server_h__
+#endif // __batyr_server_h__

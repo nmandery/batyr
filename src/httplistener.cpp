@@ -9,7 +9,7 @@
  * http://www.codeproject.com/Articles/252827/Learning-Poco-A-simple-HTTP-server
  */
 
-using namespace Geopoll;
+using namespace Batyr;
 
 
 HttpListener::HttpListener()
@@ -32,7 +32,7 @@ HttpListener::run()
     auto serverParams = new Poco::Net::HTTPServerParams; // TODO: check destruction
     serverParams->setMaxThreads(5);
 
-    auto handlerFactory = new Geopoll::HTTPRequestHandlerFactory; // TODO: check destruction
+    auto handlerFactory = new Batyr::HTTPRequestHandlerFactory; // TODO: check destruction
 
     Poco::Net::HTTPServer server(handlerFactory, Poco::Net::ServerSocket(9090), serverParams);
     server.start();

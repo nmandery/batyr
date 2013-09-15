@@ -1,5 +1,5 @@
-#ifndef __geopoll_httplistener_h__
-#define __geopoll_httplistener_h__
+#ifndef __batyr_httplistener_h__
+#define __batyr_httplistener_h__
 
 #include "Poco/Logger.h"
 
@@ -7,7 +7,7 @@
 
 #include "baselistener.h"
 
-namespace Geopoll {
+namespace Batyr {
 
     class HttpListener : public BaseListener {
         
@@ -29,4 +29,4 @@ namespace Geopoll {
 };
 
 
-#endif // __geopoll_httplistener_h__
+#endif // __batyr_httplistener_h__

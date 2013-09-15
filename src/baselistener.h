@@ -1,11 +1,11 @@
-#ifndef __geopoll_baselistener_h__
-#define __geopoll_baselistener_h__
+#ifndef __batyr_baselistener_h__
+#define __batyr_baselistener_h__
 
 #include <Poco/Logger.h>
 
 #include <memory>
 
-namespace Geopoll {
+namespace Batyr {
 
     class BaseListener {
         
@@ -28,4 +28,4 @@ namespace Geopoll {
 };
 
 
-#endif // __geopoll_baselistener_h__
+#endif // __batyr_baselistener_h__

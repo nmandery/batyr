@@ -1,6 +1,6 @@
 #include "baselistener.h"
 
-using namespace Geopoll;
+using namespace Batyr;
 
 
 BaseListener::BaseListener()
