@@ -17,6 +17,10 @@ namespace Batyr {
             BaseListener();
             ~BaseListener();
 
+            /**
+             * stop the listener.
+             * the run method should terminate when this method is called
+             */
             virtual void stop() {};
 
             /** execute the listener. this method will block and should be

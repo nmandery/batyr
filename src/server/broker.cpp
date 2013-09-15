@@ -12,8 +12,7 @@ Broker::Broker()
     :   logger(Poco::Logger::get("Broker")),
         zmq_cx(0)
 {
-    poco_information(logger, "Setting up the broker");
-    //logger = Poco::Logger::get("Broker");
+    poco_debug(logger, "Setting up the broker");
     
     zmq_cx = new zmq::context_t(1);
     if (zmq_cx == nullptr) {
@@ -44,13 +43,9 @@ Broker::run()
 {
     // start all listeners
     for(auto ilistener = listeners.begin(); ilistener != listeners.end() ; ++ilistener) {
-        // TODO: run listeners in seperate threads
         // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
-        std::thread lThread(
-            std::bind(&Batyr::BaseListener::run, (*ilistener))
-            );
+        std::thread lThread( std::bind(&Batyr::BaseListener::run, (*ilistener)) );
         lThread.detach();
-        //(*ilistener)->run();
     }
 }
 

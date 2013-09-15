@@ -1,7 +1,7 @@
 #include "notfoundhandler.h"
 #include "../response.h"
-#include "../config.h"
-#include "../macros.h"
+#include "../../config.h"
+#include "../../macros.h"
 
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>
