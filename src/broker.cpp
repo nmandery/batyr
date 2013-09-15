@@ -2,22 +2,33 @@
 
 #include <thread>
 #include <functional>
+#include <stdexcept>
 
 
 using namespace GeoPoll;
 
 
 Broker::Broker() 
-    : logger(Poco::Logger::get("Broker"))
+    :   logger(Poco::Logger::get("Broker")),
+        zmq_cx(0)
 {
     poco_information(logger, "Setting up the broker");
     //logger = Poco::Logger::get("Broker");
+    
+    zmq_cx = new zmq::context_t(1);
+    if (zmq_cx == nullptr) {
+        throw std::runtime_error("Could not intialize 0mq context");
+    }
 }
 
 
 Broker::~Broker()
 {
     stop();
+
+    if (zmq_cx != nullptr) {
+        delete zmq_cx;
+    }
 }
 
 

@@ -5,8 +5,12 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/Message.h>
 
+#include <stdexcept>
+#include <iostream>
+
 #include "server.h"
 #include "broker.h"
+
 
 using namespace Geopoll;
 
@@ -15,17 +19,25 @@ int
 Server::main(const std::vector<std::string> & args)
 {
     initLogging();
+    Poco::Logger & logger = Poco::Logger::get("Server"); 
 
-    GeoPoll::Broker broker;
+    try {
+        GeoPoll::Broker broker;
 
-    auto httplistener_ptr = std::make_shared<Geopoll::HttpListener>();
-    broker.addListener(httplistener_ptr);
-    broker.run();
+        auto httplistener_ptr = std::make_shared<Geopoll::HttpListener>();
+        broker.addListener(httplistener_ptr);
+        broker.run();
 
-    waitForTerminationRequest();  // wait for CTRL-C or kill
+        waitForTerminationRequest();  // wait for CTRL-C or kill
 
-    broker.stop();
+        broker.stop();
+    }
+    catch (std::exception& e) {
+        poco_error(logger, e.what());
+        std::cerr << e.what() << std::endl;
 
+        return Poco::Util::Application::EXIT_SOFTWARE;
+    }
     return Poco::Util::Application::EXIT_OK;
 };
 

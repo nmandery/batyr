@@ -4,7 +4,7 @@ project (geopoll)
 FILE(GLOB ServerSources src/*.cpp src/*/*.cpp)
 
 
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
 # Initialize CXXFLAGS.
@@ -35,8 +35,15 @@ endif ()
 find_library(POCO_FOUNDATION PocoFoundation)
 find_library(POCO_NET PocoNet)
 find_library(POCO_UTIL PocoUtil)
-find_package( Threads )
+find_package( Threads REQUIRED)
+find_package( ZeroMQ REQUIRED)
 
 ADD_EXECUTABLE(geopoll ${ServerSources})
-target_link_libraries(geopoll ${POCO_FOUNDATION} ${POCO_UTIL} ${POCO_NET} ${CMAKE_THREAD_LIBS_INIT})  
+target_link_libraries(geopoll ${POCO_FOUNDATION} )  
+target_link_libraries(geopoll ${POCO_UTIL} )  
+target_link_libraries(geopoll ${POCO_NET} )  
+target_link_libraries(geopoll ${CMAKE_THREAD_LIBS_INIT} )  
+target_link_libraries(geopoll ${ZeroMQ_LIBRARIES})  
 
+
+# vim: ft=text

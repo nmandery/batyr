@@ -1,7 +1,8 @@
 #ifndef __geopoll_broker_h__
 #define __geopoll_broker_h__
 
-#include "Poco/Logger.h"
+#include <Poco/Logger.h>
+#include <zmq.hpp>
 
 #include <vector>
 #include <memory>
@@ -16,6 +17,8 @@ namespace GeoPoll {
         protected:
             Poco::Logger & logger;
             std::vector< std::shared_ptr<Geopoll::BaseListener> > listeners;
+            
+            zmq::context_t * zmq_cx;
 
 
         public:
