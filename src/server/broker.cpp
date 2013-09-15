@@ -54,9 +54,7 @@ void
 Broker::stop()
 {
     // stopping all listeners
-    /*
     for(auto ilistener = listeners.begin(); ilistener != listeners.end() ; ++ilistener) {
         (*ilistener)->stop();
     }
-    */
 }
