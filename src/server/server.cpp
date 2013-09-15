@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "server.h"
+#include "macros.h"
 #include "broker.h"
 
 
@@ -18,6 +19,8 @@ using namespace Batyr;
 int
 Server::main(const std::vector<std::string> & args)
 {
+    UNUSED(args)
+
     initLogging();
     Poco::Logger & logger = Poco::Logger::get("Server"); 
 
