@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 project (batyr)
 FILE(GLOB ServerSources src/server/*.cpp src/server/*/*.cpp)
@@ -32,6 +32,7 @@ else ()
 endif ()
 
 
+# TODO: find/build macros to find POCO components
 find_library(POCO_FOUNDATION PocoFoundation)
 find_library(POCO_NET PocoNet)
 find_library(POCO_UTIL PocoUtil)

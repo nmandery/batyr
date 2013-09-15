@@ -3,3 +3,5 @@
 /CMakeFiles/
 *.swp
 /Makefile
+*~
+/batyrd
