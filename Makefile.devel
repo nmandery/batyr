@@ -1,0 +1,9 @@
+# Development makefile ... to automate repeating tasks during development 
+#
+# Not needed to build the application
+
+# build the header containing all assets as binary strings
+assets:
+	cd static_html && python ../tools/assets2header.py \
+		--output ../src/server/httpassets.h \
+		$$(find . -type f | sed 's#^\./##g')
