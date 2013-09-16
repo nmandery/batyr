@@ -26,7 +26,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     targetValue.SetObject();
     targetValue.AddMember("id", id.c_str(), allocator);
 
-    std::string statusString;
+    const char * statusString;
     switch (status) {
         case QUEUED:
             statusString = "queued";
@@ -41,7 +41,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
             statusString = "failed";
             break;
     }
-    targetValue.AddMember("status", statusString.c_str(), allocator);
+    targetValue.AddMember("status", statusString, allocator);
 
 
     if (!errorMessage.empty()) {
