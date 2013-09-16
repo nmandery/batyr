@@ -58,7 +58,7 @@ class Asset(object):
         elif self.filename.endswith('.css'):
             return 'text/css'
         elif self.filename.endswith('.html'):
-            return '/text/html'
+            return 'text/html'
         return subprocess.check_output(['file', '-b', '-i', self.filename]).strip()
 
     @classmethod
