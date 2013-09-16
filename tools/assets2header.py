@@ -15,6 +15,7 @@ import os.path
 import subprocess
 import argparse
 from contextlib import contextmanager
+import hashlib
 
 def slug(text, encoding=None,
          permitted_chars='abcdefghijklmnopqrstuvwxyz0123456789_',
@@ -52,6 +53,11 @@ class Asset(object):
     def cvar_data(self):
         return "asset_%s_data" % (self.slugname(),)
 
+    def etag(self):
+        m = hashlib.sha1()
+        m.update(open(self.filename).read())
+        return m.hexdigest()
+
     def mimetype(self):
         if self.filename.endswith('.js'):
             return 'application/javascript'
@@ -70,6 +76,7 @@ struct asset_info {
    const char * mimetype;
    const unsigned char * data;
    size_t size_in_bytes;
+   const char * etag;
 };
 """
 
@@ -90,12 +97,13 @@ struct asset_info {
 
 
     def metadata(self):
-        return """%(indenting)s{ "%(filename)s", "%(mimetype)s", %(cvar_data)s, %(filesize)d }""" % {
+        return """%(indenting)s{ "%(filename)s", "%(mimetype)s", %(cvar_data)s, %(filesize)d, "%(etag)s" }""" % {
             'filename': self.filename,
             'cvar_data': self.cvar_data(),
             'mimetype': self.mimetype(),
             'filesize': self.filesize,
-            'indenting': self.indenting*' '
+            'indenting': self.indenting*' ',
+            'etag': self.etag()
         }
 
 
@@ -135,6 +143,7 @@ if __name__ == '__main__':
         fh.write(Asset.declaration())
 
         asset_infos = []
+        args.files.sort()
         for f in args.files:
             asset = Asset(f)
             asset.write_data(fh)

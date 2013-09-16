@@ -14,6 +14,7 @@ CreateHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
 
     resp.set("Server", APP_NAME_SERVER_FULL);
     resp.setContentType("application/json");
+    resp.set("Cache-Control", "no-cache");
 
     if (req.getMethod() != "POST") {
         resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);

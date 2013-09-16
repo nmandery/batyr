@@ -19,11 +19,12 @@ namespace HttpRequest
     {
         private:
             std::string contentType;
+            std::string etag;
             const unsigned char * buffer;
             size_t bufferLen;
 
         public:
-            BufferHandler(std::string _contentType, const unsigned char * _buffer, size_t _bufferLen);
+            BufferHandler(std::string _contentType, std::string _etag, const unsigned char * _buffer, size_t _bufferLen);
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
     };
 

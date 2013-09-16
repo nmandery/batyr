@@ -50,7 +50,8 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         struct asset_info * asset = &assets[assetIndex];
 
         if ((endpoint == asset->filename) || (endpoint == "" && (strcmp("index.html", asset->filename) == 0))) {
-            return new Batyr::HttpRequest::BufferHandler(std::string(asset->mimetype), asset->data, asset->size_in_bytes);
+            return new Batyr::HttpRequest::BufferHandler(std::string(asset->mimetype),
+                        std::string(asset->etag), asset->data, asset->size_in_bytes);
         }
         assetIndex++;
     }
