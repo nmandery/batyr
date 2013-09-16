@@ -3,7 +3,9 @@
 # Not needed to build the application
 
 # build the header containing all assets as binary strings
+# sort the found files by their name to avoid to big changes
+# in the version-controled, generated header file
 assets:
 	cd static_html && python ../tools/assets2header.py \
 		--output ../src/server/httpassets.h \
-		$$(find . -type f | sed 's#^\./##g')
+		$$(find . -type f | sed 's#^\./##g' | sort)
