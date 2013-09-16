@@ -9,10 +9,13 @@ namespace Batyr
 
     class Job
     {
-        protected:
+        private:
             std::string errorMessage;
+            std::string id;
             
         public:
+            Job();
+
             friend std::ostream& operator<< (std::ostream& , const Job&);
 
             void setErrorMessage(const std::string & em) 

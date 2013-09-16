@@ -1,3 +1,6 @@
+#include <Poco/UUIDGenerator.h>
+#include <Poco/UUID.h>
+
 #include "job.h"
 #include "../lib/rapidjson/document.h"
 #include "../lib/rapidjson/prettywriter.h"
@@ -5,6 +8,15 @@
 
 using namespace Batyr;
 
+
+Job::Job()
+{
+    // generate an UUID as id for the job
+    Poco::UUIDGenerator uuidGen;
+    Poco::UUID uuid(uuidGen.createRandom());
+    id = uuid.toString();
+
+}
 
 std::string
 Job::toString() const
@@ -14,6 +26,8 @@ Job::toString() const
 
     rapidjson::Document data;
     data.SetObject();
+
+    data.AddMember("id", id.c_str(), data.GetAllocator());
 
     if (!errorMessage.empty()) {
         data.AddMember("errorMessage", errorMessage.c_str(), data.GetAllocator());
