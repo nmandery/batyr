@@ -25,7 +25,7 @@ Server::main(const std::vector<std::string> & args)
     Poco::Logger & logger = Poco::Logger::get("Server"); 
 
     try {
-        GeoPoll::Broker broker;
+        Broker broker;
 
         auto httplistener_ptr = std::make_shared<Batyr::HttpListener>();
         broker.addListener(httplistener_ptr);

@@ -1,22 +1,54 @@
 #include <Poco/UUIDGenerator.h>
 #include <Poco/UUID.h>
 
-#include "job.h"
-#include "../lib/rapidjson/document.h"
 #include "../lib/rapidjson/prettywriter.h"
 #include "../lib/rapidjson/stringbuffer.h"
+
+#include "job.h"
 
 using namespace Batyr;
 
 
 Job::Job()
+    : status(FAILED)
 {
     // generate an UUID as id for the job
-    Poco::UUIDGenerator uuidGen;
+    Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
     Poco::UUID uuid(uuidGen.createRandom());
     id = uuid.toString();
 
 }
+
+
+void
+Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const
+{
+    targetValue.SetObject();
+    targetValue.AddMember("id", id.c_str(), allocator);
+
+    std::string statusString;
+    switch (status) {
+        case QUEUED:
+            statusString = "queued";
+            break;
+        case IN_PROCESS:
+            statusString = "in_process";
+            break;
+        case FINISHED:
+            statusString = "finished";
+            break;
+        case FAILED:
+            statusString = "failed";
+            break;
+    }
+    targetValue.AddMember("status", statusString.c_str(), allocator);
+
+
+    if (!errorMessage.empty()) {
+        targetValue.AddMember("errorMessage", errorMessage.c_str(), allocator);
+    }
+}
+
 
 std::string
 Job::toString() const
@@ -25,17 +57,8 @@ Job::toString() const
     // http://www.thomaswhitton.com/blog/2013/06/27/json-c-plus-plus-examples/
 
     rapidjson::Document data;
-    data.SetObject();
 
-    data.AddMember("id", id.c_str(), data.GetAllocator());
-
-    if (!errorMessage.empty()) {
-        data.AddMember("errorMessage", errorMessage.c_str(), data.GetAllocator());
-        data.AddMember("success", false, data.GetAllocator());
-    }
-    else {
-        data.AddMember("success", true, data.GetAllocator());
-    }
+    toJsonValue(data, data.GetAllocator());
 
     // stringify
     rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;

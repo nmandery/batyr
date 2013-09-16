@@ -9,14 +9,16 @@
 
 #include "baselistener.h"
 #include "httplistener.h"
+#include "joblist.h"
 
-namespace GeoPoll {
+namespace Batyr {
    
     class Broker {
 
-        protected:
+        private:
             Poco::Logger & logger;
             std::vector< std::shared_ptr<Batyr::BaseListener> > listeners;
+            JobList joblist;
             
             zmq::context_t * zmq_cx;
 

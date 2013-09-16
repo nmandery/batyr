@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 
-using namespace GeoPoll;
+using namespace Batyr;
 
 
 Broker::Broker() 
