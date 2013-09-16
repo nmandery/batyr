@@ -1,4 +1,4 @@
-#include "response.h"
+#include "job.h"
 #include "../lib/rapidjson/document.h"
 #include "../lib/rapidjson/prettywriter.h"
 #include "../lib/rapidjson/stringbuffer.h"
@@ -7,7 +7,7 @@ using namespace Batyr;
 
 
 std::string
-Response::toString() const
+Job::toString() const
 {
     // usage of rapidjson:
     // http://www.thomaswhitton.com/blog/2013/06/27/json-c-plus-plus-examples/
@@ -33,7 +33,7 @@ Response::toString() const
 
 
 std::ostream&
-Batyr::operator<< (std::ostream& stream, const Response& r)
+Batyr::operator<< (std::ostream& stream, const Job& r)
 {
     stream << r.toString();
 

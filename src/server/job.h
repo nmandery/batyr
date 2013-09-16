@@ -1,5 +1,5 @@
-#ifndef __batyr_response_h__
-#define __batyr_response_h__
+#ifndef __batyr_job_h__
+#define __batyr_job_h__
 
 #include <string>
 #include <iostream>
@@ -7,13 +7,13 @@
 namespace Batyr 
 {
 
-    class Response
+    class Job
     {
         protected:
             std::string errorMessage;
             
         public:
-            friend std::ostream& operator<< (std::ostream& , const Response&);
+            friend std::ostream& operator<< (std::ostream& , const Job&);
 
             void setErrorMessage(const std::string & em) 
             {
@@ -24,10 +24,10 @@ namespace Batyr
 
     };
 
-    std::ostream& operator<< (std::ostream& , const Response&);
+    std::ostream& operator<< (std::ostream& , const Job&);
 
 
 };
 
 
-#endif // __batyr_response_h__
+#endif // __batyr_job_h__
