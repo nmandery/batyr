@@ -37,6 +37,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
     poco_debug(logger, "Dispatching request for endpoint:");
     poco_debug(logger, endpoint.c_str());
 
+    // dispatch to api handlers
     if (req.getURI() == "create") {
         return new Batyr::HttpRequest::CreateHandler;
     }
@@ -54,5 +55,6 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         assetIndex++;
     }
 
+    // at this point everything is just a 404 error
     return new Batyr::HttpRequest::NotFoundHandler;
 }
