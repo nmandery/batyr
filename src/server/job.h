@@ -56,13 +56,10 @@ namespace Batyr
             Job::Status status;
             std::chrono::system_clock::time_point timeAdded;
 
-            /** convert a timestamp to a JSON timestamp */
-            std::string toJSON(const std::chrono::system_clock::time_point &) const;
  
     };
 
     std::ostream& operator<< (std::ostream& , const Job&);
-
 
 };
 

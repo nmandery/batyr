@@ -1,8 +1,7 @@
 #include "joblisthandler.h"
+#include "../json.h"
 #include "../../config.h"
 
-#include "../../lib/rapidjson/prettywriter.h"
-#include "../../lib/rapidjson/stringbuffer.h"
 #include "../../lib/rapidjson/document.h"
 
 #include <Poco/Net/HTTPResponse.h>
@@ -54,12 +53,7 @@ JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTP
         poco_warning(logger, "Could not lock jobList's weak_ptr. So there are no jobs to list available");
     }
 
-   // stringify
-    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
-    rapidjson::Writer< rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
-    data.Accept(writer);
-
     std::ostream & out = resp.send();
-    out << buffer.GetString();
+    out << Batyr::Json::stringify(data);
     out.flush();
 };

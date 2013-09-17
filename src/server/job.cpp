@@ -1,14 +1,13 @@
 #include <Poco/UUIDGenerator.h>
 #include <Poco/UUID.h>
 
-#include "../lib/rapidjson/prettywriter.h"
-#include "../lib/rapidjson/stringbuffer.h"
-
 #include <ctime>
 
 #include "job.h"
+#include "json.h"
 
 using namespace Batyr;
+using namespace Batyr::Json;
 
 
 Job::Job()
@@ -19,7 +18,6 @@ Job::Job()
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
     Poco::UUID uuid(uuidGen.createRandom());
     id = uuid.toString();
-
 }
 
 
@@ -28,7 +26,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
 {
     targetValue.SetObject();
     targetValue.AddMember("id", id.c_str(), allocator);
-    targetValue.AddMember("timeAdded", toJSON(timeAdded).c_str(), allocator);
+    targetValue.AddMember("timeAdded", stringify(timeAdded).c_str(), allocator);
 
     const char * statusString;
     switch (status) {
@@ -61,27 +59,8 @@ Job::toString() const
     // http://www.thomaswhitton.com/blog/2013/06/27/json-c-plus-plus-examples/
 
     rapidjson::Document data;
-
     toJsonValue(data, data.GetAllocator());
-
-    // stringify
-    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
-    rapidjson::Writer< rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
-    data.Accept(writer);
-
-    return std::string(buffer.GetString());
-}
-
-
-std::string
-Job::toJSON(const std::chrono::system_clock::time_point & tp) const
-{
-    time_t tp_t = std::chrono::system_clock::to_time_t(tp);
-    tm utc_tm = *std::gmtime(&tp_t);
-
-    char buffer[100];
-    std::strftime(buffer, sizeof(buffer), "%FT%TZ", &utc_tm);
-    return std::string(buffer);
+    return stringify(data);
 }
 
 
