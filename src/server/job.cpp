@@ -2,6 +2,7 @@
 #include <Poco/UUID.h>
 
 #include <ctime>
+#include <algorithm>
 
 #include "job.h"
 #include "json.h"
@@ -18,6 +19,9 @@ Job::Job()
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
     Poco::UUID uuid(uuidGen.createRandom());
     id = uuid.toString();
+
+    // remove all dashes from the string
+    std::remove(id.begin(), id.end(), '-');
 }
 
 
