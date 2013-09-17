@@ -44,9 +44,9 @@ void
 Broker::run()
 {
     // start all listeners
-    for(auto ilistener = listeners.begin(); ilistener != listeners.end() ; ++ilistener) {
+    for(auto ilistener : listeners) {
         // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
-        std::thread lThread( std::bind(&Batyr::BaseListener::run, (*ilistener)) );
+        std::thread lThread( std::bind(&Batyr::BaseListener::run, ilistener) );
         lThread.detach();
     }
 }
@@ -56,7 +56,7 @@ void
 Broker::stop()
 {
     // stopping all listeners
-    for(auto ilistener = listeners.begin(); ilistener != listeners.end() ; ++ilistener) {
-        (*ilistener)->stop();
+    for(auto ilistener : listeners) {
+        ilistener->stop();
     }
 }
