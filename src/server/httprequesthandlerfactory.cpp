@@ -20,6 +20,8 @@ HTTPRequestHandlerFactory::HTTPRequestHandlerFactory()
 Poco::Net::HTTPRequestHandler *
 HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest &req)
 {
+    // cut of the request params and the beginning slash
+    // to get the name of the endpoint / handler
     std::string endpoint = "";
     std::string uri = req.getURI();
     size_t pos_start = 0;
