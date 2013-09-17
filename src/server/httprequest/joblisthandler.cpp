@@ -1,5 +1,4 @@
 #include "joblisthandler.h"
-#include "../job.h"
 #include "../../config.h"
 
 #include "../../lib/rapidjson/prettywriter.h"
@@ -52,7 +51,7 @@ JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTP
         }
     }
     else {
-        poco_warning(logger, "Could not lock jobList. So there are no jobs to list available");
+        poco_warning(logger, "Could not lock jobList's weak_ptr. So there are no jobs to list available");
     }
 
    // stringify

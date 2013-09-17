@@ -77,10 +77,10 @@ std::string
 Job::toJSON(const std::chrono::system_clock::time_point & tp) const
 {
     time_t tp_t = std::chrono::system_clock::to_time_t(tp);
-    tm utc_tm = *gmtime(&tp_t);
+    tm utc_tm = *std::gmtime(&tp_t);
 
     char buffer[100];
-    strftime(buffer, sizeof(buffer), "%FT%TZ", &utc_tm);
+    std::strftime(buffer, sizeof(buffer), "%FT%TZ", &utc_tm);
     return std::string(buffer);
 }
 

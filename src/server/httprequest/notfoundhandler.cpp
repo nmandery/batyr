@@ -1,5 +1,4 @@
 #include "notfoundhandler.h"
-#include "../job.h"
 #include "../../config.h"
 #include "../../macros.h"
 
@@ -14,14 +13,12 @@ NotFoundHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTT
     UNUSED(req)
 
     resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
-    resp.setContentType("application/json");
+    resp.setContentType("text/plain");
     resp.setReason("Not Found");
     resp.set("Server", APP_NAME_SERVER_FULL);
 
-    Job job;
-    job.setErrorMessage("Endpoint not found");
 
     std::ostream & out = resp.send();
-    out << job;
+    out << "Endpoint not found";
     out.flush();
 };
