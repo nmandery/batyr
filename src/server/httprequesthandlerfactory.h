@@ -6,6 +6,9 @@
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
 #include "Poco/Logger.h"
 
+#include <memory>
+
+#include "joblist.h"
 
 namespace Batyr {
 
@@ -15,8 +18,14 @@ namespace Batyr {
             HTTPRequestHandlerFactory();
             virtual Poco::Net::HTTPRequestHandler * createRequestHandler(const Poco::Net::HTTPServerRequest &);
 
-        protected:
+            void setJobs(std::weak_ptr<JobList> _jobs)
+            {
+                jobs = _jobs;
+            }
+            
+        private:
             Poco::Logger & logger;
+            std::weak_ptr<JobList> jobs;
     };
     
 

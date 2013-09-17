@@ -7,19 +7,26 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include <mutex>
 
 #include "job.h"
 
 
-namespace Batyr 
+namespace Batyr
 {
 
+    /**
+     * TODO:
+     *  * the internal map is not restricted in size. so there might occur a
+     *    growth problem.
+     */
     class JobList
     {
         private:
             Poco::Logger & logger;
             std::unordered_map< std::string, Job::Ptr > jobMap;
-            
+            std::mutex modificationMutex;
+
         public:
             JobList();
 
@@ -33,7 +40,7 @@ namespace Batyr
             Job::Ptr getJob(std::string _id);
 
             /** get a list of jobs ordered by their timestamp */
-            std::vector< Job::Ptr > getOrderedJobs(); 
+            std::vector< Job::Ptr > getOrderedJobs();
     };
 
 };

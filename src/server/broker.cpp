@@ -10,6 +10,7 @@ using namespace Batyr;
 
 Broker::Broker() 
     :   logger(Poco::Logger::get("Broker")),
+        jobs(std::make_shared<JobList>()),
         zmq_cx(0)
 {
     poco_debug(logger, "Setting up the broker");
@@ -34,6 +35,7 @@ Broker::~Broker()
 void
 Broker::addListener(std::shared_ptr<Batyr::BaseListener> listener_ptr)
 {
+    listener_ptr->setJobs(jobs);
     listeners.push_back(listener_ptr);
 }
 

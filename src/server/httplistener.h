@@ -11,10 +11,10 @@ namespace Batyr {
 
     class HttpListener : public BaseListener {
         
-        protected:
+        private:
             Poco::Logger & logger;
-
             std::mutex runMutex;
+
 
         public:
 

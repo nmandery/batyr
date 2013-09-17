@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <chrono>
+
 
 namespace Batyr 
 {
@@ -20,6 +22,11 @@ namespace Batyr
             std::string getId()
             {
                 return id;
+            }
+
+            std::chrono::system_clock::time_point getTimeAdded()
+            {
+                return timeAdded;
             }
 
             void setErrorMessage(const std::string & em) 
@@ -47,6 +54,10 @@ namespace Batyr
             std::string errorMessage;
             std::string id;
             Job::Status status;
+            std::chrono::system_clock::time_point timeAdded;
+
+            /** convert a timestamp to a JSON timestamp */
+            std::string toJSON(const std::chrono::system_clock::time_point &) const;
  
     };
 

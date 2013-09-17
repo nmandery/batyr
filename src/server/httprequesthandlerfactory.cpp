@@ -5,6 +5,7 @@
 #include "httprequest/createhandler.h"
 #include "httprequest/notfoundhandler.h"
 #include "httprequest/bufferhandler.h"
+#include "httprequest/joblisthandler.h"
 #include "httpassets.h"
 
 using namespace Batyr;
@@ -38,8 +39,13 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
     poco_debug(logger, endpoint.c_str());
 
     // dispatch to api handlers
-    if (req.getURI() == "create") {
+    if (endpoint == "create") {
         return new Batyr::HttpRequest::CreateHandler;
+    }
+    else if (endpoint == "jobs.json") {
+        Batyr::HttpRequest::JoblistHandler * joblistHandler = new Batyr::HttpRequest::JoblistHandler;
+        joblistHandler->setJobs(jobs);
+        return joblistHandler;
     }
 
     // attempt to satisfy the request with one of the static assets

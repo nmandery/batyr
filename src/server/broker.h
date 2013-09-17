@@ -18,7 +18,7 @@ namespace Batyr {
         private:
             Poco::Logger & logger;
             std::vector< std::shared_ptr<Batyr::BaseListener> > listeners;
-            JobList joblist;
+            std::shared_ptr<JobList> jobs;
             
             zmq::context_t * zmq_cx;
 

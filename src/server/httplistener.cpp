@@ -33,6 +33,7 @@ HttpListener::run()
     serverParams->setMaxThreads(5);
 
     auto handlerFactory = new Batyr::HTTPRequestHandlerFactory; // TODO: check destruction
+    handlerFactory->setJobs(jobs);
 
     Poco::Net::HTTPServer server(handlerFactory, Poco::Net::ServerSocket(9090), serverParams);
     server.start();

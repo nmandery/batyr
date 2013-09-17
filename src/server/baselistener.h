@@ -3,19 +3,29 @@
 
 #include <Poco/Logger.h>
 
+#include "joblist.h"
+
 #include <memory>
 
 namespace Batyr {
 
     class BaseListener {
         
-        protected:
+        private:
             Poco::Logger & logger;
+
+        protected:
+            std::weak_ptr<JobList> jobs;
 
         public:
 
             BaseListener();
             ~BaseListener();
+
+            void setJobs(std::shared_ptr<JobList> _jobs)
+            {
+                jobs = _jobs;
+            }
 
             /**
              * stop the listener.

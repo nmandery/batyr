@@ -4,13 +4,16 @@
 #include "../lib/rapidjson/prettywriter.h"
 #include "../lib/rapidjson/stringbuffer.h"
 
+#include <ctime>
+
 #include "job.h"
 
 using namespace Batyr;
 
 
 Job::Job()
-    : status(FAILED)
+    :   status(FAILED),
+        timeAdded(std::chrono::system_clock::now())
 {
     // generate an UUID as id for the job
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
@@ -25,6 +28,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
 {
     targetValue.SetObject();
     targetValue.AddMember("id", id.c_str(), allocator);
+    targetValue.AddMember("timeAdded", toJSON(timeAdded).c_str(), allocator);
 
     const char * statusString;
     switch (status) {
@@ -69,6 +73,18 @@ Job::toString() const
 }
 
 
+std::string
+Job::toJSON(const std::chrono::system_clock::time_point & tp) const
+{
+    time_t tp_t = std::chrono::system_clock::to_time_t(tp);
+    tm utc_tm = *gmtime(&tp_t);
+
+    char buffer[100];
+    strftime(buffer, sizeof(buffer), "%FT%TZ", &utc_tm);
+    return std::string(buffer);
+}
+
+
 std::ostream&
 Batyr::operator<< (std::ostream& stream, const Job& r)
 {
@@ -76,3 +92,5 @@ Batyr::operator<< (std::ostream& stream, const Job& r)
 
     return stream;
 }
+
+
