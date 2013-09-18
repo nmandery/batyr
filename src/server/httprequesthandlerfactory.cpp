@@ -3,6 +3,7 @@
 
 #include "httprequesthandlerfactory.h"
 #include "httprequest/createhandler.h"
+#include "httprequest/infohandler.h"
 #include "httprequest/notfoundhandler.h"
 #include "httprequest/bufferhandler.h"
 #include "httprequest/joblisthandler.h"
@@ -42,14 +43,18 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 
     // dispatch to api handlers
     if (endpoint == "api/create") {
-        Batyr::HttpRequest::CreateHandler * createHandler = new Batyr::HttpRequest::CreateHandler;
+        auto createHandler = new Batyr::HttpRequest::CreateHandler;
         createHandler->setJobs(jobs);
         return createHandler;
     }
     else if (endpoint == "api/jobs.json") {
-        Batyr::HttpRequest::JoblistHandler * jobstorageHandler = new Batyr::HttpRequest::JoblistHandler;
+        auto jobstorageHandler = new Batyr::HttpRequest::JoblistHandler;
         jobstorageHandler->setJobs(jobs);
         return jobstorageHandler;
+    }
+    else if (endpoint == "api/info.json") {
+        auto infoHandler = new Batyr::HttpRequest::InfoHandler;
+        return infoHandler;
     }
 
     // attempt to satisfy the request with one of the static assets
