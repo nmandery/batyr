@@ -9,9 +9,9 @@
 using namespace Batyr;
 
 
-Broker::Broker() 
+Broker::Broker()
     :   logger(Poco::Logger::get("Broker")),
-        jobs(std::make_shared<JobStorage>())
+        jobs(std::make_shared<JobStorage>( std::chrono::duration<int>( 60 * 2 ) ))
 {
     poco_debug(logger, "Setting up the broker");
 }
@@ -38,8 +38,8 @@ Broker::run(size_t _numWorkers)
     poco_debug(logger, "Starting " + std::to_string(_numWorkers) + " worker threads");
     for(size_t nW = 0; nW < _numWorkers; nW++) {
         auto worker = std::unique_ptr<Worker>(new Worker(jobs));
-        auto workerThread = std::make_shared<std::thread>( 
-                std::bind(&Worker::run, std::move(worker)) 
+        auto workerThread = std::make_shared<std::thread>(
+                std::bind(&Worker::run, std::move(worker))
         );
         workerThreads.push_back( workerThread );
     }
@@ -48,7 +48,7 @@ Broker::run(size_t _numWorkers)
     poco_debug(logger, "Starting " + std::to_string(listeners.size()) + " listener threads");
     for(auto ilistener : listeners) {
         // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
-        auto listenerThread = std::make_shared<std::thread>( 
+        auto listenerThread = std::make_shared<std::thread>(
                 std::bind(&Batyr::BaseListener::run, ilistener)
         );
         listenerThreads.push_back( listenerThread );
@@ -66,11 +66,13 @@ Broker::stop()
         }
 
         // wait until the listeners have shut down
-        poco_information(logger, "Waiting for listeners to shut down");
-        for(auto listenerThread: listenerThreads) {
-            listenerThread->join();
+        if (!listenerThreads.empty()) {
+            poco_information(logger, "Waiting for listeners to shut down");
+            for(auto listenerThread: listenerThreads) {
+                listenerThread->join();
+            }
+            listenerThreads.clear();
         }
-        listenerThreads.clear();
     }
 
     // quit the jobs. this will ttigger all attached workers to

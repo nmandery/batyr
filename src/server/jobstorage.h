@@ -6,8 +6,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <chrono>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 #include "job.h"
 #include "quitablequeue.h"
@@ -28,11 +30,26 @@ namespace Batyr
         private:
             Poco::Logger & logger;
             std::unordered_map< std::string, Job::Ptr > jobMap;
-            std::mutex modificationMutex;
+            std::mutex mapModificationMutex;
             JobQueue queue;
 
+            std::thread cleanupThread;
+
+            /**
+             * mutex to signal the cleanupthread when to exit.
+             * This class releases its lock on the mutex to signal
+             * the cleanup thread to exit
+             */
+            std::timed_mutex cleanupExitMutex;
+
+            /**
+             * the max age in seconds finished jobs are allowed to have
+             * before they are removed
+             */
+            std::chrono::duration<int> maxAgeDoneJobs;
+
         public:
-            JobStorage();
+            JobStorage(std::chrono::duration<int> _maxAgeDoneJobs);
             ~JobStorage();
 
             /**

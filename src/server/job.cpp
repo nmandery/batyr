@@ -32,6 +32,10 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     targetValue.AddMember("id", id.c_str(), allocator);
     targetValue.AddMember("timeAdded", stringify(timeAdded).c_str(), allocator);
 
+    if (isDone()) {
+        targetValue.AddMember("timeFinished", stringify(timeFinished).c_str(), allocator);
+    }
+
     const char * statusString;
     switch (status) {
         case QUEUED:

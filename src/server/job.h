@@ -9,7 +9,7 @@
 #include <chrono>
 
 
-namespace Batyr 
+namespace Batyr
 {
 
     class Job
@@ -17,7 +17,24 @@ namespace Batyr
         public:
             Job();
 
+            enum Status {
+                QUEUED,
+                IN_PROCESS,
+                FINISHED,
+                FAILED
+            };
+
             friend std::ostream& operator<< (std::ostream& , const Job&);
+
+            typedef std::shared_ptr<Job> Ptr;
+
+            void setStatus(Status _status)
+            {
+                status = _status;
+                if (isDone()) {
+                    timeFinished = std::chrono::system_clock::now();
+                }
+            }
 
             std::string getId()
             {
@@ -29,10 +46,23 @@ namespace Batyr
                 return timeAdded;
             }
 
-            void setErrorMessage(const std::string & em) 
+            std::chrono::system_clock::time_point getTimeFinished()
+            {
+                return timeFinished;
+            }
+
+            void setErrorMessage(const std::string & em)
             {
                 errorMessage = em;
-                status = FAILED;
+                setStatus(FAILED);
+            }
+
+            /**
+             * true if the job is, successful or not, finished
+             */
+            bool isDone() const
+            {
+                return (status == FINISHED) || (status == FAILED);
             }
 
             /** return the object as a json string */
@@ -41,22 +71,16 @@ namespace Batyr
             /** push the contents of the object into rapidjson document or value */
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 
-            typedef std::shared_ptr<Job> Ptr;
 
-            enum Status {
-                QUEUED,
-                IN_PROCESS,
-                FINISHED,
-                FAILED
-            };
 
         private:
             std::string errorMessage;
             std::string id;
             Job::Status status;
             std::chrono::system_clock::time_point timeAdded;
+            std::chrono::system_clock::time_point timeFinished;
 
- 
+
     };
 
     std::ostream& operator<< (std::ostream& , const Job&);
