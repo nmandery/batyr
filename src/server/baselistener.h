@@ -3,7 +3,7 @@
 
 #include <Poco/Logger.h>
 
-#include "joblist.h"
+#include "jobstorage.h"
 
 #include <memory>
 
@@ -15,14 +15,19 @@ namespace Batyr {
             Poco::Logger & logger;
 
         protected:
-            std::weak_ptr<JobList> jobs;
+            std::weak_ptr<JobStorage> jobs;
 
         public:
 
             BaseListener();
+
+            /** disable copying */
+            BaseListener(const BaseListener &) = delete;
+            BaseListener& operator=(const BaseListener &) = delete;
+
             ~BaseListener();
 
-            void setJobs(std::shared_ptr<JobList> _jobs)
+            void setJobs(std::shared_ptr<JobStorage> _jobs)
             {
                 jobs = _jobs;
             }

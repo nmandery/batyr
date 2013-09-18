@@ -19,7 +19,13 @@ namespace Batyr {
         public:
 
             HttpListener();
+
+            /** disable copying */
+            HttpListener(const HttpListener &) = delete;
+            HttpListener& operator=(const HttpListener &) = delete;
+
             ~HttpListener();
+
 
             void run();
             void stop();

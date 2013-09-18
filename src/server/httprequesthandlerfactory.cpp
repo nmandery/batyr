@@ -42,12 +42,14 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 
     // dispatch to api handlers
     if (endpoint == "create") {
-        return new Batyr::HttpRequest::CreateHandler;
+        Batyr::HttpRequest::CreateHandler * createHandler = new Batyr::HttpRequest::CreateHandler;
+        createHandler->setJobs(jobs);
+        return createHandler;
     }
     else if (endpoint == "jobs.json") {
-        Batyr::HttpRequest::JoblistHandler * joblistHandler = new Batyr::HttpRequest::JoblistHandler;
-        joblistHandler->setJobs(jobs);
-        return joblistHandler;
+        Batyr::HttpRequest::JoblistHandler * jobstorageHandler = new Batyr::HttpRequest::JoblistHandler;
+        jobstorageHandler->setJobs(jobs);
+        return jobstorageHandler;
     }
 
     // attempt to satisfy the request with one of the static assets

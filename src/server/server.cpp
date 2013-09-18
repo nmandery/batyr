@@ -29,7 +29,7 @@ Server::main(const std::vector<std::string> & args)
 
         auto httplistener_ptr = std::make_shared<Batyr::HttpListener>();
         broker.addListener(httplistener_ptr);
-        broker.run();
+        broker.run(2);
 
         waitForTerminationRequest();  // wait for CTRL-C or kill
 

@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "../joblist.h"
+#include "../jobstorage.h"
 
 namespace Batyr 
 {
@@ -19,7 +19,7 @@ namespace HttpRequest
     class JoblistHandler : public Poco::Net::HTTPRequestHandler
     {
         private:
-            std::weak_ptr<JobList> jobs;
+            std::weak_ptr<JobStorage> jobs;
             Poco::Logger & logger;
 
         public:
@@ -27,7 +27,7 @@ namespace HttpRequest
 
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
 
-            void setJobs(std::weak_ptr<JobList> _jobs)
+            void setJobs(std::weak_ptr<JobStorage> _jobs)
             {
                 jobs = _jobs;
             }

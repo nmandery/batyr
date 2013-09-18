@@ -2,14 +2,14 @@
 #define __batyr_broker_h__
 
 #include <Poco/Logger.h>
-#include <zmq.hpp>
 
 #include <vector>
 #include <memory>
 
 #include "baselistener.h"
+#include "worker.h"
 #include "httplistener.h"
-#include "joblist.h"
+#include "jobstorage.h"
 
 namespace Batyr {
    
@@ -18,17 +18,22 @@ namespace Batyr {
         private:
             Poco::Logger & logger;
             std::vector< std::shared_ptr<Batyr::BaseListener> > listeners;
-            std::shared_ptr<JobList> jobs;
-            
-            zmq::context_t * zmq_cx;
+            std::shared_ptr<JobStorage> jobs;
+            std::vector< std::shared_ptr< std::thread > > workerThreads;
+            std::vector< std::shared_ptr< std::thread > > listenerThreads;
 
 
         public:
             Broker();
+
+            /** disable copying */
+            Broker(const Broker &) = delete;
+            Broker& operator=(const Broker &) = delete;
+
             ~Broker();
 
             void addListener( std::shared_ptr<Batyr::BaseListener> );
-            void run();
+            void run(size_t _numWorkers);
             void stop();
     };
 

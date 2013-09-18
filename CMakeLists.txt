@@ -33,23 +33,22 @@ endif ()
 
 
 find_package( Threads REQUIRED)
-find_package( ZeroMQ REQUIRED)
+#find_package( ZeroMQ REQUIRED)
 find_package( GDAL REQUIRED)
 find_package( Postgres REQUIRED)
 find_package( Poco REQUIRED Foundation Util Net)
 
 include_directories(${Poco_INCLUDE_DIRS})
-include_directories(${ZeroMQ_INCLUDE_DIRS})
+#include_directories(${ZeroMQ_INCLUDE_DIRS})
 include_directories(${POSTGRES_INCLUDE_DIR})
 include_directories(${GDAL_INCLUDE_DIR})
 
 ADD_EXECUTABLE(batyrd ${ServerSources})
 target_link_libraries(batyrd ${Poco_LIBRARIES} )
-target_link_libraries(batyrd ${ZeroMQ_LIBRARIES} )
+#target_link_libraries(batyrd ${ZeroMQ_LIBRARIES} )
 target_link_libraries(batyrd ${POSTGRES_LIBRARY} )
 target_link_libraries(batyrd ${GDAL_LIBRARY} )
 target_link_libraries(batyrd ${CMAKE_THREAD_LIBS_INIT} )
-target_link_libraries(batyrd ${ZeroMQ_LIBRARIES})
 
 
 # vim: ft=cmake
