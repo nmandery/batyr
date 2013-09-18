@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "jobstorage.h"
+#include "../config.h"
 
 
 using namespace Batyr;
@@ -14,7 +15,7 @@ JobStorage::JobStorage(std::chrono::duration<int> _maxAgeDoneJobs)
     cleanupExitMutex.lock();
     cleanupThread = std::thread([&jobMap, &logger, &maxAgeDoneJobs, &cleanupExitMutex, &mapModificationMutex](){
         // run every 10 seconds
-        while (!cleanupExitMutex.try_lock_for( std::chrono::duration<int>( 10 ) )) {
+        while (!cleanupExitMutex.try_lock_for( std::chrono::duration<int>( SERVER_JOB_CLEANUP_INTERVAL ) )) {
             // perform the cleaning
             std::lock_guard<std::mutex> lock(mapModificationMutex);
 

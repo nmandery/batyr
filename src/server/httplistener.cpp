@@ -1,5 +1,6 @@
 #include "httplistener.h"
 #include "httprequesthandlerfactory.h"
+#include "../config.h"
 
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/ServerSocket.h>
@@ -30,7 +31,7 @@ HttpListener::run()
     runMutex.lock(); // TODO: use try_lock and log failures
 
     auto serverParams = new Poco::Net::HTTPServerParams; // TODO: check destruction
-    serverParams->setMaxThreads(5);
+    serverParams->setMaxThreads( SERVER_HTTP_THREADS );
 
     auto handlerFactory = new Batyr::HTTPRequestHandlerFactory; // TODO: check destruction
     handlerFactory->setJobs(jobs);
