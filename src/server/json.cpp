@@ -1,6 +1,7 @@
 #include "json.h"
 
 #include "../lib/rapidjson/prettywriter.h"
+#include "../lib/rapidjson/writer.h"
 #include "../lib/rapidjson/stringbuffer.h"
 
 
@@ -11,7 +12,14 @@ std::string
 Batyr::Json::stringify(rapidjson::Document & doc)
 {
     rapidjson::StringBuffer buffer;
+
+#ifdef _DEBUG
+    // use pretty printed json when creating a debug build
     rapidjson::PrettyWriter< rapidjson::StringBuffer > writer(buffer);
+#else
+    rapidjson::Writer< rapidjson::StringBuffer > writer(buffer);
+#endif
+
     doc.Accept(writer);
 
     return std::string(buffer.GetString());
