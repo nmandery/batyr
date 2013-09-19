@@ -18,7 +18,7 @@ Verbose messages when running make:
 ToDo
 ====
 
-Also see "TODO" comments in the code
+Also see "TODO" comments in the code.
 
 High priority
 -------------
@@ -27,6 +27,8 @@ High priority
 Medium priority
 ---------------
 
+* Implement Access Control Headers for HTTP api
+  see https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS?
 
 Low Priority
 ------------
