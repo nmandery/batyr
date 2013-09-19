@@ -1,22 +1,20 @@
 
-
 Building
-========
+--------
 
+Dependencies (on Debian Wheezy/Ubuntu):
+
+ sudo apt-get install libpoco-dev libpocofoundation9 libpoconet9 libpocoutil9 libgdal1 libgdal1-dev cmake g++
+
+
+Building:
+
+ cmake .
+ make
 
 Development
-===========
+-----------
 
-Creating a debug build:
+see the DEVELOPMENT.md file.
 
- cmake -DCMAKE_BUILD_TYPE=Debug .
 
-Verbose messages when running make:
-
- make VERBOSE=1
-
-ToDo
-====
-
-* Once POCO 1.5 is in debian stable rapidjson might be dropped in favor of
-  the JSON support in POCO.
