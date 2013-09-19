@@ -8,7 +8,6 @@
 #include "json.h"
 
 using namespace Batyr;
-using namespace Batyr::Json;
 
 
 Job::Job()
@@ -20,7 +19,7 @@ Job::Job()
     Poco::UUID uuid(uuidGen.createRandom());
     id = uuid.toString();
 
-    // remove all dashes from the string
+    // remove all dashes from the string for nicer looking URLs ;)
     std::remove(id.begin(), id.end(), '-');
 }
 
@@ -30,10 +29,15 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
 {
     targetValue.SetObject();
     targetValue.AddMember("id", id.c_str(), allocator);
-    targetValue.AddMember("timeAdded", stringify(timeAdded).c_str(), allocator);
+
+    rapidjson::Value vTimeAdded;
+    Batyr::Json::toValue(vTimeAdded, timeAdded, allocator);
+    targetValue.AddMember("timeAdded", vTimeAdded, allocator);
 
     if (isDone()) {
-        targetValue.AddMember("timeFinished", stringify(timeFinished).c_str(), allocator);
+        rapidjson::Value vTimeFinished;
+        Batyr::Json::toValue(vTimeFinished, timeFinished, allocator);
+        targetValue.AddMember("timeFinished", vTimeFinished, allocator);
     }
 
     const char * statusString;
@@ -68,7 +72,7 @@ Job::toString() const
 
     rapidjson::Document data;
     toJsonValue(data, data.GetAllocator());
-    return stringify(data);
+    return Batyr::Json::stringify(data);
 }
 
 
