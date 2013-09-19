@@ -37,23 +37,27 @@ JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTP
     resp.setContentType("application/json");
 
     // build the json document 
-    rapidjson::Document data;
-    data.SetArray();
+    rapidjson::Document doc;
+    doc.SetObject();
+    doc.AddMember("maxAgeDoneJobsSeconds", 157, doc.GetAllocator()); // TODO
 
+    rapidjson::Value vJobs;
+    vJobs.SetArray();
     if (auto jobList = jobs.lock()) {
         auto jobsVec = jobList->getOrderedJobs();
 
         for(auto jobP : jobsVec) {
             rapidjson::Value val;
-            jobP->toJsonValue(val, data.GetAllocator());
-            data.PushBack(val, data.GetAllocator());
+            jobP->toJsonValue(val, doc.GetAllocator());
+            vJobs.PushBack(val, doc.GetAllocator());
         }
     }
     else {
         poco_warning(logger, "Could not lock jobList's weak_ptr. So there are no jobs to list available");
     }
+    doc.AddMember("jobs", vJobs, doc.GetAllocator());
 
     std::ostream & out = resp.send();
-    out << Batyr::Json::stringify(data);
+    out << Batyr::Json::stringify(doc);
     out.flush();
 };

@@ -21,8 +21,8 @@ function MenuListCtrl($scope) {
 
 function StatusCtrl($scope, $http, $timeout) {
 
-    // update interval of in milliseconds
-    $scope.updateIntervalMs = 5000;
+    // update interval of in seconds
+    $scope.updateIntervalSecs = 5;
 
     var fetchStatus = function() {
         $http.get('api/status.json').success(function(data) {
@@ -38,8 +38,8 @@ function StatusCtrl($scope, $http, $timeout) {
     var intervalFetch = function() {
         cancelRefresh = $timeout(function performFetch() {
             fetchStatus()
-            cancelRefresh = $timeout(intervalFetch, $scope.updateIntervalMs);
-        }, $scope.updateIntervalMs);
+            cancelRefresh = $timeout(intervalFetch, $scope.updateIntervalSecs * 1000);
+        }, $scope.updateIntervalSecs * 1000);
     };
     intervalFetch();
 
@@ -62,9 +62,10 @@ function LayersCtrl($scope, $http) {
 }
 
 function JobsCtrl($scope, $http) {
+    $scope.joblist = {};
     var fetchJobs = function() {
         $http.get('api/jobs.json').success(function(data) {
-            $scope.jobs = data;
+            $scope.joblist = data;
         });
     }
     fetchJobs();
