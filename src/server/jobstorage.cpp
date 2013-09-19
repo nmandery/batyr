@@ -13,23 +13,24 @@ JobStorage::JobStorage(std::chrono::duration<int> _maxAgeDoneJobs)
 {
     // start thread to cleanup finished jobs
     cleanupExitMutex.lock();
-    cleanupThread = std::thread([&jobMap, &logger, &maxAgeDoneJobs, &cleanupExitMutex, &mapModificationMutex](){
-        // run every 10 seconds
-        while (!cleanupExitMutex.try_lock_for( std::chrono::duration<int>( SERVER_JOB_CLEANUP_INTERVAL ) )) {
+    auto storage = this;
+    cleanupThread = std::thread([storage](){
+        // run every few seconds
+        while (!storage->cleanupExitMutex.try_lock_for( std::chrono::duration<int>( SERVER_JOB_CLEANUP_INTERVAL ) )) {
             // perform the cleaning
-            std::lock_guard<std::mutex> lock(mapModificationMutex);
+            std::lock_guard<std::mutex> lock(storage->mapModificationMutex);
 
             // calculate the min finishTime a job must have to be spared
             // from the cleaning
-            auto minTime = std::chrono::system_clock::now() - maxAgeDoneJobs;
-                // TODO:
-            poco_debug(logger, "Starting to remove deprecated jobs");
+            auto minTime = std::chrono::system_clock::now() - storage->maxAgeDoneJobs;
+
+            poco_debug(storage->logger, "Starting to remove deprecated jobs");
 
             size_t numRemovedJobs = 0;
-            for (auto it = jobMap.begin(), ite = jobMap.end(); it != ite;) {
+            for (auto it = storage->jobMap.begin(), ite = storage->jobMap.end(); it != ite;) {
                 if (it->second->isDone()) {
                     if (it->second->getTimeFinished() < minTime) {
-                        it = jobMap.erase(it);
+                        it = storage->jobMap.erase(it);
                         numRemovedJobs++;
                     }
                     else {
@@ -40,11 +41,18 @@ JobStorage::JobStorage(std::chrono::duration<int> _maxAgeDoneJobs)
                     ++it;
                 }
             }
-            poco_debug(logger, "Removed " + std::to_string(numRemovedJobs) + " deprecated jobs");
+#ifdef _DEBUG
+            poco_information(storage->logger, "Removed " + std::to_string(numRemovedJobs) + " deprecated jobs");
+#else
+            // decrease verbosity
+            if (numRemovedJobs > 0) {
+                poco_information(storage->logger, "Removed " + std::to_string(numRemovedJobs) + " deprecated jobs");
+            }
+#endif
         }
         // locking succeded. time to exit
-        cleanupExitMutex.unlock();
-        poco_debug(logger, "Exiting cleanup thread");
+        storage->cleanupExitMutex.unlock();
+        poco_debug(storage->logger, "Exiting cleanup thread");
     });
 
 }
