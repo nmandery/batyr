@@ -1,5 +1,5 @@
-#ifndef __batyr_httprequest_infohandler_h__
-#define __batyr_httprequest_infohandler_h__
+#ifndef __batyr_httprequest_statushandler_h__
+#define __batyr_httprequest_statushandler_h__
 
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
@@ -13,13 +13,13 @@ namespace Batyr
 namespace HttpRequest 
 {
 
-    class InfoHandler : public Poco::Net::HTTPRequestHandler
+    class StatusHandler : public Poco::Net::HTTPRequestHandler
     {
         private:
             Poco::Logger & logger;
 
         public:
-            InfoHandler();
+            StatusHandler();
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
 
     };
@@ -27,4 +27,4 @@ namespace HttpRequest
 };
 };
 
-#endif // __batyr_httprequest_infohandler_h__
+#endif // __batyr_httprequest_statushandler_h__

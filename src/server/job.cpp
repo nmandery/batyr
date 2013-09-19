@@ -57,6 +57,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     }
     targetValue.AddMember("status", statusString, allocator);
 
+    targetValue.AddMember("layerName", "todo", allocator); // TODO
 
     if (!errorMessage.empty()) {
         targetValue.AddMember("errorMessage", errorMessage.c_str(), allocator);

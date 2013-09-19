@@ -1,4 +1,4 @@
-#include "infohandler.h"
+#include "statushandler.h"
 #include "../../config.h"
 #include "../../macros.h"
 #include "../json.h"
@@ -9,14 +9,14 @@
 using namespace Batyr::HttpRequest;
 
 
-InfoHandler::InfoHandler()
+StatusHandler::StatusHandler()
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("InfoHandler"))
+        logger(Poco::Logger::get("StatusHandler"))
 {
 }
 
 void
-InfoHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
+StatusHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
 {
     UNUSED(req)
 
@@ -29,6 +29,9 @@ InfoHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPSer
     doc.SetObject();
     doc.AddMember("appName", APP_NAME_SERVER, doc.GetAllocator());
     doc.AddMember("appVersion", VERSION_FULL, doc.GetAllocator());
+    doc.AddMember("numLayers", 0, doc.GetAllocator()); // TODO
+    doc.AddMember("numQueuedJobs", 0, doc.GetAllocator()); // TODO
+    doc.AddMember("numWorkers", 0, doc.GetAllocator()); // TODO
 
     std::ostream & out = resp.send();
     out << Batyr::Json::stringify(doc);

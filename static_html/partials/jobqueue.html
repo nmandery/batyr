@@ -1,0 +1,43 @@
+<div class="heroS">
+    <div class="heroS-titles">
+        <h1>Jobqueue</h1>
+    </div>
+</div>
+
+<div class="l-vbox job-box" ng-controller="JobsCtrl">
+    <div class="pure-g">
+        <div class="pure-u-1-2">
+            <div class="l-box mini">
+                The colors of the entries indicate if these jobs are <span class="job-status-queued-label">queued</span>, 
+                <span class="job-status-finished-label">finished</span>, have
+                <span class="job-status-failed-label">failed</span> or 
+                if they are currently <span class="job-status-in_process-label">processed</span>.
+            </div>
+        </div>
+        <div class="pure-u-1-2">
+            <div class="l-box right">
+                <div class="pure-button pure-button-primary" ng-click="refreshJobs()">Refresh</div>
+            </div>
+        </div>
+    </div>
+    <table class="pure-table job-table">
+        <thead>
+            <tr>
+           <!--     <th>ID</th> -->
+                <th>Layer</th>
+                <th>Added</th>
+                <th>Finished</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="job in jobs" class="job-status-{{ job.status }}">
+                <!-- <td class="job-id">{{ job.id }}</td> -->
+                <td>{{ job.layerName }}</td>
+                <td>{{ job.timeAdded | fromNow }} </td>
+                <td>{{ job.timeFinished | fromNow }}</td>
+                <td><div class="job-message">{{ job.errorMessage }}</div></td>
+            </tr>
+        </body>
+    </table>
+</div>
