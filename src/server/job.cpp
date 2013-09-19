@@ -8,7 +8,6 @@
 #include "json.h"
 
 using namespace Batyr;
-using namespace Batyr::Json;
 
 
 Job::Job()
@@ -31,13 +30,14 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     targetValue.SetObject();
     targetValue.AddMember("id", id.c_str(), allocator);
 
-    auto sTimeAdded = stringify(timeAdded);
-    targetValue.AddMember("timeAdded", sTimeAdded.c_str(), allocator);
+    rapidjson::Value vTimeAdded;
+    Batyr::Json::toValue(vTimeAdded, timeAdded, allocator);
+    targetValue.AddMember("timeAdded", vTimeAdded, allocator);
 
     if (isDone()) {
-        auto sTimeFinished = stringify(timeFinished); // temporarily store string in object to prevent
-                                                      // freeing before rapidjson can copy the contents
-        targetValue.AddMember("timeFinished", sTimeFinished.c_str(), allocator);
+        rapidjson::Value vTimeFinished;
+        Batyr::Json::toValue(vTimeFinished, timeFinished, allocator);
+        targetValue.AddMember("timeFinished", vTimeFinished, allocator);
     }
 
     const char * statusString;
@@ -72,7 +72,7 @@ Job::toString() const
 
     rapidjson::Document data;
     toJsonValue(data, data.GetAllocator());
-    return stringify(data);
+    return Batyr::Json::stringify(data);
 }
 
 
