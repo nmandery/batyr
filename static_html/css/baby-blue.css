@@ -369,63 +369,6 @@ a.pure-button-primary {
  * --------------------------
 */
 
-@media (max-width: 870px) {
-
-    /* Navigation Push Styles */
-    #layout {
-        position: relative;
-        padding-left: 0;
-    }
-        #layout.active {
-            position: relative;
-            left: 150px;
-        }
-            #layout.active #menu {
-                left: 150px;
-                width: 150px;
-            }
-
-    #menu {
-        left: 0;
-    }
-
-    .pure-menu-link {
-        position: fixed;
-        left: 0;
-        display: block;
-    }
-
-    #layout.active .pure-menu-link {
-        left: 150px;
-    }
-}
-
-@media (max-width: 767px) {
-
-    .header,
-    .content {
-        font-size: 87.5%;
-    }
-
-    .header,
-    .content,
-    .legal {
-        padding-left: 1.1429em;
-        padding-right: 1.1429em;
-    }
-
-    .legal-license,
-    .legal-copyright,
-    .legal-links,
-    .legal-links li {
-        text-align: center;
-    }
-
-    /* normalize paddings on small screens*/
-    .l-hbox {
-        padding: 1.3em;
-    }
-}
 
 .hero {
     text-align: center;
