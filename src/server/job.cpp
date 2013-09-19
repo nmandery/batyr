@@ -20,7 +20,7 @@ Job::Job()
     Poco::UUID uuid(uuidGen.createRandom());
     id = uuid.toString();
 
-    // remove all dashes from the string
+    // remove all dashes from the string for nicer looking URLs ;)
     std::remove(id.begin(), id.end(), '-');
 }
 
@@ -30,10 +30,14 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
 {
     targetValue.SetObject();
     targetValue.AddMember("id", id.c_str(), allocator);
-    targetValue.AddMember("timeAdded", stringify(timeAdded).c_str(), allocator);
+
+    auto sTimeAdded = stringify(timeAdded);
+    targetValue.AddMember("timeAdded", sTimeAdded.c_str(), allocator);
 
     if (isDone()) {
-        targetValue.AddMember("timeFinished", stringify(timeFinished).c_str(), allocator);
+        auto sTimeFinished = stringify(timeFinished); // temporarily store string in object to prevent
+                                                      // freeing before rapidjson can copy the contents
+        targetValue.AddMember("timeFinished", sTimeFinished.c_str(), allocator);
     }
 
     const char * statusString;
