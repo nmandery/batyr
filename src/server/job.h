@@ -1,7 +1,7 @@
 #ifndef __batyr_job_h__
 #define __batyr_job_h__
 
-#include "../lib/rapidjson/document.h"
+#include "rapidjson/document.h"
 
 #include <string>
 #include <iostream>

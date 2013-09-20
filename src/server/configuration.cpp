@@ -1,9 +1,9 @@
-#include "configuration.h"
+#include "server/configuration.h"
 
 #include <fstream>
 #include <algorithm>
 
-#include "../lib/ini-parser/ini.hpp"
+#include "ini-parser/ini.hpp"
 
 using namespace Batyr;
 

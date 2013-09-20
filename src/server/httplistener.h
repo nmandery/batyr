@@ -5,7 +5,7 @@
 
 #include <mutex>
 
-#include "baselistener.h"
+#include "server/baselistener.h"
 
 namespace Batyr {
 

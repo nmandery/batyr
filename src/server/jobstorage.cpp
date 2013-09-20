@@ -1,8 +1,8 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "jobstorage.h"
-#include "../config.h"
+#include "server/jobstorage.h"
+#include "common/config.h"
 
 
 using namespace Batyr;

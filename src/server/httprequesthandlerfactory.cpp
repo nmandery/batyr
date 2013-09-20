@@ -1,14 +1,14 @@
 #include <string>
 #include <cstring>
 
-#include "httprequesthandlerfactory.h"
-#include "httprequest/createhandler.h"
-#include "httprequest/statushandler.h"
-#include "httprequest/notfoundhandler.h"
-#include "httprequest/bufferhandler.h"
-#include "httprequest/joblisthandler.h"
-#include "httprequest/layerlisthandler.h"
-#include "httpassets.h"
+#include "server/httprequesthandlerfactory.h"
+#include "server/httprequest/createhandler.h"
+#include "server/httprequest/statushandler.h"
+#include "server/httprequest/notfoundhandler.h"
+#include "server/httprequest/bufferhandler.h"
+#include "server/httprequest/joblisthandler.h"
+#include "server/httprequest/layerlisthandler.h"
+#include "server/httpassets.h"
 
 using namespace Batyr;
 

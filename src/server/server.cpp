@@ -12,9 +12,9 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "server.h"
-#include "../macros.h"
-#include "broker.h"
+#include "server/server.h"
+#include "common/macros.h"
+#include "server/broker.h"
 
 
 using namespace Batyr;

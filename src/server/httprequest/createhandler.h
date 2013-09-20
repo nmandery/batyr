@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "../jobstorage.h"
+#include "server/jobstorage.h"
 
 namespace Batyr 
 {

@@ -3,8 +3,8 @@
 
 #include <Poco/Logger.h>
 
-#include "jobstorage.h"
-#include "configuration.h"
+#include "server/jobstorage.h"
+#include "server/configuration.h"
 
 #include <memory>
 

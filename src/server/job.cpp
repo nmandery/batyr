@@ -4,8 +4,8 @@
 #include <ctime>
 #include <algorithm>
 
-#include "job.h"
-#include "json.h"
+#include "server/job.h"
+#include "server/json.h"
 
 using namespace Batyr;
 

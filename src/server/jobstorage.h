@@ -11,8 +11,8 @@
 #include <mutex>
 #include <thread>
 
-#include "job.h"
-#include "quitablequeue.h"
+#include "server/job.h"
+#include "server/quitablequeue.h"
 
 
 namespace Batyr

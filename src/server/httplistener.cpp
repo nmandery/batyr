@@ -1,6 +1,6 @@
-#include "httplistener.h"
-#include "httprequesthandlerfactory.h"
-#include "../config.h"
+#include "server/httplistener.h"
+#include "server/httprequesthandlerfactory.h"
+#include "common/config.h"
 
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/ServerSocket.h>

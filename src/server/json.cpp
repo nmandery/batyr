@@ -1,8 +1,8 @@
 #include "json.h"
 
-#include "../lib/rapidjson/prettywriter.h"
-#include "../lib/rapidjson/writer.h"
-#include "../lib/rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 #include <memory>
 

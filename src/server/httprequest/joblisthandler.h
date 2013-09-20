@@ -9,8 +9,8 @@
 
 #include <memory>
 
-#include "../jobstorage.h"
-#include "../configuration.h"
+#include "server/jobstorage.h"
+#include "server/configuration.h"
 
 namespace Batyr 
 {

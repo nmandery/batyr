@@ -8,7 +8,7 @@
 #include <string>
 #include <cstring>
 
-#include "../../config.h"
+#include "common/config.h"
 
 namespace Batyr
 {

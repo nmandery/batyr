@@ -6,11 +6,11 @@
 #include <vector>
 #include <memory>
 
-#include "baselistener.h"
-#include "worker.h"
-#include "httplistener.h"
-#include "jobstorage.h"
-#include "configuration.h"
+#include "server/baselistener.h"
+#include "server/worker.h"
+#include "server/httplistener.h"
+#include "server/jobstorage.h"
+#include "server/configuration.h"
 
 namespace Batyr {
    

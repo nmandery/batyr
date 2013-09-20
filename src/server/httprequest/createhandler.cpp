@@ -1,6 +1,6 @@
-#include "createhandler.h"
-#include "../job.h"
-#include "../../config.h"
+#include "server/httprequest/createhandler.h"
+#include "server/job.h"
+#include "common/config.h"
 
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>

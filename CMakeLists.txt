@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 
 project (batyr)
-FILE(GLOB ServerSources src/server/*.cpp src/server/*/*.cpp)
-
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -38,17 +36,7 @@ find_package( GDAL REQUIRED)
 find_package( Postgres REQUIRED)
 find_package( Poco REQUIRED Foundation Util Net)
 
-include_directories(${Poco_INCLUDE_DIRS})
-#include_directories(${ZeroMQ_INCLUDE_DIRS})
-include_directories(${POSTGRES_INCLUDE_DIR})
-include_directories(${GDAL_INCLUDE_DIR})
-
-ADD_EXECUTABLE(batyrd ${ServerSources})
-target_link_libraries(batyrd ${Poco_LIBRARIES} )
-#target_link_libraries(batyrd ${ZeroMQ_LIBRARIES} )
-target_link_libraries(batyrd ${POSTGRES_LIBRARY} )
-target_link_libraries(batyrd ${GDAL_LIBRARY} )
-target_link_libraries(batyrd ${CMAKE_THREAD_LIBS_INIT} )
+add_subdirectory(src)
 
 
 # vim: ft=cmake
