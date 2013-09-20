@@ -8,4 +8,4 @@
 assets:
 	cd static_html && python ../tools/assets2header.py \
 		--output ../src/server/httpassets.h \
-		$$(find . -type f | sed 's#^\./##g' | sort)
+		$$(find . -type f | grep -rv '.swp' |sed 's#^\./##g' | sort)
