@@ -121,6 +121,26 @@ Configuration::parse(const std::string & configFile)
 
             }
             else if (sectionPair.first == "LAYERS") {
+                for(auto const layerSectionPair : sectionPair.second.sections) {
+                    auto layer = std::make_shared<Layer>();
+                    layer->name = layerSectionPair.first;
+
+                    // TODO: collect layer infos
+                    for(auto const layerValuePair: layerSectionPair.second.values) {
+                        if (layerValuePair.first == "description") {
+                            layer->description = layerValuePair.second;
+                        }
+                        else {
+                            throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
+                        }
+                    }
+
+                    // check for missing mantatory settings
+                    // TODO
+
+                    layers[layer->name] = layer;
+                }
+
             }
             else if (sectionPair.first == "LOGGING") {
             }

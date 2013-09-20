@@ -13,6 +13,7 @@ namespace Batyr
     {
         std::string name;
         std::string dataSource;
+        std::string description;
 
         typedef std::shared_ptr<Layer> Ptr;
     };
