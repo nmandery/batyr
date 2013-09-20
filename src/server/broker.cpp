@@ -14,7 +14,6 @@ Broker::Broker(Configuration::Ptr _configuration)
         jobs(std::make_shared<JobStorage>( std::chrono::duration<int>( _configuration->getMaxAgeDoneJobs() ) )),
         configuration(_configuration)
 {
-    poco_debug(logger, "Setting up the broker");
 }
 
 
@@ -37,7 +36,7 @@ Broker::run()
 {
     // start all workers
     size_t _numWorkers = configuration->getNumWorkerThreads();
-    poco_debug(logger, "Starting " + std::to_string(_numWorkers) + " worker threads");
+    poco_information(logger, "Starting " + std::to_string(_numWorkers) + " workers");
     for(size_t nW = 0; nW < _numWorkers; nW++) {
         auto worker = std::unique_ptr<Worker>(new Worker(jobs));
         auto workerThread = std::make_shared<std::thread>(
@@ -47,7 +46,7 @@ Broker::run()
     }
 
     // start all listener threads
-    poco_debug(logger, "Starting " + std::to_string(listeners.size()) + " listener threads");
+    poco_information(logger, "Starting " + std::to_string(listeners.size()) + " listeners");
     for(auto ilistener : listeners) {
         // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
         auto listenerThread = std::make_shared<std::thread>(

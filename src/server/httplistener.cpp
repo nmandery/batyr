@@ -17,7 +17,6 @@ HttpListener::HttpListener(Configuration::Ptr _configuration)
     :   BaseListener(_configuration), 
         logger(Poco::Logger::get("HttpListener"))
 {
-    poco_debug(logger, "Setting up http listener");
 }
 
 HttpListener::~HttpListener() 

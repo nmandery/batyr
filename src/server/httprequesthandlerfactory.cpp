@@ -40,8 +40,10 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         }
         endpoint = uri.substr(pos_start, pos_end-pos_start);
     }
-    poco_debug(logger, "Dispatching request for endpoint:");
-    poco_debug(logger, endpoint.c_str());
+#ifdef _DEBUG
+    std::string logMessage = "Dispatching request " + endpoint;
+    poco_debug(logger, logMessage.c_str());
+#endif
 
     // dispatch to api handlers
     if (endpoint == "api/create") {

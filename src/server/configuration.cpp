@@ -79,6 +79,7 @@ valueToInt(const std::string & s, bool & ok)
     int i;
     try {
         i = std::stoi(trim(s));
+        ok = true;
     }
     catch (std::exception) {
         ok = false;
@@ -118,7 +119,6 @@ Configuration::parse(const std::string & configFile)
                         throwUnknownSetting(sectionPair.first, valuePair.first);
                     }
                 }
-
             }
             else if (sectionPair.first == "MAIN") {
                 for(auto const valuePair : sectionPair.second.values) {
@@ -150,14 +150,13 @@ Configuration::parse(const std::string & configFile)
                         throwUnknownSetting(sectionPair.first, valuePair.first);
                     }
                 }
-
             }
             else if (sectionPair.first == "LAYERS") {
                 for(auto const layerSectionPair : sectionPair.second.sections) {
                     auto layer = std::make_shared<Layer>();
                     layer->name = layerSectionPair.first;
 
-                    // TODO: collect layer infos
+                    // collect layer infos
                     for(auto const layerValuePair: layerSectionPair.second.values) {
                         if (layerValuePair.first == "description") {
                             layer->description = layerValuePair.second;
@@ -172,7 +171,6 @@ Configuration::parse(const std::string & configFile)
 
                     layers[layer->name] = layer;
                 }
-
             }
             else if (sectionPair.first == "LOGGING") {
             }
