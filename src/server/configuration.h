@@ -55,6 +55,11 @@ namespace Batyr
                 return layers.size();
             }
 
+            unsigned int getMaxAgeDoneJobs() const
+            {
+                return max_age_done_jobs;
+            }
+
             typedef std::shared_ptr<Configuration> Ptr;
 
         private:
@@ -63,6 +68,7 @@ namespace Batyr
             /* settings */
             unsigned int http_port;
             unsigned int num_worker_threads;
+            unsigned int max_age_done_jobs;
 
             void parse(const std::string & configFile);
     };

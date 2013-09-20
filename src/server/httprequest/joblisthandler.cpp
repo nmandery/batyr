@@ -10,9 +10,10 @@
 
 using namespace Batyr::HttpRequest;
 
-JoblistHandler::JoblistHandler()
+JoblistHandler::JoblistHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("JoblistHandler"))
+        logger(Poco::Logger::get("JoblistHandler")),
+        configuration(_configuration)
 {
 }
 
@@ -31,7 +32,7 @@ JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTP
     // build the json document 
     rapidjson::Document doc;
     doc.SetObject();
-    doc.AddMember("maxAgeDoneJobsSeconds", 157, doc.GetAllocator()); // TODO
+    doc.AddMember("maxAgeDoneJobsSeconds", configuration->getMaxAgeDoneJobs(), doc.GetAllocator());
 
     rapidjson::Value vJobs;
     vJobs.SetArray();

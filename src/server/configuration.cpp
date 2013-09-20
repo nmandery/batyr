@@ -9,7 +9,8 @@ using namespace Batyr;
 
 Configuration::Configuration(const std::string & configFile)
     :   http_port(9090),        // default value
-        num_worker_threads(2)   // default value
+        num_worker_threads(2),  // default value
+        max_age_done_jobs(600)  // default value
 {
     parse(configFile);
 }
@@ -113,6 +114,18 @@ Configuration::parse(const std::string & configFile)
                             throw ConfigurationError("At least one worker thread is required.");
                         }
                         num_worker_threads = _num_worker_threads;
+                    }
+                    else if (valuePair.first == "max_age_done_jobs") {
+                        int _max_age_done_jobs = valueToInt(valuePair.second, ok);
+                        if (!ok) {
+                            throwInvalidValue(sectionPair.first,
+                                        valuePair.first,
+                                        valuePair.second);
+                        }
+                        if (_max_age_done_jobs < 1) {
+                            throw ConfigurationError("max_age_done_jobs must be a positive value.");
+                        }
+                        max_age_done_jobs = _max_age_done_jobs;
                     }
                     else {
                         throwUnknownSetting(sectionPair.first, valuePair.first);

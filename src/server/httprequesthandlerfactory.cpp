@@ -49,7 +49,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         return createHandler;
     }
     else if (endpoint == "api/jobs.json") {
-        auto jobstorageHandler = new Batyr::HttpRequest::JoblistHandler;
+        auto jobstorageHandler = new Batyr::HttpRequest::JoblistHandler(configuration);
         jobstorageHandler->setJobs(jobs);
         return jobstorageHandler;
     }

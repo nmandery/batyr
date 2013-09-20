@@ -11,7 +11,7 @@ using namespace Batyr;
 
 Broker::Broker(Configuration::Ptr _configuration)
     :   logger(Poco::Logger::get("Broker")),
-        jobs(std::make_shared<JobStorage>( std::chrono::duration<int>( 60 * 2 ) )),
+        jobs(std::make_shared<JobStorage>( std::chrono::duration<int>( _configuration->getMaxAgeDoneJobs() ) )),
         configuration(_configuration)
 {
     poco_debug(logger, "Setting up the broker");
