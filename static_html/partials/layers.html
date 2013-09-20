@@ -4,4 +4,12 @@
     </div>
 </div>
 
+<div class="l-vbox layers-box">
+        <div class="l-vbox layer-box" ng-repeat="layer in layerlist.layers">
+            <div>
+                <div class="title">{{ layer.name }}</div>
+            </div>
+            <div class="mini">{{ layer.description }}</div>
+        </div>
+</div>
 

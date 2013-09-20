@@ -399,6 +399,21 @@ pre .string, pre .support.value  {
 }
 
 
+/**
+ * Tables
+ */
+
+.pure-table {
+    font-size: 80%;
+}
+.pure-table th {
+    font-weight: normal;
+}
+.pure-table thead {
+    background-color: #F0F0F0;
+}
+
+
 
 /*
  *  status page
@@ -422,19 +437,14 @@ pre .string, pre .support.value  {
     width: 30%;
 }
 
+
 /**
  * Jobs page
  */
+
 .job-table {
     width: 100%;
 }
-.pure-table {
-    font-size: 80%;
-}
-.pure-table th {
-    font-weight: normal;
-}
-
 .job-table tbody {
     color: #fff;
 }
@@ -477,6 +487,27 @@ pre .string, pre .support.value  {
     padding-right: 0px;
 }
 
+/**
+ * layers page
+ */
+
+.layers-box {
+    padding: 1.6em;
+}
+
+.layer-box {
+    padding: 0.5em;
+    margin-bottom: 1.6em;
+    background: #F0F0F0;
+    border: 1px solid #CBCBCB;
+}
+
+.layer-box .title {
+    font-size: 110%;
+    margin-bottom: 0.75em;
+    font-family: "omnes-pro", sans-serif;
+    color: #1f8dd6;
+}
 
 /* --------------------------
  * Footer Module Styles

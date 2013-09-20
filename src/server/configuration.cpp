@@ -41,7 +41,7 @@ Configuration::getOrderedLayers() const
     }
 
     std::sort(orderedLayers.begin(), orderedLayers.end(), [](Layer::Ptr l1, Layer::Ptr l2) {
-        return l2->name < l1->name;
+        return l2->name > l1->name;
     });
 
     return orderedLayers;

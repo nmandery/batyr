@@ -59,6 +59,13 @@ function AboutCtrl($scope, $http) {
 }
 
 function LayersCtrl($scope, $http) {
+    $scope.layerlist = {};
+    var fetchLayers = function() {
+        $http.get('api/layers.json').success(function(data) {
+            $scope.layerlist = data;
+        });
+    }
+    fetchLayers();
 }
 
 function JobsCtrl($scope, $http) {
