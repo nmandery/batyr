@@ -12,6 +12,9 @@ add_subdirectory(3rdparty)
 # include files shared by all projects
 # add_subdirectory(common)
 
+# the web gui for the server. static html/css/js/... files
+add_subdirectory(web)
+
 # the server application
 add_subdirectory(server)
 

@@ -8,7 +8,7 @@
 #include "server/httprequest/bufferhandler.h"
 #include "server/httprequest/joblisthandler.h"
 #include "server/httprequest/layerlisthandler.h"
-#include "server/httpassets.h"
+#include "web/httpassets.h"
 
 using namespace Batyr;
 

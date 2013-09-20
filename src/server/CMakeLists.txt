@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(batyrd)
 
-FILE(GLOB_RECURSE SERVER_SOURCES *.cpp)
 
+FILE(GLOB_RECURSE SERVER_SOURCES *.cpp)
 
 include_directories(
     ${BATYR_INCLUDE_DIR}
@@ -17,6 +17,9 @@ include_directories(
 )
 
 add_executable(batyrd ${SERVER_SOURCES})
+
+# the server requires the assets header to be build
+add_dependencies(batyrd web-assets)
 
 target_link_libraries(batyrd 
     ${Poco_LIBRARIES} 

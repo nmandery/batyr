@@ -4,5 +4,6 @@ CMakeFiles
 *.swp
 Makefile
 *~
-/batyrd
 *.pyc
+/src/server/batyrd
+/src/web/httpassets.h
