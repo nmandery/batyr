@@ -110,7 +110,7 @@ JobStorage::getOrderedJobs()
     std::vector< Job::Ptr > orderedJobs;
     orderedJobs.reserve(jobMap.size());
 
-    for (auto kv : jobMap) {
+    for (auto const kv : jobMap) {
         orderedJobs.push_back(kv.second);
     }
 

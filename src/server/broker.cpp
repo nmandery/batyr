@@ -9,9 +9,10 @@
 using namespace Batyr;
 
 
-Broker::Broker()
+Broker::Broker(Configuration::Ptr _configuration)
     :   logger(Poco::Logger::get("Broker")),
-        jobs(std::make_shared<JobStorage>( std::chrono::duration<int>( 60 * 2 ) ))
+        jobs(std::make_shared<JobStorage>( std::chrono::duration<int>( 60 * 2 ) )),
+        configuration(_configuration)
 {
     poco_debug(logger, "Setting up the broker");
 }
@@ -32,9 +33,10 @@ Broker::addListener(std::shared_ptr<Batyr::BaseListener> listener_ptr)
 
 
 void
-Broker::run(size_t _numWorkers)
+Broker::run()
 {
     // start all workers
+    size_t _numWorkers = configuration->getNumWorkerThreads();
     poco_debug(logger, "Starting " + std::to_string(_numWorkers) + " worker threads");
     for(size_t nW = 0; nW < _numWorkers; nW++) {
         auto worker = std::unique_ptr<Worker>(new Worker(jobs));

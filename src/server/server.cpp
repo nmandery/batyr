@@ -4,6 +4,10 @@
 #include <Poco/Logger.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/Message.h>
+#include <Poco/Util/OptionSet.h>
+#include <Poco/Util/Option.h>
+#include <Poco/Util/OptionCallback.h>
+#include <Poco/Util/HelpFormatter.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -21,15 +25,26 @@ Server::main(const std::vector<std::string> & args)
 {
     UNUSED(args)
 
+    // exit early if the user just wanted to see 
+    // the help text
+    if (_helpRequested) {
+        return Poco::Util::Application::EXIT_OK;
+    }
+
+    // check the config file
+    if (!_configOk) {
+        return Poco::Util::Application::EXIT_USAGE;
+    }
+
     initLogging();
     Poco::Logger & logger = Poco::Logger::get("Server"); 
 
     try {
-        Broker broker;
+        Broker broker(configuration);
 
-        auto httplistener_ptr = std::make_shared<Batyr::HttpListener>();
+        auto httplistener_ptr = std::make_shared<Batyr::HttpListener>(configuration);
         broker.addListener(httplistener_ptr);
-        broker.run(2);
+        broker.run();
 
         waitForTerminationRequest();  // wait for CTRL-C or kill
 
@@ -65,4 +80,63 @@ Server::initLogging()
     Poco::Logger::root().setLevel(Poco::Message::PRIO_INFORMATION);
 #endif
 
+}
+
+
+void
+Server::defineOptions(Poco::Util::OptionSet & options)
+{
+    Poco::Util::ServerApplication::defineOptions(options);
+
+    options.addOption( Poco::Util::Option("help", "h", "display help information")
+            .required(false)
+            .repeatable(false)
+            .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleHelp )));
+
+    options.addOption( Poco::Util::Option("configfile", "c", "path to the config file")
+            .required(true)
+            .repeatable(false)
+            .argument("file")
+            .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleConfigfile )));
+}
+
+
+void
+Server::displayHelp()
+{
+    Poco::Util::HelpFormatter helpFormatter(options());
+    helpFormatter.setCommand(commandName());
+    helpFormatter.setUsage("-c CONFIGFILE [OPTIONS]");
+    helpFormatter.setHeader("TODO ---- write some short description here");
+    helpFormatter.format(std::cout);
+
+}
+
+
+void
+Server::handleHelp(const std::string& name, const std::string& value)
+{
+    UNUSED(name)
+    UNUSED(value)
+
+    _helpRequested = true;
+    displayHelp();
+    stopOptionsProcessing();
+}
+
+
+void
+Server::handleConfigfile(const std::string& name, const std::string& value)
+{
+    UNUSED(name)
+
+    try {
+        configuration = std::make_shared<Configuration>(value);
+        _configOk = true;
+    }
+    catch (Batyr::ConfigurationError &e) {
+        std::cerr << "Configuration error: " << e.what() << std::endl;
+        _configOk = false;
+        stopOptionsProcessing();
+    }
 }

@@ -9,9 +9,10 @@
 using namespace Batyr::HttpRequest;
 
 
-StatusHandler::StatusHandler()
+StatusHandler::StatusHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("StatusHandler"))
+        logger(Poco::Logger::get("StatusHandler")),
+        configuration(_configuration)
 {
 }
 
@@ -29,9 +30,11 @@ StatusHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
     doc.SetObject();
     doc.AddMember("appName", APP_NAME_SERVER, doc.GetAllocator());
     doc.AddMember("appVersion", VERSION_FULL, doc.GetAllocator());
-    doc.AddMember("numLayers", 0, doc.GetAllocator()); // TODO
+    doc.AddMember("numLayers", configuration->getLayerCount(), 
+                doc.GetAllocator());
     doc.AddMember("numQueuedJobs", 0, doc.GetAllocator()); // TODO
-    doc.AddMember("numWorkers", 0, doc.GetAllocator()); // TODO
+    doc.AddMember("numWorkers", configuration->getNumWorkerThreads(),
+                doc.GetAllocator());
 
     std::ostream & out = resp.send();
     out << Batyr::Json::stringify(doc);
