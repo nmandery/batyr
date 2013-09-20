@@ -1,6 +1,7 @@
 #include "configuration.h"
 
 #include <fstream>
+#include <algorithm>
 
 #include "../lib/ini-parser/ini.hpp"
 
@@ -26,6 +27,24 @@ Configuration::getLayer(const std::string & _layer) const
         throw ConfigurationError("Layer " + _layer + " not found");
     }
     return layer;
+}
+
+
+std::vector<Layer::Ptr>
+Configuration::getOrderedLayers() const
+{    
+    std::vector< Layer::Ptr > orderedLayers;
+    orderedLayers.reserve(layers.size());
+
+    for (auto const kv : layers) {
+        orderedLayers.push_back(kv.second);
+    }
+
+    std::sort(orderedLayers.begin(), orderedLayers.end(), [](Layer::Ptr l1, Layer::Ptr l2) {
+        return l2->name < l1->name;
+    });
+
+    return orderedLayers;
 }
 
 

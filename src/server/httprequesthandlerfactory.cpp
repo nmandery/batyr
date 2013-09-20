@@ -7,6 +7,7 @@
 #include "httprequest/notfoundhandler.h"
 #include "httprequest/bufferhandler.h"
 #include "httprequest/joblisthandler.h"
+#include "httprequest/layerlisthandler.h"
 #include "httpassets.h"
 
 using namespace Batyr;
@@ -49,9 +50,13 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         return createHandler;
     }
     else if (endpoint == "api/jobs.json") {
-        auto jobstorageHandler = new Batyr::HttpRequest::JoblistHandler(configuration);
-        jobstorageHandler->setJobs(jobs);
-        return jobstorageHandler;
+        auto joblistHandler = new Batyr::HttpRequest::JoblistHandler(configuration);
+        joblistHandler->setJobs(jobs);
+        return joblistHandler;
+    }
+    else if (endpoint == "api/layers.json") {
+        auto layerlistHandler = new Batyr::HttpRequest::LayerlistHandler(configuration);
+        return layerlistHandler;
     }
     else if (endpoint == "api/status.json") {
         auto statusHandler = new Batyr::HttpRequest::StatusHandler(configuration);

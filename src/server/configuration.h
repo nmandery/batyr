@@ -3,8 +3,10 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include <stdexcept>
 #include <unordered_map>
+
 
 namespace Batyr
 {
@@ -59,6 +61,11 @@ namespace Batyr
             {
                 return max_age_done_jobs;
             }
+
+            /**
+             * get a vector with all layers ordered by their names
+             */
+            std::vector<Layer::Ptr> getOrderedLayers() const;
 
             typedef std::shared_ptr<Configuration> Ptr;
 
