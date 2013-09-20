@@ -8,6 +8,8 @@
 
 #include <memory>
 
+#include "../configuration.h"
+
 namespace Batyr 
 {
 namespace HttpRequest 
@@ -17,9 +19,10 @@ namespace HttpRequest
     {
         private:
             Poco::Logger & logger;
+            Configuration::Ptr configuration;
 
         public:
-            StatusHandler();
+            StatusHandler(Configuration::Ptr);
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
 
     };

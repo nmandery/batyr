@@ -4,6 +4,7 @@
 #include <Poco/Logger.h>
 
 #include "jobstorage.h"
+#include "configuration.h"
 
 #include <memory>
 
@@ -16,10 +17,11 @@ namespace Batyr {
 
         protected:
             std::weak_ptr<JobStorage> jobs;
+            Configuration::Ptr configuration;
 
         public:
 
-            BaseListener();
+            BaseListener(Configuration::Ptr);
 
             /** disable copying */
             BaseListener(const BaseListener &) = delete;

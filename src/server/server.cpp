@@ -36,16 +36,15 @@ Server::main(const std::vector<std::string> & args)
         return Poco::Util::Application::EXIT_USAGE;
     }
 
-
     initLogging();
     Poco::Logger & logger = Poco::Logger::get("Server"); 
 
     try {
-        Broker broker;
+        Broker broker(configuration);
 
-        auto httplistener_ptr = std::make_shared<Batyr::HttpListener>();
+        auto httplistener_ptr = std::make_shared<Batyr::HttpListener>(configuration);
         broker.addListener(httplistener_ptr);
-        broker.run(2);
+        broker.run();
 
         waitForTerminationRequest();  // wait for CTRL-C or kill
 
@@ -94,9 +93,10 @@ Server::defineOptions(Poco::Util::OptionSet & options)
             .repeatable(false)
             .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleHelp )));
 
-    options.addOption( Poco::Util::Option("config", "c", "path to the config file")
+    options.addOption( Poco::Util::Option("configfile", "c", "path to the config file")
             .required(true)
             .repeatable(false)
+            .argument("file")
             .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleConfigfile )));
 }
 
@@ -129,7 +129,14 @@ void
 Server::handleConfigfile(const std::string& name, const std::string& value)
 {
     UNUSED(name)
-    UNUSED(value)
 
-    // stopOptionsProcessing();
+    try {
+        configuration = std::make_shared<Configuration>(value);
+        _configOk = true;
+    }
+    catch (Batyr::ConfigurationError &e) {
+        std::cerr << "Configuration error: " << e.what() << std::endl;
+        _configOk = false;
+        stopOptionsProcessing();
+    }
 }

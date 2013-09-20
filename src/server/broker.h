@@ -10,6 +10,7 @@
 #include "worker.h"
 #include "httplistener.h"
 #include "jobstorage.h"
+#include "configuration.h"
 
 namespace Batyr {
    
@@ -21,10 +22,10 @@ namespace Batyr {
             std::shared_ptr<JobStorage> jobs;
             std::vector< std::shared_ptr< std::thread > > workerThreads;
             std::vector< std::shared_ptr< std::thread > > listenerThreads;
-
+            Configuration::Ptr configuration;
 
         public:
-            Broker();
+            Broker(Configuration::Ptr);
 
             /** disable copying */
             Broker(const Broker &) = delete;
@@ -33,7 +34,7 @@ namespace Batyr {
             ~Broker();
 
             void addListener( std::shared_ptr<Batyr::BaseListener> );
-            void run(size_t _numWorkers);
+            void run();
             void stop();
     };
 

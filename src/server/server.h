@@ -6,13 +6,17 @@
 
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "configuration.h"
 
 namespace Batyr {
 
     class Server : public Poco::Util::ServerApplication
     {
-        protected:
-            int main(const std::vector<std::string> &);
+        private:
+
+            Configuration::Ptr configuration;
 
             /** initialize the logging system */
             void initLogging();
@@ -24,11 +28,14 @@ namespace Batyr {
             /** indicates that the configfile is found and free of errors */
             bool _configOk = true; 
 
-            void defineOptions(Poco::Util::OptionSet & options);
             void handleHelp(const std::string& name, const std::string& value);
             void handleConfigfile(const std::string& name, const std::string& value);
             void displayHelp();
 
+
+        protected:
+            int main(const std::vector<std::string> &);
+            void defineOptions(Poco::Util::OptionSet & options);
     };
 
 };

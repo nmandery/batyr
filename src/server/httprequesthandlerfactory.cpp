@@ -12,9 +12,10 @@
 using namespace Batyr;
 
 
-HTTPRequestHandlerFactory::HTTPRequestHandlerFactory()
+HTTPRequestHandlerFactory::HTTPRequestHandlerFactory(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandlerFactory(),
-        logger(Poco::Logger::get("HTTPRequestHandlerFactory"))
+        logger(Poco::Logger::get("HTTPRequestHandlerFactory")),
+        configuration(_configuration)
 {
 }
 
@@ -53,7 +54,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         return jobstorageHandler;
     }
     else if (endpoint == "api/status.json") {
-        auto statusHandler = new Batyr::HttpRequest::StatusHandler;
+        auto statusHandler = new Batyr::HttpRequest::StatusHandler(configuration);
         return statusHandler;
     }
 

@@ -13,8 +13,9 @@
 using namespace Batyr;
 
 
-HttpListener::HttpListener()
-    : BaseListener(), logger(Poco::Logger::get("HttpListener"))
+HttpListener::HttpListener(Configuration::Ptr _configuration)
+    :   BaseListener(_configuration), 
+        logger(Poco::Logger::get("HttpListener"))
 {
     poco_debug(logger, "Setting up http listener");
 }
@@ -33,10 +34,12 @@ HttpListener::run()
     auto serverParams = new Poco::Net::HTTPServerParams; // TODO: check destruction
     serverParams->setMaxThreads( SERVER_HTTP_THREADS );
 
-    auto handlerFactory = new Batyr::HTTPRequestHandlerFactory; // TODO: check destruction
+    auto handlerFactory = new Batyr::HTTPRequestHandlerFactory(configuration); // TODO: check destruction
     handlerFactory->setJobs(jobs);
 
-    Poco::Net::HTTPServer server(handlerFactory, Poco::Net::ServerSocket(9090), serverParams);
+    Poco::Net::HTTPServer server(handlerFactory, 
+            Poco::Net::ServerSocket( configuration->getHttpPort() ), 
+            serverParams);
     server.start();
 
     // wait until shutdown

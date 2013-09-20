@@ -18,7 +18,7 @@ namespace Batyr {
 
         public:
 
-            HttpListener();
+            HttpListener(Configuration::Ptr);
 
             /** disable copying */
             HttpListener(const HttpListener &) = delete;
