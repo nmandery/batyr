@@ -23,10 +23,10 @@ namespace Batyr {
 
             /* Commandline argument parsing -----------*/
 
-            bool _helpRequested = false;
+            bool _helpRequested;
 
             /** indicates that the configfile is found and free of errors */
-            bool _configOk = true; 
+            bool _configOk; 
 
             void handleHelp(const std::string& name, const std::string& value);
             void handleConfigfile(const std::string& name, const std::string& value);
@@ -36,6 +36,9 @@ namespace Batyr {
         protected:
             int main(const std::vector<std::string> &);
             void defineOptions(Poco::Util::OptionSet & options);
+
+        public:
+            Server();
     };
 
 };

@@ -8,6 +8,8 @@ using namespace Batyr;
 
 
 Configuration::Configuration(const std::string & configFile)
+    :   http_port(9090),        // default value
+        num_worker_threads(2)   // default value
 {
     parse(configFile);
 }

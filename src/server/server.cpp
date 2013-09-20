@@ -20,6 +20,14 @@
 using namespace Batyr;
 
 
+Server::Server()
+    :   Poco::Util::ServerApplication(),
+        _helpRequested(false),
+        _configOk(false)
+{
+}
+
+
 int
 Server::main(const std::vector<std::string> & args)
 {

@@ -59,9 +59,9 @@ namespace Batyr
         private:
             std::unordered_map<std::string, Layer::Ptr> layers;
 
-            /* default settings */
-            unsigned int http_port = 9090;
-            unsigned int num_worker_threads = 2;
+            /* settings */
+            unsigned int http_port;
+            unsigned int num_worker_threads;
 
             void parse(const std::string & configFile);
     };
