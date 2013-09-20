@@ -4,6 +4,10 @@
 #include <Poco/Logger.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/Message.h>
+#include <Poco/Util/OptionSet.h>
+#include <Poco/Util/Option.h>
+#include <Poco/Util/OptionCallback.h>
+#include <Poco/Util/HelpFormatter.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -20,6 +24,18 @@ int
 Server::main(const std::vector<std::string> & args)
 {
     UNUSED(args)
+
+    // exit early if the user just wanted to see 
+    // the help text
+    if (_helpRequested) {
+        return Poco::Util::Application::EXIT_OK;
+    }
+
+    // check the config file
+    if (!_configOk) {
+        return Poco::Util::Application::EXIT_USAGE;
+    }
+
 
     initLogging();
     Poco::Logger & logger = Poco::Logger::get("Server"); 
@@ -65,4 +81,55 @@ Server::initLogging()
     Poco::Logger::root().setLevel(Poco::Message::PRIO_INFORMATION);
 #endif
 
+}
+
+
+void
+Server::defineOptions(Poco::Util::OptionSet & options)
+{
+    Poco::Util::ServerApplication::defineOptions(options);
+
+    options.addOption( Poco::Util::Option("help", "h", "display help information")
+            .required(false)
+            .repeatable(false)
+            .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleHelp )));
+
+    options.addOption( Poco::Util::Option("config", "c", "path to the config file")
+            .required(true)
+            .repeatable(false)
+            .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleConfigfile )));
+}
+
+
+void
+Server::displayHelp()
+{
+    Poco::Util::HelpFormatter helpFormatter(options());
+    helpFormatter.setCommand(commandName());
+    helpFormatter.setUsage("-c CONFIGFILE [OPTIONS]");
+    helpFormatter.setHeader("TODO ---- write some short description here");
+    helpFormatter.format(std::cout);
+
+}
+
+
+void
+Server::handleHelp(const std::string& name, const std::string& value)
+{
+    UNUSED(name)
+    UNUSED(value)
+
+    _helpRequested = true;
+    displayHelp();
+    stopOptionsProcessing();
+}
+
+
+void
+Server::handleConfigfile(const std::string& name, const std::string& value)
+{
+    UNUSED(name)
+    UNUSED(value)
+
+    // stopOptionsProcessing();
 }
