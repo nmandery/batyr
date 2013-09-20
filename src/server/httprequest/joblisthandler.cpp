@@ -1,6 +1,7 @@
 #include "joblisthandler.h"
 #include "../json.h"
 #include "../../config.h"
+#include "../../macros.h"
 
 #include "../../lib/rapidjson/document.h"
 
@@ -19,22 +20,13 @@ JoblistHandler::JoblistHandler()
 void
 JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
 {
+    UNUSED(req)
+
     resp.set("Server", APP_NAME_SERVER_FULL);
     resp.set("Cache-Control", "no-cache");
-
-    if (req.getMethod() != "GET") {
-        resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-        resp.setContentType("text/plain");
-        resp.setReason("Bad Request");
-        
-        std::ostream & out = resp.send();
-        out << "Only GET requests are supported";
-        out.flush();
-        return;
-    }
+    resp.setContentType("application/json");
 
     resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-    resp.setContentType("application/json");
 
     // build the json document 
     rapidjson::Document doc;
