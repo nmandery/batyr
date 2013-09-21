@@ -8,7 +8,7 @@
 #include "server/httprequest/bufferhandler.h"
 #include "server/httprequest/joblisthandler.h"
 #include "server/httprequest/layerlisthandler.h"
-#include "web/httpassets.h"
+#include "web/http_resources.h"
 
 using namespace Batyr;
 
@@ -65,18 +65,18 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         return statusHandler;
     }
 
-    // attempt to satisfy the request with one of the static assets
-    // TODO: a std::map would be better than looping over the assets, but as long
-    // as there are not to many assets this will also work
-    size_t assetIndex = 0;
-    while (assetIndex < assets_count) {
-        struct asset_info * asset = &assets[assetIndex];
+    // attempt to satisfy the request with one of the static resources
+    // TODO: a std::map would be better than looping over the resources, but as long
+    // as there are not to many resources this will also work
+    size_t resourceIndex = 0;
+    while (resourceIndex < resources_count) {
+        struct resource_info * resource = &resources[resourceIndex];
 
-        if ((endpoint == asset->filename) || (endpoint == "" && (strcmp("index.html", asset->filename) == 0))) {
-            return new Batyr::HttpRequest::BufferHandler(std::string(asset->mimetype),
-                        std::string(asset->etag), asset->data, asset->size_in_bytes);
+        if ((endpoint == resource->filename) || (endpoint == "" && (strcmp("index.html", resource->filename) == 0))) {
+            return new Batyr::HttpRequest::BufferHandler(std::string(resource->mimetype),
+                        std::string(resource->etag), resource->data, resource->size_in_bytes);
         }
-        assetIndex++;
+        resourceIndex++;
     }
 
     // at this point everything is just a 404 error

@@ -2,7 +2,7 @@
 """
 
 Usage:
-assets2header.py
+resources-to-header.py
 
 # TODO
 escaping of filenames and mimetypes
@@ -37,7 +37,7 @@ def fail(msg, rc=1):
     sys.exit(rc)
 
 
-class Asset(object):
+class Resource(object):
     filename=None
     filesize=0
     indenting = 4
@@ -51,7 +51,7 @@ class Asset(object):
         return slug(self.filename).lower().strip()
 
     def cvar_data(self):
-        return "asset_%s_data" % (self.slugname(),)
+        return "resource_%s_data" % (self.slugname(),)
 
     def etag(self):
         m = hashlib.sha1()
@@ -71,7 +71,7 @@ class Asset(object):
     def declaration(self):
         return """#include <stddef.h>
 
-struct asset_info {
+struct resource_info {
    const char * filename;
    const char * mimetype;
    const unsigned char * data;
@@ -132,7 +132,7 @@ def writeable_headerfile(filename, language='C'):
 if __name__ == '__main__':
     aparser = argparse.ArgumentParser(description=sys.modules[__name__].__doc__)
     aparser.add_argument('files', metavar='F', type=str, nargs='+',
-                               help='a file to include in the asset header')
+                               help='a file to include in the resource header')
     aparser.add_argument('--output', dest='output', type=str, required=True,
                             help='the file to write the header to')
 
@@ -140,19 +140,19 @@ if __name__ == '__main__':
 
     with writeable_headerfile(args.output) as fh:
 
-        fh.write(Asset.declaration())
+        fh.write(Resource.declaration())
 
-        asset_infos = []
+        resource_infos = []
         args.files.sort()
         for f in args.files:
-            asset = Asset(f)
-            asset.write_data(fh)
-            asset_infos.append(asset.metadata())
+            resource = Resource(f)
+            resource.write_data(fh)
+            resource_infos.append(resource.metadata())
 
-        # write an integer containing the number of assets in this file
-        fh.write("\n\nstatic size_t assets_count = %d;\n" % len(asset_infos))
+        # write an integer containing the number of resources in this file
+        fh.write("\n\nstatic size_t resources_count = %d;\n" % len(resource_infos))
 
-        # write an assets struct listing all assets of this file
-        fh.write("\nstatic struct asset_info assets[] = {\n")
-        fh.write(',\n'.join(asset_infos))
+        # write an resources struct listing all resources of this file
+        fh.write("\nstatic struct resource_info resources[] = {\n")
+        fh.write(',\n'.join(resource_infos))
         fh.write("\n};\n\n")

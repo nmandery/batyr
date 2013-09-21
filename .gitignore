@@ -6,4 +6,4 @@ Makefile
 *~
 *.pyc
 /src/server/batyrd
-/src/web/httpassets.h
+/src/web/http_resources.h
