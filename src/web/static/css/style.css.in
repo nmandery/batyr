@@ -66,11 +66,11 @@ dd {
 
 /* Apply the .box class on the immediate parent of any grid element (pure-u-*) to apply some padding. */
 .l-box {
-    padding: 1.3em; 
+    padding: 1.3em;
 }
 
 .l-vbox {
-    padding: 1.3em 0; 
+    padding: 1.3em 0;
 }
 
 .l-hbox {
@@ -538,4 +538,11 @@ pre .string, pre .support.value  {
     }
 
 
+/**
+ * other
+ */
+
+.pure-button-primary {
+    background: #0E90D2;
+}
 /* vim: set ft=css */

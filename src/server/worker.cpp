@@ -26,6 +26,7 @@ Worker::run()
             break;
         }
         poco_debug(logger, "Got job from queue");
+        job->setStatus(Job::Status::IN_PROCESS);
     }
     poco_debug(logger, "leaving run method");
 }
