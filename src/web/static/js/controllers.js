@@ -66,6 +66,24 @@ function LayersCtrl($scope, $http) {
         });
     }
     fetchLayers();
+
+    // TODO: add helplink to http://www.gdal.org/ogr/ogr_sql.html
+    $scope.filterHelp = function() {
+        if (console) {
+            console.log("Filter help");
+        }
+    };
+
+    $scope.pullLayer = function(layer) {
+        if (console) {
+            console.log(layer);
+        }
+        var job = {
+            layerName:  layer.name,
+            filter:     layer.filter
+        };
+        var promise = $http.post('api/create', job);
+    }
 }
 
 function JobsCtrl($scope, $http) {

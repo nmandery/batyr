@@ -223,6 +223,12 @@ a.pure-button-primary {
 .right {
     text-align: right;
 }
+
+.text-button {
+    cursor: pointer;
+    color: #3B8BBA;
+}
+
 /* --------------------------
  * Responsive Styles
  * --------------------------

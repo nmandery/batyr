@@ -5,11 +5,18 @@
 </div>
 
 <div class="l-vbox layers-box">
+        <div class="l-vbox right mini">
+            <span class="text-button"  ng-click="filterHelp()">Help for writing a filter</span>
+        </div>
         <div class="l-vbox layer-box" ng-repeat="layer in layerlist.layers">
             <div>
                 <div class="title">{{ layer.name }}</div>
             </div>
             <div class="mini">{{ layer.description }}</div>
+            <div class="right pure-form">
+                <input type="text" placeholder="Filter" ng-model="layer.filter">
+                <button class="pure-button pure-button-primary" ng-click="pullLayer(layer)">Pull</button>
+            </div>
         </div>
 </div>
 
