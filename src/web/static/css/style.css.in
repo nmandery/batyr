@@ -530,3 +530,6 @@ pre .string, pre .support.value  {
     .footer-links {
         margin: 0;
     }
+
+
+/* vim: set ft=css */
