@@ -101,3 +101,5 @@ function JobsCtrl($scope, $http) {
     };
 }
 
+
+/* vim: set ft=javascript */

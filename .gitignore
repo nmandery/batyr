@@ -6,4 +6,7 @@ Makefile
 *~
 *.pyc
 /src/server/batyrd
-/src/web/httpassets.h
+/src/web/http_resources.h
+/src/web/static/css/style.css
+/src/web/static/js/app.js
+/src/web/static/js/controllers.js

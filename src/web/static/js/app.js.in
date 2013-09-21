@@ -29,3 +29,6 @@ angular.module('batyrd', []).
             return moment.duration(secs, 'seconds').humanize();
         }
     });
+
+
+/* vim: set ft=javascript */

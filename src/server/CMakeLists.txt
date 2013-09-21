@@ -7,8 +7,6 @@ FILE(GLOB_RECURSE SERVER_SOURCES *.cpp)
 
 include_directories(
     ${BATYR_INCLUDE_DIR}
-    ${RAPIDJSON_SOURCE_DIR}
-    ${INIPARSER_SOURCE_DIR}
     #${GDAL_INCLUDE_DIR}
     ${Poco_INCLUDE_DIRS}
     ${POSTGRES_INCLUDE_DIR}
@@ -16,12 +14,26 @@ include_directories(
     ${RAPIDJSON_INCLUDE_DIR}
 )
 
-add_executable(batyrd ${SERVER_SOURCES})
+# ensure the file exists
+# otherwise cmake is unable to resolve its dependencies
+# and find all files to build the executable
+execute_process(
+    COMMAND touch ${BATYR_INCLUDE_DIR}/web/http_resources.h
+)
 
-# the server requires the assets header to be build
-add_dependencies(batyrd web-assets)
+# also add header of resources file to rebuild after
+# it has been updated. this will result in always compiling
+# at least one file and linking this project, but at least
+# the resources will always up to date
+add_executable( ${PROJECT_NAME}
+    ${SERVER_SOURCES}
+    ${BATYR_INCLUDE_DIR}/web/http_resources.h
+    )
 
-target_link_libraries(batyrd 
+# the server requires the resources header to be build
+add_dependencies(batyrd web-resources)
+
+target_link_libraries( ${PROJECT_NAME}
     ${Poco_LIBRARIES} 
     #${ZeroMQ_LIBRARIES} 
     ${POSTGRES_LIBRARY} 
