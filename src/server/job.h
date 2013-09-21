@@ -68,6 +68,14 @@ namespace Batyr
             /** return the object as a json string */
             std::string toString() const;
 
+            /** 
+             * fill the objects members from a JSON string 
+             *
+             * will throw a std::invalid_argument if things are not going
+             * to well.
+             */
+            void fromString(std::string);
+
             /** push the contents of the object into rapidjson document or value */
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 
@@ -75,6 +83,8 @@ namespace Batyr
 
         private:
             std::string errorMessage;
+            std::string layerName;
+            std::string filter;
             std::string id;
             Job::Status status;
             std::chrono::system_clock::time_point timeAdded;

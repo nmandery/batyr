@@ -2,10 +2,13 @@
 #include <Poco/UUID.h>
 
 #include <ctime>
+#include <stdexcept>
 #include <algorithm>
 
 #include "server/job.h"
 #include "server/json.h"
+
+#include "rapidjson/document.h"
 
 using namespace Batyr;
 
@@ -55,12 +58,22 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
             statusString = "failed";
             break;
     }
-    targetValue.AddMember("status", statusString, allocator);
+    rapidjson::Value vStatusString;
+    Batyr::Json::toValue(vStatusString, statusString, allocator);
+    targetValue.AddMember("status", vStatusString, allocator);
 
-    targetValue.AddMember("layerName", "todo", allocator); // TODO
+    rapidjson::Value vLayerName;
+    Batyr::Json::toValue(vLayerName, layerName, allocator);
+    targetValue.AddMember("layerName", vLayerName, allocator);
+
+    rapidjson::Value vFilter;
+    Batyr::Json::toValue(vFilter, filter, allocator);
+    targetValue.AddMember("filter", vFilter, allocator);
 
     if (!errorMessage.empty()) {
-        targetValue.AddMember("errorMessage", errorMessage.c_str(), allocator);
+        rapidjson::Value vErrorMessage;
+        Batyr::Json::toValue(vErrorMessage, errorMessage, allocator);
+        targetValue.AddMember("errorMessage", vErrorMessage, allocator);
     }
 }
 
@@ -75,6 +88,36 @@ Job::toString() const
     toJsonValue(data, data.GetAllocator());
     return Batyr::Json::stringify(data);
 }
+
+
+void
+Job::fromString(std::string data)
+{
+    rapidjson::Document doc;
+    doc.Parse<0>( data.c_str() );
+
+    if (doc.HasParseError()) {
+        throw std::invalid_argument("Invalid JSON data");
+    }
+    if (!doc.IsObject()) {
+        throw std::invalid_argument("JSON data should be an object");
+    }
+    if (!doc.HasMember("layerName")) {
+        throw std::invalid_argument("Missing key layerName in JSON object");
+    }
+    if (!doc["layerName"].IsString()) {
+        throw std::invalid_argument("Key layerName should be a string");
+    }
+    layerName = doc["layerName"].GetString();
+
+    if (doc.HasMember("filter")) {
+        if (!doc["filter"].IsString()) {
+            throw std::invalid_argument("Key filter should be a string");
+        }
+        filter = doc["filter"].GetString();
+    }
+}
+
 
 
 std::ostream&

@@ -63,6 +63,10 @@ function LayersCtrl($scope, $http) {
     $scope.layerlist = {};
 
     var fetchLayers = function() {
+        // clear layerlist object to avoid displaying outdated data before
+        // the request bellow is finished
+        $scope.layerlist = {};
+
         $http.get('api/layers.json').success(function(data) {
             $scope.layerlist = data;
         });
@@ -73,14 +77,12 @@ function LayersCtrl($scope, $http) {
         $scope.showLayerHelp = !$scope.showLayerHelp;
     };
     $scope.pullLayer = function(layer) {
-        if (console) {
-            console.log(layer);
-        }
         var job = {
             layerName:  layer.name,
             filter:     layer.filter
         };
         var promise = $http.post('api/create', job);
+        // TODO: display errors
     }
 }
 
