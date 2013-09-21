@@ -5,9 +5,37 @@
 </div>
 
 <div class="l-vbox layers-box">
-        <div class="l-vbox right mini">
-            <span class="text-button"  ng-click="filterHelp()">Help for writing a filter</span>
+        <div class="l-vbox right mini" ng-show="showLayerHelp">
+            <span class="text-button"  ng-click="toggleFilterHelp()">Hide help</span>
         </div>
+        <div class="l-vbox mini" ng-show="showLayerHelp">
+            <p>
+            A filter is a criteria to specify which datasets should be pulled from the datasource. The 
+            filter should be in the format of an SQL WHERE clause. For instance 
+            <code>population &gt; 1000000 and population &lt; 5000000</code> where population is an attribute 
+            in the layer.
+            </p>
+            <p>
+            The available logical operators are <code>=</code>, <code>!=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, 
+            <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>LIKE</code> and <code>ILIKE</code>, <code>BETWEEN</code> 
+            and <code>IN</code>. Most of the operators are self explanitory, but is is worth nothing 
+            that <code>!=</code> is the same as <code>&lt;&gt;</code>, the string equality is case insensitive, 
+            but the <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> and <code>&gt;=</code> operators 
+            are case 
+            sensitive. Both the <code>LIKE</code> and <code>ILIKE</code> operators are case insensitive.
+            </p>
+            <p>
+            The available logical operators are <code>AND</code>, <code>OR</code> and <code>NOT</code>.
+            </p>
+            <p>
+            The filter capabilties also depend on the data source the layer is pulled from.
+            More information to these filters can be found in the <a href="http://www.gdal.org/ogr/ogr_sql.html" target="_blank">OGR SQL Documetation</a> in the section explaining the WHERE clause.
+            </p>
+        </div>
+        <div class="l-vbox right mini" ng-hide="showLayerHelp">
+            <span class="text-button"  ng-click="toggleFilterHelp()">Help for writing a filter</span>
+        </div>
+
         <div class="l-vbox layer-box" ng-repeat="layer in layerlist.layers">
             <div>
                 <div class="title">{{ layer.name }}</div>

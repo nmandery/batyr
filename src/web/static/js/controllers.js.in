@@ -59,7 +59,9 @@ function AboutCtrl($scope, $http) {
 }
 
 function LayersCtrl($scope, $http) {
+    $scope.showLayerHelp = false;
     $scope.layerlist = {};
+
     var fetchLayers = function() {
         $http.get('api/layers.json').success(function(data) {
             $scope.layerlist = data;
@@ -67,13 +69,9 @@ function LayersCtrl($scope, $http) {
     }
     fetchLayers();
 
-    // TODO: add helplink to http://www.gdal.org/ogr/ogr_sql.html
-    $scope.filterHelp = function() {
-        if (console) {
-            console.log("Filter help");
-        }
+    $scope.toggleFilterHelp = function() {
+        $scope.showLayerHelp = !$scope.showLayerHelp;
     };
-
     $scope.pullLayer = function(layer) {
         if (console) {
             console.log(layer);
