@@ -2,10 +2,16 @@
 #define __batyr_httplistener_h__
 
 #include "Poco/Logger.h"
+#include <Poco/Net/ServerSocket.h>
+#include <Poco/Net/HTTPServerParams.h>
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/SharedPtr.h>
 
-#include <mutex>
+#include <memory>
 
 #include "server/baselistener.h"
+#include "server/httprequesthandlerfactory.h"
+
 
 namespace Batyr {
 
@@ -13,7 +19,12 @@ namespace Batyr {
         
         private:
             Poco::Logger & logger;
-            std::mutex runMutex;
+            bool isRunning;
+
+            Poco::Net::ServerSocket socket;
+            Poco::Net::HTTPServerParams::Ptr serverParamsPtr;
+            Poco::SharedPtr<Batyr::HTTPRequestHandlerFactory> handlerFactoryPtr;
+            std::unique_ptr<Poco::Net::HTTPServer> server;
 
 
         public:

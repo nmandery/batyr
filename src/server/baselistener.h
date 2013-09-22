@@ -35,13 +35,22 @@ namespace Batyr {
             }
 
             /**
+             * indicates if the run method of the listener
+             * will not imediately return and if the listener
+             * shoudl be run in a sperate thread
+             */
+            virtual bool runInThread() { return false; }
+
+            /**
              * stop the listener.
              * the run method should terminate when this method is called
              */
             virtual void stop() {};
 
-            /** execute the listener. this method will block and should be
-             * executed in a seperate thread
+            /** execute the listener. this method may block and should 
+             * in that case be executed in a seperate thread
+             *
+             * Also see the runInThread method
              */
             virtual void run() {};
     };

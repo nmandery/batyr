@@ -48,11 +48,15 @@ Broker::run()
     // start all listener threads
     poco_information(logger, "Starting " + std::to_string(listeners.size()) + " listeners");
     for(auto ilistener : listeners) {
-        // http://stackoverflow.com/questions/10673585/start-thread-with-member-function
-        auto listenerThread = std::make_shared<std::thread>(
-                std::bind(&Batyr::BaseListener::run, ilistener)
-        );
-        listenerThreads.push_back( listenerThread );
+        if (ilistener->runInThread()) {
+            auto listenerThread = std::make_shared<std::thread>(
+                    std::bind(&Batyr::BaseListener::run, ilistener)
+            );
+            listenerThreads.push_back( listenerThread );
+        }
+        else {
+            ilistener->run();
+        }
     }
 }
 

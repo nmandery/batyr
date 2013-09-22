@@ -4,6 +4,7 @@
 #include <Poco/Logger.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/Message.h>
+#include <Poco/Exception.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionCallback.h>
@@ -57,6 +58,12 @@ Server::main(const std::vector<std::string> & args)
         waitForTerminationRequest();  // wait for CTRL-C or kill
 
         broker.stop();
+    }
+    catch (Poco::Exception& e) {
+        poco_error(logger, e.displayText());
+        std::cerr << e.displayText() << std::endl;
+
+        return Poco::Util::Application::EXIT_SOFTWARE;
     }
     catch (std::exception& e) {
         poco_error(logger, e.what());

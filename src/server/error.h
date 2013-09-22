@@ -14,7 +14,7 @@ namespace Batyr
         public:
             Error(const std::string msg);
 
-            friend std::ostream& operator<< (std::ostream& , const Error&);
+            //friend std::ostream& operator<< (std::ostream& , const Error&);
 
             typedef std::shared_ptr<Error> Ptr;
 

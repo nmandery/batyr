@@ -24,7 +24,7 @@ namespace Batyr
                 FAILED
             };
 
-            friend std::ostream& operator<< (std::ostream& , const Job&);
+            //friend std::ostream& operator<< (std::ostream& , const Job&);
 
             typedef std::shared_ptr<Job> Ptr;
 
