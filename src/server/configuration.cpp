@@ -76,7 +76,7 @@ trim(const std::string &s, const std::string & characters = "\"' \t\r\n")
 int
 valueToInt(const std::string & s, bool & ok)
 {
-    int i;
+    int i = 0;
     try {
         i = std::stoi(trim(s));
         ok = true;
