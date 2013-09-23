@@ -1,3 +1,8 @@
+/**
+ * https://github.com/cgross/angular-notify
+ * git latest commit 05b5202716
+ */
+
 angular.module('cgNotify',[]);
 
 angular.module('cgNotify').value('cgNotifyTemplateName','angular-notify.html');
