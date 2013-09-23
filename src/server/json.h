@@ -11,6 +11,7 @@ namespace Batyr
 namespace Json
 {
 
+
     /**
      * helper function to convert rapidjson documents to strings
      */
@@ -28,6 +29,19 @@ namespace Json
     void toValue(rapidjson::Value & _v, std::string _s, rapidjson::Document::AllocatorType & allocator); 
 
     void toValue(rapidjson::Value & _v, std::chrono::system_clock::time_point tp, rapidjson::Document::AllocatorType & allocator);
+
+    /**
+     * convert any class supporting the toJsonValue method
+     * to a serialized JSON document
+     **/
+    template <class T>
+    std::string toJson(T c)
+    {
+        rapidjson::Document data;
+        c.toJsonValue(data, data.GetAllocator());
+        return stringify(data);
+    };
+
 };
 };
 

@@ -24,8 +24,6 @@ namespace Batyr
                 FAILED
             };
 
-            //friend std::ostream& operator<< (std::ostream& , const Job&);
-
             typedef std::shared_ptr<Job> Ptr;
 
             void setStatus(Status _status)
@@ -65,9 +63,6 @@ namespace Batyr
                 return (status == FINISHED) || (status == FAILED);
             }
 
-            /** return the object as a json string */
-            std::string toString() const;
-
             /** 
              * fill the objects members from a JSON string 
              *
@@ -78,7 +73,6 @@ namespace Batyr
 
             /** push the contents of the object into rapidjson document or value */
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
-
 
 
         private:

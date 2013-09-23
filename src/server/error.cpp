@@ -21,20 +21,10 @@ Error::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::Allocato
 }
 
 
-std::string
-Error::toString() const
-{
-    rapidjson::Document data;
-    toJsonValue(data, data.GetAllocator());
-    return Batyr::Json::stringify(data);
-}
-
-
-
 std::ostream&
 Batyr::operator<< (std::ostream& stream, const Error& r)
 {
-    stream << r.toString();
+    stream << Batyr::Json::toJson(r);
     return stream;
 }
 
