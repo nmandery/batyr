@@ -1,3 +1,5 @@
+
+
 /**
  * items to list in the menu
  */
@@ -58,7 +60,7 @@ function AboutCtrl($scope, $http) {
     fetchStatus();
 }
 
-function LayersCtrl($scope, $http) {
+function LayersCtrl($scope, $http, NotificationService) {
     $scope.showLayerHelp = false;
     $scope.layerlist = {};
 
@@ -81,8 +83,20 @@ function LayersCtrl($scope, $http) {
             layerName:  layer.name,
             filter:     layer.filter
         };
-        var promise = $http.post('api/create', job);
-        // TODO: display errors
+        $http.post('api/create', job).then(
+            // success
+            function(resp) {
+                NotificationService.notify(
+                    "Layer " + resp.data.layerName + " added to queue",
+                    resp.data.status);
+            },
+            // error
+            function (res) {
+                NotificationService.notify(
+                    "Could not add layer " + layer.name + " to queue",
+                    "failed");
+            }
+        )
     }
 }
 

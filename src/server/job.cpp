@@ -14,7 +14,7 @@ using namespace Batyr;
 
 
 Job::Job()
-    :   status(FAILED),
+    :   status(QUEUED),
         timeAdded(std::chrono::system_clock::now())
 {
     // generate an UUID as id for the job

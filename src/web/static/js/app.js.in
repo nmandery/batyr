@@ -1,4 +1,4 @@
-angular.module('batyrd', []).
+angular.module('batyrd', ['cgNotify']).
     config(['$routeProvider', function($routeProvider) {
         $routeProvider.
         when('/status', {templateUrl: 'partials/status.html', controller: StatusCtrl}).
@@ -28,7 +28,33 @@ angular.module('batyrd', []).
             }
             return moment.duration(secs, 'seconds').humanize();
         }
-    });
+    }).
+    run(function($templateCache) {
+        // the the template for notifications
+        $templateCache.put("notification.html",
+            "<div class=\"notification {{type}}\">" +
+            "	{{message}}" +
+            "</div>"
+        )
+    }).
+    factory('NotificationService', ['notify', function (notify) {
+        return {
+            /** function to format notifications */
+            notify: function(message, type) {
+                var css = "notification-bg";
+                if (type) {
+                    css = type;
+                }
+                notify({
+                    message: message,
+                    template: "notification.html",
+                    scope: {
+                        type: css
+                    }
+                });
+            }
+        }
+    }]);
 
 
 /* vim: set ft=javascript */

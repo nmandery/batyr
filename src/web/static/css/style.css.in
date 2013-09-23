@@ -458,31 +458,31 @@ pre .string, pre .support.value  {
     padding: 1.6em;
 }
 
-.job-status-failed {
+.failed {
      background: #DD514C;
 }
-.job-status-failed-label {
+.failed-label {
      color: #DD514C;
 }
 
-.job-status-finished {
+.finished {
      background: #5EB95E;
 }
-.job-status-finished-label {
+.finished-label {
      color: #5EB95E;
 }
 
-.job-status-queued {
+.queued {
      background: #FAD232;
 }
-.job-status-queued-label {
+.queued-label {
      color: #FAD232;
 }
 
-.job-status-in_process {
+.in_process {
      background: #0E90D2;
 }
-.job-status-in_process-label {
+.in_process-label {
      color: #0E90D2;
 }
 .job-message {
@@ -546,3 +546,30 @@ pre .string, pre .support.value  {
     background: #0E90D2;
 }
 /* vim: set ft=css */
+
+
+/**
+ * notifications
+ */
+.notification {
+    position:fixed;
+    right: 10px;
+    top:-50px;
+    z-index: 9999;
+
+    color: #fff;
+    border: 0 none transparent;
+    border-radius: 2px 2px 2px 2px;
+    font-size: 13px;
+    padding: 0.5em 1em;    
+    margin: 0.2em;
+
+    -webkit-transition: top 0.5s ease-out,opacity 0.5s ease-out 4s; /* 4 sec delay for longer message visibility */
+    -moz-transition: top 0.5s ease-out,opacity 0.5s ease-out 4s;
+    -o-transition: top 0.5s ease-out,opacity 0.5s ease-out 4s;
+    transition: top 0.5s ease-out,opacity 0.5s ease-out 4s;
+}
+
+.notification-bg {
+    background: #191818;
+}

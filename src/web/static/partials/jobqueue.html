@@ -8,10 +8,10 @@
     <div class="pure-g">
         <div class="pure-u-1-2">
             <div class="l-box mini">
-                The colors of the entries indicate if these jobs are <span class="job-status-queued-label">queued</span>, 
-                <span class="job-status-finished-label">finished</span>, have
-                <span class="job-status-failed-label">failed</span> or 
-                if they are currently <span class="job-status-in_process-label">processed</span>. Finished or 
+                The colors of the entries indicate if these jobs are <span class="queued-label">queued</span>, 
+                <span class="finished-label">finished</span>, have
+                <span class="failed-label">failed</span> or 
+                if they are currently <span class="in_process-label">processed</span>. Finished or 
                 failed jobs older than {{ joblist.maxAgeDoneJobsSeconds | secondDuration }} will get automatically removed.
             </div>
         </div>
@@ -32,7 +32,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="job in joblist.jobs" class="job-status-{{ job.status }}">
+            <tr ng-repeat="job in joblist.jobs" class="{{job.status }}">
                 <!-- <td class="job-id">{{ job.id }}</td> -->
                 <td>{{ job.layerName }}</td>
                 <td>{{ job.timeAdded | fromNow }} </td>
