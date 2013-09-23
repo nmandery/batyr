@@ -43,6 +43,7 @@ HttpListener::HttpListener(Configuration::Ptr _configuration)
 HttpListener::~HttpListener() 
 {
     stop();
+    socket.close();
 }
 
 void
