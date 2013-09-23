@@ -65,6 +65,10 @@ class Resource(object):
             return 'text/css'
         elif self.filename.endswith('.html'):
             return 'text/html'
+        elif self.filename.endswith('.woff'):
+            return 'application/font-woff'
+        elif self.filename.endswith('.ttf'):
+            return 'application/x-font-ttf'
         return subprocess.check_output(['file', '-b', '-i', self.filename]).strip()
 
     @classmethod

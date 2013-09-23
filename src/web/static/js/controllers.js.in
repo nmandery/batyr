@@ -7,14 +7,17 @@ function MenuListCtrl($scope) {
     $scope.menuitems = [
     {
         "name": "Status",
+        "icon": "icon-info-sign",
         "link": "status"
     },
     {
         "name": "Layers",
+        "icon": "icon-reorder",
         "link": "layers"
     },
     {
         "name": "Jobqueue",
+        "icon": "icon-cogs",
         "link": "jobqueue"
     }
     ];

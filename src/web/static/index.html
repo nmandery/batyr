@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batyr</title>
     <link rel="stylesheet" href="css/pure.min.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
     <link rel="stylesheet" href="css/style.css">
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/moment.min.js"></script>
@@ -20,10 +21,10 @@
                 <a class="pure-menu-heading" href="/">Batyr</a>
                 <ul>
                     <li class=" " ng-repeat="menuitem in menuitems">
-                        <a href="#/{{menuitem.link}}">{{menuitem.name}}</a>
+                        <a href="#/{{menuitem.link}}"><i class="{{menuitem.icon}} icon-large"></i>{{menuitem.name}}</a>
                     </li>
                     <li class="menu-item-divided">
-                        <a href="#/about">About</a>
+                        <a href="#/about"><i class="icon-comment-alt"></i>About</a>
                     </li>
                 </ul>
             </div>

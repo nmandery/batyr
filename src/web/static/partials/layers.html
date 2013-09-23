@@ -6,7 +6,7 @@
 
 <div class="l-vbox layers-box">
         <div class="l-vbox right mini" ng-show="showLayerHelp">
-            <span class="text-button"  ng-click="toggleFilterHelp()">Hide help</span>
+            <span class="text-button"  ng-click="toggleFilterHelp()"><i class="icon-remove"></i>Hide help</span>
         </div>
         <div class="l-vbox mini" ng-show="showLayerHelp">
             <p>
@@ -33,7 +33,7 @@
             </p>
         </div>
         <div class="l-vbox right mini" ng-hide="showLayerHelp">
-            <span class="text-button"  ng-click="toggleFilterHelp()">Help for writing a filter</span>
+            <span class="text-button"  ng-click="toggleFilterHelp()"><i class="icon-question-sign"></i>Help for writing a filter</span>
         </div>
 
         <div class="l-vbox layer-box" ng-repeat="layer in layerlist.layers">
@@ -43,7 +43,7 @@
             <div class="mini">{{ layer.description }}</div>
             <div class="right pure-form">
                 <input type="text" placeholder="Filter" ng-model="layer.filter">
-                <button class="pure-button pure-button-primary" ng-click="pullLayer(layer)">Pull</button>
+                <button class="pure-button pure-button-primary" ng-click="pullLayer(layer)"><i class="icon-download-alt"></i>Pull</button>
             </div>
         </div>
 </div>

@@ -188,6 +188,9 @@ dd {
         }
 
 
+#menu i {
+    font-size: 90%;
+}
 
 /* ---------------------
  * Smaller Module Styles
@@ -547,6 +550,13 @@ pre .string, pre .support.value  {
 }
 /* vim: set ft=css */
 
+i {
+    margin-right: 1em;
+}
+
+.pure-button i {
+    font-size: 90%;
+}
 
 /**
  * notifications
