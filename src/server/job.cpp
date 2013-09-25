@@ -70,11 +70,9 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     Batyr::Json::toValue(vFilter, filter, allocator);
     targetValue.AddMember("filter", vFilter, allocator);
 
-    if (!errorMessage.empty()) {
-        rapidjson::Value vErrorMessage;
-        Batyr::Json::toValue(vErrorMessage, errorMessage, allocator);
-        targetValue.AddMember("errorMessage", vErrorMessage, allocator);
-    }
+    rapidjson::Value vMessage;
+    Batyr::Json::toValue(vMessage, message, allocator);
+    targetValue.AddMember("message", vMessage, allocator);
 }
 
 

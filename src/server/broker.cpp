@@ -38,7 +38,7 @@ Broker::run()
     size_t _numWorkers = configuration->getNumWorkerThreads();
     poco_information(logger, "Starting " + std::to_string(_numWorkers) + " workers");
     for(size_t nW = 0; nW < _numWorkers; nW++) {
-        auto worker = std::unique_ptr<Worker>(new Worker(jobs));
+        auto worker = std::unique_ptr<Worker>(new Worker(configuration, jobs));
         auto workerThread = std::make_shared<std::thread>(
                 std::bind(&Worker::run, std::move(worker))
         );

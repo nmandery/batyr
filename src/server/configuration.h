@@ -62,6 +62,12 @@ namespace Batyr
                 return max_age_done_jobs;
             }
 
+
+            std::string getDbConnectionString() const
+            {
+                return db_connection_string;
+            }
+
             /**
              * get a vector with all layers ordered by their names
              */
@@ -76,6 +82,7 @@ namespace Batyr
             unsigned int http_port;
             unsigned int num_worker_threads;
             unsigned int max_age_done_jobs;
+            std::string db_connection_string;
 
             void parse(const std::string & configFile);
     };

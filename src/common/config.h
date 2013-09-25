@@ -42,4 +42,12 @@
 #define SERVER_HTTP_THREADS 10
 
 
+/**
+ * interval the server sleeps between retries to establish a broken
+ * database connection
+ *
+ * unit: milliseconds
+ */
+#define SERVER_DB_RECONNECT_WAIT 1000
+
 #endif // __batyr_config_h__

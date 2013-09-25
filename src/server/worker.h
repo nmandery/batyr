@@ -6,6 +6,8 @@
 #include <memory>
 
 #include "server/jobstorage.h"
+#include "server/configuration.h"
+#include "server/db/connection.h"
 
 
 namespace Batyr
@@ -15,10 +17,12 @@ namespace Batyr
     {
         private:
             Poco::Logger & logger;
+            Configuration::Ptr configuration;
             std::shared_ptr<JobStorage> jobs;
+            Batyr::Db::Connection db;
 
         public:
-            Worker(std::shared_ptr<JobStorage> _jobs);
+            Worker(Configuration::Ptr _configuration, std::shared_ptr<JobStorage> _jobs);
 
             /** disable copying */
             Worker(const Worker &) = delete;

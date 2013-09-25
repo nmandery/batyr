@@ -6,7 +6,7 @@ using namespace Batyr;
 
 
 Error::Error(const std::string msg)
-    :   errorMessage(msg)
+    :   message(msg)
 {
 }
 
@@ -15,9 +15,9 @@ Error::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::Allocato
 {
     targetValue.SetObject();
 
-    rapidjson::Value vErrorMessage;
-    Batyr::Json::toValue(vErrorMessage, errorMessage, allocator);
-    targetValue.AddMember("errorMessage", vErrorMessage, allocator);
+    rapidjson::Value vMessage;
+    Batyr::Json::toValue(vMessage, message, allocator);
+    targetValue.AddMember("message", vMessage, allocator);
 }
 
 

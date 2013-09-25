@@ -49,10 +49,9 @@ namespace Batyr
                 return timeFinished;
             }
 
-            void setErrorMessage(const std::string & em)
+            void setMessage(const std::string & m)
             {
-                errorMessage = em;
-                setStatus(FAILED);
+                message = m;
             }
 
             /**
@@ -76,7 +75,7 @@ namespace Batyr
 
 
         private:
-            std::string errorMessage;
+            std::string message;
             std::string layerName;
             std::string filter;
             std::string id;

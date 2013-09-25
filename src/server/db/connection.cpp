@@ -1,0 +1,96 @@
+
+#include "server/db/connection.h"
+#include "server/db/transaction.h"
+
+
+using namespace Batyr::Db;
+
+
+Connection::Connection(Batyr::Configuration::Ptr _configuration)
+    :   logger(Poco::Logger::get("Db::Connection")),
+        configuration(_configuration),
+        pgconn(0),
+        connection_ok(true)
+{
+    poco_debug(logger, "Setting up connection object");
+
+    // set up initial connection
+    if (!reconnect(false)) {
+        throw DbError("Unable to connect to the database");
+    }
+}
+
+
+Connection::~Connection()
+{
+    if (pgconn != nullptr) {
+        PQfinish(pgconn);
+    }
+}
+
+
+bool
+Connection::reconnect(bool restore)
+{
+    if (pgconn != nullptr) {
+
+        // just send a single sql command to ger useful info if
+        // the connection is alive
+        auto res = PQexec(pgconn, "select 1");
+        if (res != nullptr) { 
+            PQclear(res);
+        }
+
+        // check if the connection is fine
+        if (PQstatus(pgconn) != CONNECTION_OK) {
+            if (restore) {
+
+                // only log this message once per dead connection
+                if (connection_ok) {
+                    poco_error(logger, "database connection has become bad - trying to reconnect");
+                }
+                PQreset(pgconn);
+                if (PQstatus(pgconn) != CONNECTION_OK) {
+                    if (connection_ok) {
+                        poco_error(logger, "could not immediately reconnect to database");
+                    }
+                    connection_ok = false;
+                }
+                else {
+                    connection_ok = true;
+                    poco_error(logger, "Successfully reconnected to database");
+                }
+            }
+            else {
+                connection_ok = false;
+            }
+        }
+        else {
+            poco_debug(logger, "Existing, open connection is OK");
+            connection_ok = true;
+        }
+    }
+    else {
+        // establish a new connection
+        auto connString = configuration->getDbConnectionString();
+        pgconn = PQconnectdb(connString.c_str());
+
+        if (PQstatus(pgconn) != CONNECTION_OK) {
+            connection_ok = false;
+            poco_error(logger, "Could not connect to the database");
+        }
+        else {
+            connection_ok = true;
+            poco_debug(logger, "Successfully connected to the database");
+        }
+    }
+    return connection_ok;
+}
+
+
+std::unique_ptr<Transaction>
+Connection::getTransaction()
+{
+    std::unique_ptr<Transaction> transaction( new Transaction(this) );
+    return std::move(transaction);
+}

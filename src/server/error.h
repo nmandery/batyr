@@ -16,16 +16,16 @@ namespace Batyr
 
             typedef std::shared_ptr<Error> Ptr;
 
-            void setErrorMessage(const std::string & em)
+            void setMessage(const std::string & m)
             {
-                errorMessage = em;
+                message = m;
             }
 
             /** push the contents of the object into rapidjson document or value */
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 
         private:
-            std::string errorMessage;
+            std::string message;
     };
 
     std::ostream& operator<< (std::ostream& , const Error&);
