@@ -1,21 +1,21 @@
 #include <string>
 #include <cstring>
 
-#include "server/httprequesthandlerfactory.h"
-#include "server/httprequest/createhandler.h"
-#include "server/httprequest/statushandler.h"
-#include "server/httprequest/notfoundhandler.h"
-#include "server/httprequest/bufferhandler.h"
-#include "server/httprequest/joblisthandler.h"
-#include "server/httprequest/layerlisthandler.h"
+#include "server/http/httprequesthandlerfactory.h"
+#include "server/http/createhandler.h"
+#include "server/http/statushandler.h"
+#include "server/http/notfoundhandler.h"
+#include "server/http/bufferhandler.h"
+#include "server/http/joblisthandler.h"
+#include "server/http/layerlisthandler.h"
 #include "web/http_resources.h"
 
-using namespace Batyr;
+using namespace Batyr::Http;
 
 
 HTTPRequestHandlerFactory::HTTPRequestHandlerFactory(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandlerFactory(),
-        logger(Poco::Logger::get("HTTPRequestHandlerFactory")),
+        logger(Poco::Logger::get("Http::HTTPRequestHandlerFactory")),
         configuration(_configuration)
 {
 }
@@ -47,21 +47,21 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 
     // dispatch to api handlers
     if (endpoint == "api/create") {
-        auto createHandler = new Batyr::HttpRequest::CreateHandler;
+        auto createHandler = new CreateHandler;
         createHandler->setJobs(jobs);
         return createHandler;
     }
     else if (endpoint == "api/jobs.json") {
-        auto joblistHandler = new Batyr::HttpRequest::JoblistHandler(configuration);
+        auto joblistHandler = new JoblistHandler(configuration);
         joblistHandler->setJobs(jobs);
         return joblistHandler;
     }
     else if (endpoint == "api/layers.json") {
-        auto layerlistHandler = new Batyr::HttpRequest::LayerlistHandler(configuration);
+        auto layerlistHandler = new LayerlistHandler(configuration);
         return layerlistHandler;
     }
     else if (endpoint == "api/status.json") {
-        auto statusHandler = new Batyr::HttpRequest::StatusHandler(configuration);
+        auto statusHandler = new StatusHandler(configuration);
         return statusHandler;
     }
 
@@ -73,12 +73,12 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         struct resource_info * resource = &resources[resourceIndex];
 
         if ((endpoint == resource->filename) || (endpoint == "" && (strcmp("index.html", resource->filename) == 0))) {
-            return new Batyr::HttpRequest::BufferHandler(std::string(resource->mimetype),
+            return new BufferHandler(std::string(resource->mimetype),
                         std::string(resource->etag), resource->data, resource->size_in_bytes);
         }
         resourceIndex++;
     }
 
     // at this point everything is just a 404 error
-    return new Batyr::HttpRequest::NotFoundHandler;
+    return new NotFoundHandler;
 }

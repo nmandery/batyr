@@ -1,5 +1,5 @@
-#ifndef __batyr_httprequest_joblisthandler_h__
-#define __batyr_httprequest_joblisthandler_h__
+#ifndef __batyr_http_layerlisthandler_h__
+#define __batyr_http_layerlisthandler_h__
 
 
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -14,10 +14,10 @@
 
 namespace Batyr 
 {
-namespace HttpRequest 
+namespace Http
 {
 
-    class JoblistHandler : public Poco::Net::HTTPRequestHandler
+    class LayerlistHandler : public Poco::Net::HTTPRequestHandler
     {
         private:
             std::weak_ptr<JobStorage> jobs;
@@ -25,7 +25,7 @@ namespace HttpRequest
             Configuration::Ptr configuration;
 
         public:
-            JoblistHandler(Configuration::Ptr);
+            LayerlistHandler(Configuration::Ptr);
 
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
 
@@ -39,4 +39,4 @@ namespace HttpRequest
 };
 };
 
-#endif // __batyr_httprequest_joblisthandler_h__
+#endif // __batyr_http_layerlisthandler_h__

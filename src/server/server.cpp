@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "server/server.h"
+#include "server/http/listener.h"
 #include "common/macros.h"
 #include "server/broker.h"
 
@@ -51,7 +52,7 @@ Server::main(const std::vector<std::string> & args)
     try {
         Broker broker(configuration);
 
-        auto httplistener_ptr = std::make_shared<Batyr::HttpListener>(configuration);
+        auto httplistener_ptr = std::make_shared<Batyr::Http::Listener>(configuration);
         broker.addListener(httplistener_ptr);
         broker.run();
 

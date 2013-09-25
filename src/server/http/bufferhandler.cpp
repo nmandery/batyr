@@ -1,6 +1,6 @@
-#include "server/httprequest/bufferhandler.h"
+#include "server/http/bufferhandler.h"
 
-using namespace Batyr::HttpRequest;
+using namespace Batyr::Http;
 
             
 BufferHandler::BufferHandler(std::string _contentType, std::string _etag, const unsigned char * _buffer, size_t _bufferLen)

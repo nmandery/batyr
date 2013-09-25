@@ -1,5 +1,5 @@
-#ifndef __batyr_httplistener_h__
-#define __batyr_httplistener_h__
+#ifndef __batyr_http_listener_h__
+#define __batyr_http_listener_h__
 
 #include "Poco/Logger.h"
 #include <Poco/Net/ServerSocket.h>
@@ -10,12 +10,15 @@
 #include <memory>
 
 #include "server/baselistener.h"
-#include "server/httprequesthandlerfactory.h"
+#include "server/http/httprequesthandlerfactory.h"
 
 
-namespace Batyr {
+namespace Batyr
+{
+namespace Http
+{
 
-    class HttpListener : public BaseListener {
+    class Listener : public BaseListener {
         
         private:
             Poco::Logger & logger;
@@ -23,19 +26,19 @@ namespace Batyr {
 
             Poco::Net::ServerSocket socket;
             Poco::Net::HTTPServerParams::Ptr serverParamsPtr;
-            Poco::SharedPtr<Batyr::HTTPRequestHandlerFactory> handlerFactoryPtr;
+            Poco::SharedPtr<Batyr::Http::HTTPRequestHandlerFactory> handlerFactoryPtr;
             std::unique_ptr<Poco::Net::HTTPServer> server;
 
 
         public:
 
-            HttpListener(Configuration::Ptr);
+            Listener(Configuration::Ptr);
 
             /** disable copying */
-            HttpListener(const HttpListener &) = delete;
-            HttpListener& operator=(const HttpListener &) = delete;
+            Listener(const Listener &) = delete;
+            Listener& operator=(const Listener &) = delete;
 
-            ~HttpListener();
+            ~Listener();
 
 
             void run();
@@ -44,6 +47,7 @@ namespace Batyr {
 
 
 };
+};
 
 
-#endif // __batyr_httplistener_h__
+#endif // __batyr_http_listener_h__

@@ -1,4 +1,4 @@
-#include "server/httprequest/statushandler.h"
+#include "server/http/statushandler.h"
 #include "common/config.h"
 #include "common/macros.h"
 #include "server/json.h"
@@ -6,12 +6,12 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>
 
-using namespace Batyr::HttpRequest;
+using namespace Batyr::Http;
 
 
 StatusHandler::StatusHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("StatusHandler")),
+        logger(Poco::Logger::get("Http::StatusHandler")),
         configuration(_configuration)
 {
 }

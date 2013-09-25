@@ -10,7 +10,7 @@
 using namespace Batyr::Json;
 
 
-std::string 
+std::string
 Batyr::Json::stringify(rapidjson::Document & doc)
 {
     rapidjson::StringBuffer buffer;
@@ -41,13 +41,15 @@ Batyr::Json::stringify(std::chrono::system_clock::time_point tp)
 
 
 void
-Batyr::Json::toValue(rapidjson::Value & _v, std::string _s, rapidjson::Document::AllocatorType & allocator)
+Batyr::Json::toValue(rapidjson::Value & _v, std::string _s,
+            rapidjson::Document::AllocatorType & allocator)
 {
     _v.SetString(_s.c_str(), _s.size(), allocator);
 }
 
 void
-Batyr::Json::toValue(rapidjson::Value & _v, std::chrono::system_clock::time_point tp, rapidjson::Document::AllocatorType & allocator)
+Batyr::Json::toValue(rapidjson::Value & _v, std::chrono::system_clock::time_point tp,
+            rapidjson::Document::AllocatorType & allocator)
 {
     toValue(_v, stringify(tp), allocator);
 }

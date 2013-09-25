@@ -1,4 +1,4 @@
-#include "server/httprequest/createhandler.h"
+#include "server/http/createhandler.h"
 #include "server/job.h"
 #include "server/error.h"
 #include "common/config.h"
@@ -8,12 +8,12 @@
 #include <stdexcept>
 #include <sstream>
 
-using namespace Batyr::HttpRequest;
+using namespace Batyr::Http;
 
 
 CreateHandler::CreateHandler()
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("CreateHandler"))
+        logger(Poco::Logger::get("Http::CreateHandler"))
 {
 }
 

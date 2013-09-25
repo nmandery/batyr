@@ -1,5 +1,5 @@
-#ifndef __batyr_httprequest_notfoundhandler_h__
-#define __batyr_httprequest_notfoundhandler_h__
+#ifndef __batyr_http_notfoundhandler_h__
+#define __batyr_http_notfoundhandler_h__
 
 
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -9,7 +9,7 @@
 
 namespace Batyr 
 {
-namespace HttpRequest 
+namespace Http
 {
 
     class NotFoundHandler : public Poco::Net::HTTPRequestHandler
@@ -21,4 +21,4 @@ namespace HttpRequest
 };
 };
 
-#endif // __batyr_httprequest_notfoundhandler_h__
+#endif // __batyr_http_notfoundhandler_h__

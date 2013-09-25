@@ -1,4 +1,4 @@
-#include "server/httprequest/joblisthandler.h"
+#include "server/http/joblisthandler.h"
 #include "server/json.h"
 #include "common/config.h"
 #include "common/macros.h"
@@ -8,11 +8,11 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>
 
-using namespace Batyr::HttpRequest;
+using namespace Batyr::Http;
 
 JoblistHandler::JoblistHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("JoblistHandler")),
+        logger(Poco::Logger::get("Http::JoblistHandler")),
         configuration(_configuration)
 {
 }

@@ -8,7 +8,6 @@
 
 #include "server/baselistener.h"
 #include "server/worker.h"
-#include "server/httplistener.h"
 #include "server/jobstorage.h"
 #include "server/configuration.h"
 

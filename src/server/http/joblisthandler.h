@@ -1,5 +1,5 @@
-#ifndef __batyr_httprequest_createhandler_h__
-#define __batyr_httprequest_createhandler_h__
+#ifndef __batyr_http_joblisthandler_h__
+#define __batyr_http_joblisthandler_h__
 
 
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -10,30 +10,33 @@
 #include <memory>
 
 #include "server/jobstorage.h"
+#include "server/configuration.h"
 
 namespace Batyr 
 {
-namespace HttpRequest 
+namespace Http
 {
 
-    class CreateHandler : public Poco::Net::HTTPRequestHandler
+    class JoblistHandler : public Poco::Net::HTTPRequestHandler
     {
         private:
             std::weak_ptr<JobStorage> jobs;
             Poco::Logger & logger;
+            Configuration::Ptr configuration;
 
         public:
-            CreateHandler();
+            JoblistHandler(Configuration::Ptr);
+
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
 
             void setJobs(std::weak_ptr<JobStorage> _jobs)
             {
                 jobs = _jobs;
             }
-  
+            
     };
 
 };
 };
 
-#endif // __batyr_httprequest_createhandler_h__
+#endif // __batyr_http_joblisthandler_h__

@@ -1,5 +1,5 @@
-#ifndef __batyr_httprequesthandlerfactory_h__
-#define __batyr_httprequesthandlerfactory_h__
+#ifndef __batyr_http_httprequesthandlerfactory_h__
+#define __batyr_http_httprequesthandlerfactory_h__
 
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
@@ -11,7 +11,10 @@
 #include "server/jobstorage.h"
 #include "server/configuration.h"
 
-namespace Batyr {
+namespace Batyr
+{
+namespace Http
+{
 
     class HTTPRequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
     {
@@ -32,5 +35,6 @@ namespace Batyr {
     
 
 };
+};
 
-#endif // __batyr_httprequesthandlerfactory_h__
+#endif // __batyr_http_httprequesthandlerfactory_h__

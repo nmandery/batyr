@@ -1,4 +1,4 @@
-#include "server/httprequest/layerlisthandler.h"
+#include "server/http/layerlisthandler.h"
 #include "server/json.h"
 #include "common/config.h"
 #include "common/macros.h"
@@ -8,11 +8,11 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>
 
-using namespace Batyr::HttpRequest;
+using namespace Batyr::Http;
 
 LayerlistHandler::LayerlistHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("LayerlistHandler")),
+        logger(Poco::Logger::get("Http::LayerlistHandler")),
         configuration(_configuration)
 {
 }
