@@ -146,6 +146,9 @@ Configuration::parse(const std::string & configFile)
                         }
                         max_age_done_jobs = _max_age_done_jobs;
                     }
+                    else if (valuePair.first == "dsn") {
+                        db_connection_string = trim(valuePair.second);
+                    }
                     else {
                         throwUnknownSetting(sectionPair.first, valuePair.first);
                     }
@@ -180,7 +183,9 @@ Configuration::parse(const std::string & configFile)
         }
 
         // check for missing mantatory settings
-        // TODO
+        if (db_connection_string.empty()) {
+            throw ConfigurationError("Missing dsn configuration to connect to postgresql");
+        }
 
     }
     catch( std::runtime_error &e) {
