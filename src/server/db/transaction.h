@@ -3,6 +3,8 @@
 
 #include <Poco/Logger.h>
 
+#include <libpq-fe.h>
+
 #include <memory>
 
 
@@ -26,6 +28,12 @@ namespace Db
              * regardless if an error occured or not
              */
             bool rollback;
+
+            /**
+             * check a PQresult if it was a scuccessfull
+             * or throw a meaningful DbError
+             **/
+            void checkResult(const PGresult *);
 
         public:
             friend class Connection;

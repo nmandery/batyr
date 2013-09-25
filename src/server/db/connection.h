@@ -66,6 +66,8 @@ namespace Db
              */
             bool reconnect(bool restore);
     };
+
+
 };
 };
 
