@@ -45,6 +45,11 @@ namespace Db
              */
             bool connection_ok;
 
+            /**
+             * set the name of the application in postgresql to
+             * show in pg_stat_activity
+             */
+            void setApplicationName();
 
         public:
             Connection(Batyr::Configuration::Ptr _configuration);

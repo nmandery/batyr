@@ -1,6 +1,8 @@
+#include <cstring>
 
 #include "server/db/connection.h"
 #include "server/db/transaction.h"
+#include "common/config.h"
 
 
 using namespace Batyr::Db;
@@ -37,7 +39,7 @@ Connection::reconnect(bool restore)
         // just send a single sql command to ger useful info if
         // the connection is alive
         auto res = PQexec(pgconn, "select 1");
-        if (res != nullptr) { 
+        if (res != nullptr) {
             PQclear(res);
         }
 
@@ -59,6 +61,7 @@ Connection::reconnect(bool restore)
                 else {
                     connection_ok = true;
                     poco_error(logger, "Successfully reconnected to database");
+                    setApplicationName();
                 }
             }
             else {
@@ -82,6 +85,7 @@ Connection::reconnect(bool restore)
         else {
             connection_ok = true;
             poco_debug(logger, "Successfully connected to the database");
+            setApplicationName();
         }
     }
     return connection_ok;
@@ -93,4 +97,29 @@ Connection::getTransaction()
 {
     std::unique_ptr<Transaction> transaction( new Transaction(this) );
     return std::move(transaction);
+}
+
+
+void
+Connection::setApplicationName()
+{
+    if (pgconn != nullptr) {
+        // setting exists only from version 9.0 on
+        if (PQserverVersion(pgconn) >= 90000) {
+
+            const char * batyr_name = APP_NAME_SERVER;
+            char * batyr_name_e = PQescapeLiteral(pgconn, batyr_name, strlen(batyr_name));
+            if (batyr_name_e != nullptr) {
+
+                std::string query("set application_name to " + std::string(batyr_name_e));
+
+                auto res = PQexec(pgconn, query.c_str());
+                if (res != nullptr) {
+                    PQclear(res);
+                }
+
+                PQfreemem(batyr_name_e);
+            }
+        }
+    }
 }
