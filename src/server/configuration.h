@@ -14,8 +14,10 @@ namespace Batyr
     struct Layer
     {
         std::string name;
-        std::string dataSource;
+        std::string source;
+        std::string source_layer;
         std::string description;
+        std::string target_table;
 
         typedef std::shared_ptr<Layer> Ptr;
     };

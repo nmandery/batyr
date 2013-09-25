@@ -164,13 +164,30 @@ Configuration::parse(const std::string & configFile)
                         if (layerValuePair.first == "description") {
                             layer->description = layerValuePair.second;
                         }
+                        else if (layerValuePair.first == "source") {
+                            layer->source = layerValuePair.second;
+                        }
+                        else if (layerValuePair.first == "source_layer") {
+                            layer->source_layer = layerValuePair.second;
+                        }
+                        else if (layerValuePair.first == "target_table") {
+                            layer->target_table = layerValuePair.second;
+                        }
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
                         }
                     }
 
                     // check for missing mantatory settings
-                    // TODO
+                    if (layer->source.empty()) {
+                        throw ConfigurationError("Layer \"" + layer->name + "\" is missing the \"" "source" "\" setting");
+                    }
+                    if (layer->source_layer.empty()) {
+                        throw ConfigurationError("Layer \"" + layer->name + "\" is missing the \"" "source_layer" "\" setting");
+                    }
+                    if (layer->target_table.empty()) {
+                        throw ConfigurationError("Layer \"" + layer->name + "\" is missing the \"" "target_table" "\" setting");
+                    }
 
                     layers[layer->name] = layer;
                 }
