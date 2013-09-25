@@ -15,12 +15,17 @@ Listener::Listener(Configuration::Ptr _configuration)
 {
     // prepare the server parameters and let them be managed by
     // a smart pointer
-    auto serverParams = new Poco::Net::HTTPServerParams;
-    serverParams->setMaxThreads( SERVER_HTTP_THREADS );
-    serverParamsPtr.assign(serverParams);
+    serverParamsPtr.assign( new Poco::Net::HTTPServerParams );
+    serverParamsPtr->setMaxThreads( SERVER_HTTP_THREADS );
     
     // set up the network socket
     try {
+        // set reuse flags on the socket to prevent "Adress already in use"
+        // errors on quick restarts of the server when the TCP socket
+        // is still in TIME_WAIT state
+        //socket.setReuseAddress(true);
+        socket.setReusePort(true);
+
         socket.bind( configuration->getHttpPort() );
         socket.listen();
     }
@@ -30,8 +35,7 @@ Listener::Listener(Configuration::Ptr _configuration)
     }
 
     // will get destroyed with by the poco httpserver
-    auto handlerFactory = new HTTPRequestHandlerFactory(configuration);
-    handlerFactoryPtr.assign(handlerFactory);
+    handlerFactoryPtr.assign( new HTTPRequestHandlerFactory(configuration) );
 
     server.reset(new Poco::Net::HTTPServer(handlerFactoryPtr, socket, serverParamsPtr));
 }
