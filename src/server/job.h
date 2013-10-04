@@ -54,6 +54,11 @@ namespace Batyr
                 message = m;
             }
 
+            std::string getLayerName() const 
+            {
+                return layerName;
+            }
+
             /**
              * true if the job is, successful or not, finished
              */

@@ -47,7 +47,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 
     // dispatch to api handlers
     if (endpoint == "api/create") {
-        auto createHandler = new CreateHandler;
+        auto createHandler = new CreateHandler(configuration);
         createHandler->setJobs(jobs);
         return createHandler;
     }

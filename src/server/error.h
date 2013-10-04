@@ -21,6 +21,11 @@ namespace Batyr
                 message = m;
             }
 
+            std::string getMessage() const
+            {
+                return message;
+            }
+
             /** push the contents of the object into rapidjson document or value */
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 

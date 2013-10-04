@@ -11,9 +11,10 @@
 using namespace Batyr::Http;
 
 
-CreateHandler::CreateHandler()
+CreateHandler::CreateHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("Http::CreateHandler"))
+        logger(Poco::Logger::get("Http::CreateHandler")),
+        configuration(_configuration)
 {
 }
 
@@ -60,7 +61,26 @@ CreateHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
         return;
     }
 
-    // TODO: return 404 if layer does not exist
+    // return 404 if layer does not exist
+    try {
+        auto layer = configuration->getLayer(job->getLayerName());
+    }
+    catch (ConfigurationError) {
+        // layer does not exist
+        resp.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
+        resp.setReason("Not Found");
+        
+        std::stringstream msgstream;
+        msgstream << "Layer \"" << job->getLayerName() << "\" does not exist";
+
+        Error error(msgstream.str());
+        poco_warning(logger, error.getMessage());
+
+        std::ostream & out = resp.send();
+        out << error;
+        out.flush();
+        return;
+    }
 
 
     if (auto jobstorage = jobs.lock()) {
