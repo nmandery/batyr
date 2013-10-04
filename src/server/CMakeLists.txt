@@ -7,10 +7,9 @@ FILE(GLOB_RECURSE SERVER_SOURCES *.cpp)
 
 include_directories(
     ${BATYR_INCLUDE_DIR}
-    #${GDAL_INCLUDE_DIR}
+    ${GDAL_INCLUDE_DIR}
     ${Poco_INCLUDE_DIRS}
     ${POSTGRES_INCLUDE_DIR}
-    ${INIPARSER_INCLUDE_DIR}
     ${RAPIDJSON_INCLUDE_DIR}
 )
 
@@ -35,10 +34,11 @@ add_dependencies(batyrd web-resources)
 
 target_link_libraries( ${PROJECT_NAME}
     ${Poco_LIBRARIES} 
-    #${ZeroMQ_LIBRARIES} 
     ${POSTGRES_LIBRARY} 
     ${GDAL_LIBRARY} 
-    ${CMAKE_THREAD_LIBS_INIT} )
+    ${CMAKE_THREAD_LIBS_INIT}
+    batyrcommon
+    )
 
 
 # vim: ft=cmake

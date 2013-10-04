@@ -1,11 +1,18 @@
 #include "server/configuration.h"
+#include "common/iniparser.h"
+#include "common/stringutils.h"
 
 #include <fstream>
 #include <algorithm>
 
-#include "ini-parser/ini.hpp"
 
 using namespace Batyr;
+
+
+/**
+ * characters to trim from config values
+ */
+static const char trimChars[] = "'\"\r\n\t ";
 
 
 Configuration::Configuration(const std::string & configFile)
@@ -49,13 +56,13 @@ Configuration::getOrderedLayers() const
 
 
 void 
-throwUnknownSetting(const std::string & sectionName, const std::string & settingName)
+static throwUnknownSetting(const std::string & sectionName, const std::string & settingName)
 {
     throw ConfigurationError("Unknown option \""+settingName+
                     "\" in section \""+sectionName+"\"");
 }
 
-void 
+static void 
 throwInvalidValue(const std::string & sectionName, const std::string & settingName,
         const std::string & value)
 {
@@ -64,21 +71,12 @@ throwInvalidValue(const std::string & sectionName, const std::string & settingNa
 }
 
 
-std::string
-trim(const std::string &s, const std::string & characters = "\"' \t\r\n")
-{
-  size_t sec_start = s.find_first_not_of(characters);
-  size_t sec_end = s.find_last_not_of(characters);
-  return s.substr(sec_start, sec_end - sec_start + 1);
-}
-
-
-int
+static int
 valueToInt(const std::string & s, bool & ok)
 {
     int i = 0;
     try {
-        i = std::stoi(trim(s));
+        i = std::stoi(StringUtils::trim(s, trimChars));
         ok = true;
     }
     catch (std::exception) {
@@ -99,8 +97,8 @@ Configuration::parse(const std::string & configFile)
 
     try {
         
-        INI::Parser parser(ifs);
-        INI::Level toplevel = parser.top();
+        Ini::Parser parser(ifs);
+        Ini::Level toplevel = parser.top();
 
         bool ok = true;
         // parse all section seperate
@@ -147,7 +145,7 @@ Configuration::parse(const std::string & configFile)
                         max_age_done_jobs = _max_age_done_jobs;
                     }
                     else if (valuePair.first == "dsn") {
-                        db_connection_string = trim(valuePair.second);
+                        db_connection_string = StringUtils::trim(valuePair.second, trimChars);
                     }
                     else {
                         throwUnknownSetting(sectionPair.first, valuePair.first);

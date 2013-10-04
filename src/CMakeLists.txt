@@ -10,7 +10,7 @@ set(BATYR_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(3rdparty)
 
 # include files shared by all projects
-# add_subdirectory(common)
+add_subdirectory(common)
 
 # the web gui for the server. static html/css/js/... files
 add_subdirectory(web)
