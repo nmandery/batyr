@@ -32,7 +32,16 @@ StatusHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
     doc.AddMember("appVersion", VERSION_FULL, doc.GetAllocator());
     doc.AddMember("numLayers", configuration->getLayerCount(), 
                 doc.GetAllocator());
-    doc.AddMember("numQueuedJobs", 0, doc.GetAllocator()); // TODO
+
+    if (auto jobstorage = jobs.lock()) {
+        doc.AddMember("numQueuedJobs", jobstorage->queueSize(), doc.GetAllocator());
+    }
+    else {
+        const char * emsg = "Could not get a lock on jobstorage";
+        poco_warning(logger, emsg); // not a severe problem here
+    
+        doc.AddMember("numQueuedJobs", "?", doc.GetAllocator());
+    }
     doc.AddMember("numWorkers", configuration->getNumWorkerThreads(),
                 doc.GetAllocator());
 

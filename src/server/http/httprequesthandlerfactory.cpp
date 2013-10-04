@@ -62,6 +62,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
     }
     else if (endpoint == "api/status.json") {
         auto statusHandler = new StatusHandler(configuration);
+        statusHandler->setJobs(jobs);
         return statusHandler;
     }
 
