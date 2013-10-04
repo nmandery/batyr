@@ -41,14 +41,11 @@ JobStorage::JobStorage(std::chrono::duration<int> _maxAgeDoneJobs)
                     ++it;
                 }
             }
-#ifdef _DEBUG
-            poco_information(storage->logger, "Removed " + std::to_string(numRemovedJobs) + " deprecated jobs");
-#else
+
             // decrease verbosity
             if (numRemovedJobs > 0) {
                 poco_information(storage->logger, "Removed " + std::to_string(numRemovedJobs) + " deprecated jobs");
             }
-#endif
         }
         // locking succeded. time to exit
         storage->cleanupExitMutex.unlock();
