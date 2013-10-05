@@ -36,6 +36,24 @@ find_package( GDAL REQUIRED)
 find_package( Postgres REQUIRED)
 find_package( Poco REQUIRED Foundation Util Net)
 
+#
+# Manual project configuration
+#
+
+# version information
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
+set(VERSION_PATCH 0)
+
+# compile the http web gui in the server when this is enabled
+option(ENABLE_HTTP_WEB_GUI "Enable the HTTP Web user interface" ON)
+if (ENABLE_HTTP_WEB_GUI)
+    message(STATUS "Building with the Web GUI")
+else ()
+    message(STATUS "Building without the Web GUI")
+endif ()
+
+
 add_subdirectory(src)
 
 

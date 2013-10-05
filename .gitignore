@@ -13,3 +13,4 @@ Makefile
 /src/web/static/js/angular-notify.js
 /src/web/static/css/font-awesome.css
 /src/common/libbatyrcommon.a
+/src/common/config.h

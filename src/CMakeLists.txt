@@ -13,7 +13,9 @@ add_subdirectory(3rdparty)
 add_subdirectory(common)
 
 # the web gui for the server. static html/css/js/... files
-add_subdirectory(web)
+if (ENABLE_HTTP_WEB_GUI)
+    add_subdirectory(web)
+endif (ENABLE_HTTP_WEB_GUI)
 
 # the server application
 add_subdirectory(server)

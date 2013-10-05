@@ -5,10 +5,14 @@
 #include "server/http/createhandler.h"
 #include "server/http/statushandler.h"
 #include "server/http/notfoundhandler.h"
-#include "server/http/bufferhandler.h"
 #include "server/http/joblisthandler.h"
 #include "server/http/layerlisthandler.h"
+#include "common/config.h"
+
+#ifdef ENABLE_HTTP_WEB_GUI
+#include "server/http/bufferhandler.h"
 #include "web/http_resources.h"
+#endif
 
 using namespace Batyr::Http;
 
@@ -66,6 +70,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         return statusHandler;
     }
 
+#ifdef ENABLE_HTTP_WEB_GUI
     // attempt to satisfy the request with one of the static resources
     // TODO: a std::map would be better than looping over the resources, but as long
     // as there are not to many resources this will also work
@@ -79,6 +84,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         }
         resourceIndex++;
     }
+#endif
 
     // at this point everything is just a 404 error
     return new NotFoundHandler;

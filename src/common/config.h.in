@@ -6,9 +6,9 @@
 
 // version number ---------------------------------------------
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 0
+#define VERSION_MAJOR @VERSION_MAJOR@
+#define VERSION_MINOR @VERSION_MINOR@
+#define VERSION_PATCH @VERSION_PATCH@
 #define VERSION_FULL STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
 
 
@@ -20,6 +20,12 @@
 
 
 // internal server configuration -------------------------------
+
+/**
+ * compile the http web gui in the server when this define is set
+ **/
+#cmakedefine ENABLE_HTTP_WEB_GUI
+
 
 /**
  * the interval (in seconds) in which the server checks for finished
