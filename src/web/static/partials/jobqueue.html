@@ -13,7 +13,7 @@
                 <span class="failed-label">failed</span> or 
                 if they are currently <span class="in_process-label">processed</span>. Finished or 
                 failed jobs older than {{ joblist.maxAgeDoneJobsSeconds | secondDuration }} will get automatically removed.
-                The columns C, U and D show how many rows have been newly <b>C</b>reated, <b>U</b>pdated and <b>D</b>eleted.
+                The columns P, C, U and D show how many rows have been <b>P</b>ulled from the source and how many of those rows <b>C</b>reated new rows in the database, <b>U</b>pdated existing ones or resulted in <b>D</b>eletions.
             </div>
         </div>
         <div class="pure-u-1-2">
@@ -29,6 +29,7 @@
                 <th>Layer</th>
                 <th>Added</th>
                 <th>Finished</th>
+                <th>P</th>
                 <th>C</th>
                 <th>U</th>
                 <th>D</th>
@@ -41,6 +42,7 @@
                 <td>{{ job.layerName }}</td>
                 <td>{{ job.timeAdded | fromNow }} </td>
                 <td>{{ job.timeFinished | fromNow }}</td>
+                <td>{{ job.numPulled }}</td>
                 <td>{{ job.numCreated }}</td>
                 <td>{{ job.numUpdated }}</td>
                 <td>{{ job.numDeleted }}</td>

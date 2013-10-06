@@ -19,7 +19,8 @@ Job::Job()
         timeAdded(std::chrono::system_clock::now()),
         numCreated(0),
         numUpdated(0),
-        numDeleted(0)
+        numDeleted(0),
+        numPulled(0)
 {
     // generate an UUID as id for the job
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
@@ -82,6 +83,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     targetValue.AddMember("numCreated", numCreated, allocator);
     targetValue.AddMember("numUpdated", numUpdated, allocator);
     targetValue.AddMember("numDeleted", numDeleted, allocator);
+    targetValue.AddMember("numPulled", numPulled, allocator);
 }
 
 

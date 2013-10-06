@@ -84,8 +84,9 @@ namespace Batyr
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 
 
-            void setStatistics(int _numCreated, int _numUpdated, int _numDeleted)
+            void setStatistics(int _numPulled, int _numCreated, int _numUpdated, int _numDeleted)
             {
+                numPulled = _numPulled;
                 numCreated = _numCreated;
                 numUpdated = _numUpdated;
                 numDeleted = _numDeleted;
@@ -104,6 +105,7 @@ namespace Batyr
             int numCreated;
             int numUpdated;
             int numDeleted;
+            int numPulled;
 
 
     };
