@@ -1,8 +1,6 @@
 #ifndef __batyr_db_field_h__
 #define __batyr_db_field_h__
 
-#include "ogrsf_frmts.h"
-
 #include <libpq-fe.h>
 
 #include <string>

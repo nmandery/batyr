@@ -4,6 +4,7 @@
 #include <Poco/Logger.h>
 
 #include <memory>
+#include <stdexcept>
 
 #include "server/jobstorage.h"
 #include "server/configuration.h"
@@ -13,6 +14,16 @@
 namespace Batyr
 {
 
+    class WorkerError : public std::runtime_error 
+    {
+        public:
+            WorkerError(const std::string & message) 
+                    : std::runtime_error(message)
+            {
+            };
+    };
+
+
     class Worker
     {
         private:
@@ -20,6 +31,8 @@ namespace Batyr
             Configuration::Ptr configuration;
             std::shared_ptr<JobStorage> jobs;
             Batyr::Db::Connection db;
+
+            void pull(Job::Ptr job);
 
         public:
             Worker(Configuration::Ptr _configuration, std::shared_ptr<JobStorage> _jobs);
