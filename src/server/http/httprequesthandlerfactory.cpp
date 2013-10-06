@@ -24,13 +24,13 @@ HTTPRequestHandlerFactory::HTTPRequestHandlerFactory(Configuration::Ptr _configu
 {
 }
 
-Poco::Net::HTTPRequestHandler *
-HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest &req)
+
+std::string
+HTTPRequestHandlerFactory::normalizeUri(const std::string uri) const
 {
     // cut of the request params and the beginning slash
     // to get the name of the endpoint / handler
     std::string endpoint = "";
-    std::string uri = req.getURI();
     size_t pos_start = 0;
     size_t pos_end = uri.length();
     if (pos_end > 0) {
@@ -44,6 +44,16 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         }
         endpoint = uri.substr(pos_start, pos_end-pos_start);
     }
+    return endpoint;
+}
+
+
+Poco::Net::HTTPRequestHandler *
+HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest &req)
+{
+    // cut of the request params and the beginning slash
+    // to get the name of the endpoint / handler
+    std::string endpoint = normalizeUri(req.getURI());
 #ifdef _DEBUG
     std::string logMessage = "Dispatching request " + endpoint;
     poco_debug(logger, logMessage.c_str());

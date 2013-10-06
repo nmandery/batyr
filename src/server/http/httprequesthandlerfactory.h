@@ -7,6 +7,7 @@
 #include "Poco/Logger.h"
 
 #include <memory>
+#include <string>
 
 #include "server/jobstorage.h"
 #include "server/configuration.h"
@@ -31,6 +32,8 @@ namespace Http
             Poco::Logger & logger;
             Configuration::Ptr configuration;
             std::weak_ptr<JobStorage> jobs;
+
+            std::string normalizeUri(const std::string) const;
     };
     
 
