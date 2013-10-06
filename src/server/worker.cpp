@@ -29,6 +29,13 @@ Worker::~Worker()
 void
 Worker::pull(Job::Ptr job)
 {
+    if (job->getFilter().empty()) {
+        poco_information(logger, "pulling layer \""+job->getLayerName()+"\"");
+    }
+    else {
+        poco_information(logger, "pulling layer \""+job->getLayerName()+"\" using filter \""+job->getFilter()+"\"");
+    }
+
     auto layer = configuration->getLayer(job->getLayerName());
 
     // open the dataset

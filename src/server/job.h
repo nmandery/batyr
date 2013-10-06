@@ -54,9 +54,14 @@ namespace Batyr
                 message = m;
             }
 
-            std::string getLayerName() const 
+            std::string getLayerName() const
             {
                 return layerName;
+            }
+
+            std::string getFilter() const
+            {
+                return filter;
             }
 
             /**
@@ -67,8 +72,8 @@ namespace Batyr
                 return (status == FINISHED) || (status == FAILED);
             }
 
-            /** 
-             * fill the objects members from a JSON string 
+            /**
+             * fill the objects members from a JSON string
              *
              * will throw a std::invalid_argument if things are not going
              * to well.

@@ -7,6 +7,7 @@
 
 #include "server/job.h"
 #include "server/json.h"
+#include "common/stringutils.h"
 
 #include "rapidjson/document.h"
 
@@ -108,7 +109,7 @@ Job::fromString(std::string data)
         if (!doc["filter"].IsString()) {
             throw std::invalid_argument("Key filter should be a string");
         }
-        filter = doc["filter"].GetString();
+        filter = StringUtils::trim(doc["filter"].GetString());
     }
 }
 
