@@ -37,6 +37,7 @@ Worker::run()
             }
             poco_debug(logger, "Got job from queue");
 
+            auto layer = configuration->getLayer(job->getLayerName());
             job->setStatus(Job::Status::IN_PROCESS);
 
             // check if we got a working database connection
@@ -53,6 +54,15 @@ Worker::run()
 
             // perform the work in an transaction
             if (auto transaction = db.getTransaction()) {
+
+                // build a unique name for the temporary table
+                std::string tempTableName = "batyr_" + job->getId();
+
+                // create a temp table to write the data to
+                transaction->createTempTable(layer->target_table, tempTableName);
+
+                
+
                 job->setStatus(Job::Status::FINISHED);
             }
             else {
