@@ -18,6 +18,11 @@ namespace Db
  
     class Connection; // forward decl;
 
+    /** 
+     * smartpointer to free a PGresult on scope exit
+     */
+    typedef std::unique_ptr<PGresult, void (*)(PGresult*) > PGresultPtr;
+
     class Transaction
     {
         private:
@@ -42,15 +47,21 @@ namespace Db
             /**
              * check a PQresult if it was a scuccessfull
              * or throw a meaningful DbError
-             *
-             * will free the resultset in case of an error
              **/
-            void checkResult(PGresult *);
+            void checkResult(PGresultPtr & res);
 
         public:
             friend class Connection;
 
             ~Transaction();
+
+            /**
+             * execute a sql query
+             */
+            PGresultPtr exec(const std::string);
+            PGresultPtr execParams(const std::string _sql, int nParams, const Oid *paramTypes,
+                        const char * const *paramValues, const int *paramLengths, const int *paramFormats, int resultFormat);
+
 
             void discard()
             {

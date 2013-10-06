@@ -16,9 +16,7 @@ Transaction::Transaction(Connection * _connection)
     poco_debug(logger, "BEGIN");
 
     // start transaction
-    auto res = PQexec(connection->pgconn, "begin;");
-    checkResult(res);
-    PQclear(res);
+    exec("begin;");
 }
 
 
@@ -27,28 +25,18 @@ Transaction::~Transaction()
     auto transactionStatus = PQtransactionStatus(connection->pgconn);
     if (rollback || (transactionStatus == PQTRANS_INERROR) || (transactionStatus == PQTRANS_UNKNOWN)) {
         poco_debug(logger, "ROLLBACK");
-
-       auto res = PQexec(connection->pgconn, "rollback;");
-       checkResult(res);
-       PQclear(res);
+        exec("rollback;");
     }
     else {
         poco_debug(logger, "COMMIT");
-
-       auto res = PQexec(connection->pgconn, "commit;");
-       checkResult(res);
-       PQclear(res);
+        exec("commit;");
     }
 
     // run all exitSqls
     for(auto exitSql: exitSqls) {
         try {
-
             poco_debug(logger, "Running Exit SQL: " + exitSql);
-
-            auto res = PQexec(connection->pgconn, exitSql.c_str());
-            checkResult(res);
-            PQclear(res);
+            exec(exitSql);
         }
         catch(DbError &e) {
             poco_warning(logger, "Transaction Exit SQL failed: "+exitSql);
@@ -58,27 +46,50 @@ Transaction::~Transaction()
 }
 
 
-void
-Transaction::checkResult(PGresult * res)
+PGresultPtr
+Transaction::exec(const std::string _sql)
 {
-    if (res == nullptr) {
+    PGresultPtr result( PQexec(connection->pgconn, _sql.c_str()), PQclear);
+    checkResult(result);
+    return std::move(result);
+}
+
+
+PGresultPtr
+Transaction::execParams(const std::string _sql, int nParams, const Oid *paramTypes,
+            const char * const *paramValues, const int *paramLengths, const int *paramFormats, int resultFormat)
+{
+    PGresultPtr result( PQexecParams(connection->pgconn, _sql.c_str(),
+                nParams,
+                paramTypes,
+                paramValues,
+                paramLengths,
+                paramFormats,
+                resultFormat
+            ), PQclear);
+    checkResult(result);
+    return std::move(result);
+}
+
+
+void
+Transaction::checkResult(PGresultPtr & res)
+{
+    if (!res) {
         std::string msg = "query result was null: " + std::string(PQerrorMessage(connection->pgconn));
         poco_error(logger, msg.c_str());
         rollback = true;
         throw DbError(msg);
     }
 
-    auto resStatus = PQresultStatus(res);
+    auto resStatus = PQresultStatus(res.get());
     if (resStatus == PGRES_FATAL_ERROR) {
-        char * sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
-        char * msg_primary = PQresultErrorField(res, PG_DIAG_MESSAGE_PRIMARY);
+        char * sqlstate = PQresultErrorField(res.get(), PG_DIAG_SQLSTATE);
+        char * msg_primary = PQresultErrorField(res.get(), PG_DIAG_MESSAGE_PRIMARY);
 
         std::stringstream msgstream;
         msgstream << "query failed: " << msg_primary << " [sqlstate: " << sqlstate << "]";
         poco_error(logger, msgstream.str().c_str());
-
-        // free the resultset
-        PQclear(res);
 
         rollback = true;
 
@@ -106,9 +117,7 @@ Transaction::createTempTable(const std::string existingTableName, const std::str
     exitSqls.push_back(dropTableStream.str());
 
     // create the temporary table
-    auto res = PQexec(connection->pgconn, query.c_str());
-    checkResult(res);
-    PQclear(res);
+    exec(query);
 
 }
 
@@ -119,7 +128,7 @@ Transaction::getTableFields(const std::string tableName)
 
     const char *paramValues[1] = { tableName.c_str() };
     int paramLengths[1] = { static_cast<int>(tableName.length()) };
-    auto res = PQexecParams(connection->pgconn,
+    auto res = execParams(
                 "select pa.attname, pt.typname, pt.oid, coalesce(is_pk.is_pk, 'N')::text as is_pk"
                 " from pg_catalog.pg_attribute pa"
                 " join pg_catalog.pg_class pc on pc.oid=pa.attrelid and pa.attnum>0"
@@ -131,17 +140,15 @@ Transaction::getTableFields(const std::string tableName)
                 " ) is_pk on is_pk.relid = pt.oid and is_pk.attnum=pa.attnum"
                 " where pc.oid = $1::regclass::oid",
             1, NULL, paramValues, paramLengths, NULL, 1);
-    checkResult(res);
 
-    for (int i; i < PQntuples(res); i++) {
-        auto attname = PQgetvalue(res, i, 0);
-        auto typname = PQgetvalue(res, i, 1);
-        auto oid = PQgetvalue(res, i, 2);
-        auto isPk = PQgetvalue(res, i, 3);
+    for (int i; i < PQntuples(res.get()); i++) {
+        auto attname = PQgetvalue(res.get(), i, 0);
+        auto typname = PQgetvalue(res.get(), i, 1);
+        auto oid = PQgetvalue(res.get(), i, 2);
+        auto isPk = PQgetvalue(res.get(), i, 3);
 
         auto field = &fieldMap[attname];
         if (!field->name.empty()) {
-            PQclear(res);
             throw DbError("Tables with multiple columns with the same name are not supported. Column: "+std::string(attname));
         }
 
@@ -150,7 +157,5 @@ Transaction::getTableFields(const std::string tableName)
         field->pgTypeOid = std::atoi(oid);
         field->isPrimaryKey = (std::strcmp(isPk,"Y") == 0);
     }
-    PQclear(res);
-
     return fieldMap;
 }
