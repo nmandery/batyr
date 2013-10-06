@@ -79,6 +79,13 @@ namespace Batyr
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 
 
+            void setStatistics(int _numCreated, int _numUpdated, int _numDeleted)
+            {
+                numCreated = _numCreated;
+                numUpdated = _numUpdated;
+                numDeleted = _numDeleted;
+            }
+
         private:
             std::string message;
             std::string layerName;
@@ -87,6 +94,11 @@ namespace Batyr
             Job::Status status;
             std::chrono::system_clock::time_point timeAdded;
             std::chrono::system_clock::time_point timeFinished;
+
+            // statistics how many rows have been modified
+            int numCreated;
+            int numUpdated;
+            int numDeleted;
 
 
     };

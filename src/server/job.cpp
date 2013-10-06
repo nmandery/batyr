@@ -15,7 +15,10 @@ using namespace Batyr;
 
 Job::Job()
     :   status(QUEUED),
-        timeAdded(std::chrono::system_clock::now())
+        timeAdded(std::chrono::system_clock::now()),
+        numCreated(0),
+        numUpdated(0),
+        numDeleted(0)
 {
     // generate an UUID as id for the job
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
@@ -73,6 +76,11 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     rapidjson::Value vMessage;
     Batyr::Json::toValue(vMessage, message, allocator);
     targetValue.AddMember("message", vMessage, allocator);
+
+
+    targetValue.AddMember("numCreated", numCreated, allocator);
+    targetValue.AddMember("numUpdated", numUpdated, allocator);
+    targetValue.AddMember("numDeleted", numDeleted, allocator);
 }
 
 
