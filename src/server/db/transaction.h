@@ -5,6 +5,8 @@
 
 #include <libpq-fe.h>
 
+#include "server/db/field.h"
+
 #include <memory>
 #include <vector>
 
@@ -61,6 +63,10 @@ namespace Db
              */
             void createTempTable(const std::string existingTableName, const std::string tempTableName); 
 
+            /**
+             *
+             */
+            FieldMap getTableFields(const std::string tableName);
     };
 
 };

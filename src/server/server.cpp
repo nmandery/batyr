@@ -10,6 +10,8 @@
 #include <Poco/Util/OptionCallback.h>
 #include <Poco/Util/HelpFormatter.h>
 
+#include "ogrsf_frmts.h"
+
 #include <stdexcept>
 #include <iostream>
 
@@ -48,6 +50,9 @@ Server::main(const std::vector<std::string> & args)
 
     initLogging();
     Poco::Logger & logger = Poco::Logger::get("Server"); 
+
+    // initialize ogr
+    OGRRegisterAll();
 
     try {
         Broker broker(configuration);

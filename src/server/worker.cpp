@@ -61,7 +61,9 @@ Worker::run()
                 // create a temp table to write the data to
                 transaction->createTempTable(layer->target_table, tempTableName);
 
-                
+                // fetch the column list from the target_table as the tempTable
+                // does not have the constraints of the original table
+                auto tableFields = transaction->getTableFields(layer->target_table);
 
                 job->setStatus(Job::Status::FINISHED);
             }
@@ -73,12 +75,12 @@ Worker::run()
             }
         }
         catch (Batyr::Db::DbError &e) {
-            poco_error(logger, e.what()); 
+            poco_error(logger, e.what());
             job->setStatus(Job::Status::FAILED);
             job->setMessage(e.what());
         }
         catch (std::runtime_error &e) {
-            poco_error(logger, e.what()); 
+            poco_error(logger, e.what());
             job->setStatus(Job::Status::FAILED);
             job->setMessage(e.what());
 

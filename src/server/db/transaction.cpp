@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cstring>
 
 #include "server/db/transaction.h"
 #include "server/db/connection.h"
@@ -42,7 +43,7 @@ Transaction::~Transaction()
     // run all exitSqls
     for(auto exitSql: exitSqls) {
         try {
-            
+
             poco_debug(logger, "Running Exit SQL: " + exitSql);
 
             auto res = PQexec(connection->pgconn, exitSql.c_str());
@@ -56,13 +57,13 @@ Transaction::~Transaction()
     exitSqls.clear();
 }
 
- 
-void 
+
+void
 Transaction::checkResult(PGresult * res)
 {
     if (res == nullptr) {
         std::string msg = "query result was null: " + std::string(PQerrorMessage(connection->pgconn));
-        poco_error(logger, msg.c_str()); 
+        poco_error(logger, msg.c_str());
         rollback = true;
         throw DbError(msg);
     }
@@ -109,4 +110,47 @@ Transaction::createTempTable(const std::string existingTableName, const std::str
     checkResult(res);
     PQclear(res);
 
+}
+
+FieldMap
+Transaction::getTableFields(const std::string tableName)
+{
+    FieldMap fieldMap;
+
+    const char *paramValues[1] = { tableName.c_str() };
+    int paramLengths[1] = { static_cast<int>(tableName.length()) };
+    auto res = PQexecParams(connection->pgconn,
+                "select pa.attname, pt.typname, pt.oid, coalesce(is_pk.is_pk, 'N')::text as is_pk"
+                " from pg_catalog.pg_attribute pa"
+                " join pg_catalog.pg_class pc on pc.oid=pa.attrelid and pa.attnum>0"
+                " join pg_catalog.pg_type pt on pt.oid=pa.atttypid"
+                " left join ("
+                "    select pcs.conrelid as relid, unnest(conkey) as attnum, 'Y'::text as is_pk "
+                "        from pg_catalog.pg_constraint pcs"
+                "        where pcs.contype = 'p'"
+                " ) is_pk on is_pk.relid = pt.oid and is_pk.attnum=pa.attnum"
+                " where pc.oid = $1::regclass::oid",
+            1, NULL, paramValues, paramLengths, NULL, 1);
+    checkResult(res);
+
+    for (int i; i < PQntuples(res); i++) {
+        auto attname = PQgetvalue(res, i, 0);
+        auto typname = PQgetvalue(res, i, 1);
+        auto oid = PQgetvalue(res, i, 2);
+        auto isPk = PQgetvalue(res, i, 3);
+
+        auto field = &fieldMap[attname];
+        if (!field->name.empty()) {
+            PQclear(res);
+            throw DbError("Tables with multiple columns with the same name are not supported. Column: "+std::string(attname));
+        }
+
+        field->name = attname;
+        field->pgTypeName = typname;
+        field->pgTypeOid = std::atoi(oid);
+        field->isPrimaryKey = (std::strcmp(isPk,"Y") == 0);
+    }
+    PQclear(res);
+
+    return fieldMap;
 }
