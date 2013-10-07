@@ -137,7 +137,7 @@ Transaction::getTableFields(const std::string tableName)
                 "    select pcs.conrelid as relid, unnest(conkey) as attnum, 'Y'::text as is_pk "
                 "        from pg_catalog.pg_constraint pcs"
                 "        where pcs.contype = 'p'"
-                " ) is_pk on is_pk.relid = pt.oid and is_pk.attnum=pa.attnum"
+                " ) is_pk on is_pk.relid = pc.oid and is_pk.attnum=pa.attnum"
                 " where pc.oid = $1::regclass::oid",
             1, NULL, paramValues, paramLengths, NULL, 1);
 
