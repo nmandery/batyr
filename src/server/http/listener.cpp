@@ -23,10 +23,7 @@ Listener::Listener(Configuration::Ptr _configuration)
         // set reuse flags on the socket to prevent "Adress already in use"
         // errors on quick restarts of the server when the TCP socket
         // is still in TIME_WAIT state
-        //socket.setReuseAddress(true);
-        socket.setReusePort(true);
-
-        socket.bind( configuration->getHttpPort() );
+        socket.bind( configuration->getHttpPort(), true);
         socket.listen();
     }
     catch (Poco::Exception& e) {
