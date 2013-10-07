@@ -2,6 +2,7 @@
 #define __batyr_db_field_h__
 
 #include <libpq-fe.h>
+#include "ogrsf_frmts.h"
 
 #include <string>
 #include <map>
@@ -12,8 +13,8 @@ namespace Batyr
 namespace Db
 {
 
-    struct Field {
-
+    struct Field
+    {
         /** column name */
         std::string name;
 
@@ -28,6 +29,7 @@ namespace Db
     };
 
     typedef std::map<std::string, Field> FieldMap;
+
 };
 };
 

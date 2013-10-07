@@ -2,6 +2,7 @@
 #define __common_stringutils_h__
 
 #include <string>
+#include <vector>
 
 namespace StringUtils 
 {
@@ -10,6 +11,7 @@ namespace StringUtils
      */
     std::string trim(const std::string &s, const std::string & characters = " \t\r\n");
 
+    std::string join( const std::vector<std::string>& elements, const char* const separator);
 };
 
 #endif /* __common_stringutils_h__ */

@@ -1,13 +1,26 @@
 #include <thread>
 #include <chrono>
 #include <stdexcept>
+#include <cctype>
+#include <algorithm>
+#include <vector>
+#include <map>
 
 #include "ogrsf_frmts.h"
 
 #include "common/config.h"
+#include "common/stringutils.h"
 #include "server/worker.h"
 
 using namespace Batyr;
+
+struct OgrField 
+{
+    std::string name;
+    unsigned int index;
+    OGRFieldType type;
+};
+typedef std::map<std::string, OgrField> OgrFieldMap;
 
 
 Worker::Worker(Configuration::Ptr _configuration, std::shared_ptr<JobStorage> _jobs)
@@ -54,8 +67,30 @@ Worker::pull(Job::Ptr job)
     ogrLayer->ResetReading();
 
     // TODO: set filter
+    
 
+    // collect the columns of the dataset
+    OgrFieldMap ogrFields;
+    auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
+    for(int i=0; i<ogrFeatureDefn->GetFieldCount(); i++) {
+        auto ogrFieldDefn = ogrFeatureDefn->GetFieldDefn(i);
+        
+        // lowercase column names -- TODO: this may cause problems when postgresqls column names
+        // contain uppercase letters, but will do for a start
+        std::string fieldNameCased = std::string(ogrFieldDefn->GetNameRef());
+        std::string fieldName;
+        std::transform(fieldNameCased.begin(), fieldNameCased.end(), std::back_inserter(fieldName), ::tolower);
 
+#ifdef _DEBUG
+        {
+            std::string msg = "ogr layer provides the column " + fieldName;
+            poco_debug(logger, msg.c_str());
+        }
+#endif
+        auto entry = &ogrFields[fieldName];
+        entry->index = i;
+        entry->type = ogrFieldDefn->GetType();
+    }
 
     // perform the work in an transaction
     if (auto transaction = db.getTransaction()) {
@@ -69,6 +104,30 @@ Worker::pull(Job::Ptr job)
         // fetch the column list from the target_table as the tempTable
         // does not have the constraints of the original table
         auto tableFields = transaction->getTableFields(layer->target_table);
+
+        // check if the requirements of the primary key are satisfied
+        // TODO: allow overriding the primarykey from the configfile
+        std::vector<std::string> primaryKeyColumns;
+        for(auto tableFieldPair : tableFields) {
+            if (tableFieldPair.second.isPrimaryKey) {
+                primaryKeyColumns.push_back(tableFieldPair.second.name);
+            }
+        }
+        if (primaryKeyColumns.empty()) {
+            throw WorkerError("Got no primarykey for layer \"" + job->getLayerName() + "\"");
+        }
+        std::vector<std::string> missingPrimaryKeysSource;
+        for( auto primaryKeyCol : primaryKeyColumns) {
+            if (ogrFields.find(primaryKeyCol) == ogrFields.end()) {
+                missingPrimaryKeysSource.push_back(primaryKeyCol);
+            }
+        }
+        if (!missingPrimaryKeysSource.empty()) {
+            throw WorkerError("The source for layer \"" + job->getLayerName() + "\" is missing the following fields required "+
+                    "by the primary key: " + StringUtils::join(missingPrimaryKeysSource, ", "));
+        }
+        
+
 
         job->setStatus(Job::Status::FINISHED);
     }
