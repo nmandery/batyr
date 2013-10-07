@@ -68,10 +68,18 @@ Worker::pull(Job::Ptr job)
 
     // TODO: set filter
     
+    auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
+
+#if GDAL_VERSION_MAJOR > 1
+    if (ogrFeatureDefn->GetGeomFieldCount() != 1) {
+        std::string msg = "The source provides " + std::to_string(ogrFeatureDefn->GetGeomFieldCount()) +
+                "geometry fields. Currently only sources with on geoemtry field are supported";
+        throw WorkerError(msg);
+    }
+#endif
 
     // collect the columns of the dataset
     OgrFieldMap ogrFields;
-    auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
     for(int i=0; i<ogrFeatureDefn->GetFieldCount(); i++) {
         auto ogrFieldDefn = ogrFeatureDefn->GetFieldDefn(i);
         
@@ -127,7 +135,13 @@ Worker::pull(Job::Ptr job)
                     "by the primary key: " + StringUtils::join(missingPrimaryKeysSource, ", "));
         }
         
+        // prepare an insert query into the temporary table 
 
+        // update the existing table
+
+        // insert missing rows in the exisiting table
+
+        // delete deprecated rows from the exisiting table
 
         job->setStatus(Job::Status::FINISHED);
     }
