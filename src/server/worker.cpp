@@ -67,7 +67,28 @@ Worker::pull(Job::Ptr job)
     }
     ogrLayer->ResetReading();
 
-    // TODO: set filter
+    // set filter if set
+    std::string filterString = job->getFilter();
+    if (!filterString.empty()) {
+        CPLErrorReset();
+        if (ogrLayer->SetAttributeFilter(filterString.c_str()) != OGRERR_NONE) {
+            std::stringstream msgstream;
+            msgstream   << "The given filter for layer \""
+                        << layer->name
+                        << "\" is invalid";
+            if (CPLGetLastErrorMsg()) {
+                msgstream   << ": " << CPLGetLastErrorMsg();
+            }
+            else {
+                msgstream   << ".";
+            }
+            msgstream   << " The applied filter was [ "
+                        << filterString
+                        << " ]";
+            CPLErrorReset();
+            throw WorkerError(msgstream.str());
+        }
+    }
     
     auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
 
