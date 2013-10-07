@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <sstream>
 
 #include "ogrsf_frmts.h"
 
@@ -102,6 +103,10 @@ Worker::pull(Job::Ptr job)
 
     // perform the work in an transaction
     if (auto transaction = db.getTransaction()) {
+        int numPulled = 0;
+        int numCreated = 0;
+        int numUpdated = 0;
+        int numDeleted = 0;
 
         // build a unique name for the temporary table
         std::string tempTableName = "batyr_" + job->getId();
@@ -116,9 +121,25 @@ Worker::pull(Job::Ptr job)
         // check if the requirements of the primary key are satisfied
         // TODO: allow overriding the primarykey from the configfile
         std::vector<std::string> primaryKeyColumns;
+        std::string geometryColumn;
+        std::vector<std::string> insertColumns;
+        std::vector<std::string> updateColumns;
         for(auto tableFieldPair : tableFields) {
             if (tableFieldPair.second.isPrimaryKey) {
                 primaryKeyColumns.push_back(tableFieldPair.second.name);
+            }
+            else {
+                updateColumns.push_back(tableFieldPair.second.name);
+            }
+            if (tableFieldPair.second.pgTypeName == "geometry") {
+                if (!geometryColumn.empty()) {
+                    throw WorkerError("Layer \"" + job->getLayerName() + "\" has multiple geometry columns. Currently only one is supported");
+                }
+                geometryColumn = tableFieldPair.second.name;
+                insertColumns.push_back(tableFieldPair.second.name);
+            }
+            if (ogrFields.find(tableFieldPair.second.name) != ogrFields.end()) {
+                insertColumns.push_back(tableFieldPair.second.name);
             }
         }
         if (primaryKeyColumns.empty()) {
@@ -136,14 +157,159 @@ Worker::pull(Job::Ptr job)
         }
         
         // prepare an insert query into the temporary table 
+        std::vector<std::string> insertQueryValues;
+        unsigned int idxColumn = 1;
+        for (std::string insertColumn : insertColumns) {
+            std::stringstream colStream;
+            colStream << "$" << idxColumn << "::" << tableFields[insertColumn].pgTypeName;
+            insertQueryValues.push_back(colStream.str());
+            idxColumn++;
+        }
+        std::stringstream insertQueryStream;
+        // TODO: include st_transform statement into insert if original table has a srid set in geometry_columns
+        insertQueryStream   << "insert into \"" << tempTableName << "\" (\""
+                            << StringUtils::join(insertColumns, "\", \"")
+                            << "\") values ("
+                            << StringUtils::join(insertQueryValues, ", ")
+                            << ")";
+        poco_debug(logger, insertQueryStream.str().c_str());
+        std::string insertStmtName = "batyr_insert" + job->getId();
+        auto resInsertStmt = transaction->prepare(insertStmtName, insertQueryStream.str(), insertColumns.size(), NULL);
 
-        // update the existing table
+        OGRFeature * ogrFeature = 0;
+        while( (ogrFeature = ogrLayer->GetNextFeature()) != nullptr) {
+            std::vector<std::string> strValues;
+
+            for (std::string insertColumn : insertColumns) {
+                auto tableField = &tableFields[insertColumn];
+
+                if (tableField->pgTypeName == "geometry") {
+                    // TODO: Maybe use the implementation from OGRPGLayer::GeometryToHex
+                    GByte * buffer;
+
+                    auto ogrGeometry = ogrFeature->GetGeometryRef();
+                    int bufferSize = ogrGeometry->WkbSize();
+
+                    buffer = (GByte *) CPLMalloc(bufferSize);
+                    if (buffer == nullptr) {
+                        throw WorkerError("Unable to allocate memory to export geometry");
+                    }
+                    if (ogrGeometry->exportToWkb(wkbNDR, buffer) != OGRERR_NONE) {
+                        OGRFree(buffer);
+                        throw WorkerError("Could not export the geometry from feature #" + std::to_string(numPulled));
+                    }
+                    char * hexBuffer = CPLBinaryToHex(bufferSize, buffer);
+                    if (hexBuffer == nullptr) {
+                        OGRFree(buffer);
+                        throw WorkerError("Unable to allocate memory to convert geometry to hex");
+                    }
+                    OGRFree(buffer);
+                    strValues.push_back(std::string(hexBuffer));
+                    CPLFree(hexBuffer);
+                }
+                else {
+                    auto ogrField = &ogrFields[insertColumn];
+                    switch (ogrField->type) {
+                        case OFTString:
+                            strValues.push_back(std::string(ogrFeature->GetFieldAsString(ogrField->index)));
+                            break; 
+                        case OFTInteger:
+                            strValues.push_back(std::to_string(ogrFeature->GetFieldAsInteger(ogrField->index)));
+                            break;
+                        case OFTReal:
+                            strValues.push_back(std::to_string(ogrFeature->GetFieldAsDouble(ogrField->index)));
+                            break;
+                        // TODO: implment all of the OGRFieldType types
+                        default:
+                            throw WorkerError("Unsupported OGR field type: " + std::to_string(static_cast<int>(ogrField->type)));
+                    }
+                }
+            }
+
+
+            // convert to an array of c strings
+            std::vector<const char*> cStrValues;
+            std::vector<int> cStrValueLenghts;
+            std::transform(strValues.begin(), strValues.end(), std::back_inserter(cStrValues),
+                        [](std::string & s){ return s.c_str();});
+            std::transform(strValues.begin(), strValues.end(), std::back_inserter(cStrValueLenghts),
+                        [](std::string & s){ return s.length();});
+            
+            transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0], &cStrValueLenghts[0],
+                        NULL, 1);
+
+            numPulled++;
+        }
+        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
+
+        // update the existing table only touching rows which have differences to prevent
+        // slowdowns by triggers
+        std::stringstream updateStmt;
+        updateStmt          << "update \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+                            << " set ";
+        bool firstIter = true;
+        for (std::string updateColumn : updateColumns) {
+            if (!firstIter) {
+                updateStmt << ", ";
+            }
+            updateStmt << "\"" << updateColumn << "\" = \"" << tempTableName << "\".\"" << updateColumn << "\" ";
+            firstIter = false;
+        }
+        updateStmt          << " from \"" << tempTableName << "\""
+                            << " where (";
+        firstIter = true;
+        for (std::string primaryKeyColumn : primaryKeyColumns) {
+            if (!firstIter) {
+                updateStmt << " and ";
+            }
+            updateStmt  << "\""  << layer->target_table_name << "\".\"" << primaryKeyColumn 
+                        << "\" is not distinct from \"" << tempTableName << "\".\"" << primaryKeyColumn << "\"";
+            firstIter = false;
+        }
+        updateStmt          << ") and (";
+        firstIter = true;
+        for (std::string updateColumn : updateColumns) {
+            if (!firstIter) {
+                updateStmt << " or ";
+            }
+            updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumn 
+                        << "\" is distinct from  \"" 
+                        << tempTableName << "\".\"" << updateColumn << "\")";
+            firstIter = false;
+        }
+        updateStmt          << ")";
+        auto updateRes = transaction->exec(updateStmt.str());
+        numUpdated = std::atoi(PQcmdTuples(updateRes.get()));
+        updateRes.reset(NULL); // immediately dispose the result
 
         // insert missing rows in the exisiting table
+        std::stringstream insertMissingStmt;
+        insertMissingStmt   << "insert into \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+                            << " ( \"" << StringUtils::join(insertColumns, "\", \"") << "\") "
+                            << " select \"" << StringUtils::join(insertColumns, "\", \"") << "\" "
+                            << " from \"" << tempTableName << "\""
+                            << " where (\"" << StringUtils::join(primaryKeyColumns, "\", \"") << "\") not in ("
+                            << " select \"" << StringUtils::join(primaryKeyColumns, "\",\"") << "\" "
+                            << "       from \"" << layer->target_table_schema << "\".\""  << layer->target_table_name << "\""
+                            << ")";
+        auto insertMissingRes = transaction->exec(insertMissingStmt.str());
+        numCreated = std::atoi(PQcmdTuples(insertMissingRes.get()));
+        insertMissingRes.reset(NULL); // immediately dispose the result
 
         // delete deprecated rows from the exisiting table
+        // TODO: make this optional and skip when a filter is used
+        std::stringstream deleteRemovedStmt;
+        deleteRemovedStmt   << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+                            << " where (\"" << StringUtils::join(primaryKeyColumns, "\", \"") << "\") not in ("
+                            << " select \"" << StringUtils::join(primaryKeyColumns, "\",\"") << "\" "
+                            << "       from \"" << tempTableName << "\""
+                            << ")";
+        auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
+        numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
+        deleteRemovedRes.reset(NULL); // immediately dispose the result
 
         job->setStatus(Job::Status::FINISHED);
+        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
     }
     else {
         std::string msg("Could not start a database transaction");
@@ -151,6 +317,7 @@ Worker::pull(Job::Ptr job)
         job->setStatus(Job::Status::FAILED);
         job->setMessage(msg);
     }
+
 }
 
 

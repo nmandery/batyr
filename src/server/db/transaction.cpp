@@ -148,8 +148,8 @@ Transaction::createTempTable(const std::string existingTableSchema, const std::s
 
     // create the temporary table
     exec(query);
-
 }
+
 
 FieldMap
 Transaction::getTableFields(const std::string tableSchema, const std::string tableName)
@@ -179,10 +179,10 @@ Transaction::getTableFields(const std::string tableSchema, const std::string tab
             COUNT_OF(paramValues), NULL, paramValues, paramLengths, NULL, 1);
 
     for (int i; i < PQntuples(res.get()); i++) {
-        auto attname = PQgetvalue(res.get(), i, 0);
-        auto typname = PQgetvalue(res.get(), i, 1);
-        auto oid = PQgetvalue(res.get(), i, 2);
-        auto isPk = PQgetvalue(res.get(), i, 3);
+        char * attname = PQgetvalue(res.get(), i, 0);
+        char * typname = PQgetvalue(res.get(), i, 1);
+        char * oid = PQgetvalue(res.get(), i, 2);
+        char * isPk = PQgetvalue(res.get(), i, 3);
 
         auto field = &fieldMap[attname];
         if (!field->name.empty()) {
@@ -194,5 +194,5 @@ Transaction::getTableFields(const std::string tableSchema, const std::string tab
         field->pgTypeOid = std::atoi(oid);
         field->isPrimaryKey = (std::strcmp(isPk,"Y") == 0);
     }
-    return fieldMap;
+    return std::move(fieldMap);
 }
