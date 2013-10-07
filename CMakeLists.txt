@@ -45,6 +45,18 @@ set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
 
+# http://brianmilco.blogspot.de/2012/11/cmake-automatically-use-git-tags-as.html
+include(GetGitRevisionDescription)
+get_git_head_revision(refspec VERSION_GIT_SHA1)
+get_git_is_dirty(VERSION_GIT_IS_DIRTY)
+STRING(SUBSTRING "${VERSION_GIT_SHA1}" 0 10 VERSION_GIT_SHA1_SHORT)
+if ("${VERSION_GIT_IS_DIRTY}" STREQUAL "")
+    set(VERSION_GIT_FULL "${VERSION_GIT_SHA1_SHORT}")
+else()
+    set(VERSION_GIT_FULL "${VERSION_GIT_SHA1_SHORT}-${VERSION_GIT_IS_DIRTY}")
+endif()
+
+
 # compile the http web gui in the server when this is enabled
 option(ENABLE_HTTP_WEB_GUI "Enable the HTTP Web user interface" ON)
 if (ENABLE_HTTP_WEB_GUI)

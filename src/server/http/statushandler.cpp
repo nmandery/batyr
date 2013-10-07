@@ -30,6 +30,7 @@ StatusHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
     doc.SetObject();
     doc.AddMember("appName", APP_NAME_SERVER, doc.GetAllocator());
     doc.AddMember("appVersion", VERSION_FULL, doc.GetAllocator());
+    doc.AddMember("appGitVersion", VERSION_GIT_FULL, doc.GetAllocator());
     doc.AddMember("numLayers", configuration->getLayerCount(), 
                 doc.GetAllocator());
 
