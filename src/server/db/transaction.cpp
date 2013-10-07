@@ -73,6 +73,35 @@ Transaction::execParams(const std::string _sql, int nParams, const Oid *paramTyp
 }
 
 
+PGresultPtr
+Transaction::prepare(const std::string stmtName, const std::string _sql, int nParams, const Oid *paramTypes)
+{
+    PGresultPtr result( PQprepare(connection->pgconn, stmtName.c_str(), _sql.c_str(),
+                nParams,
+                paramTypes
+            ), PQclear);
+    checkResult(result);
+    return std::move(result);
+}
+
+
+PGresultPtr
+Transaction::execPrepared(const std::string stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
+                         const int *paramFormats, int resultFormat)
+{
+    PGresultPtr result( PQexecPrepared(connection->pgconn, stmtName.c_str(),
+                nParams,
+                paramValues,
+                paramLengths,
+                paramFormats,
+                resultFormat
+            ),PQclear);
+    checkResult(result);
+    return std::move(result);
+}
+
+
+
 void
 Transaction::checkResult(PGresultPtr & res)
 {

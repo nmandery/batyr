@@ -61,6 +61,9 @@ namespace Db
             PGresultPtr exec(const std::string);
             PGresultPtr execParams(const std::string _sql, int nParams, const Oid *paramTypes,
                         const char * const *paramValues, const int *paramLengths, const int *paramFormats, int resultFormat);
+            PGresultPtr prepare(const std::string stmtName, const std::string _sql, int nParams, const Oid *paramTypes);
+            PGresultPtr execPrepared(const std::string stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
+                        const int *paramFormats, int resultFormat);
 
 
             void discard()
