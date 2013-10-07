@@ -72,12 +72,12 @@ namespace Db
              * create a temporary table based upon the schema
              * of an existing table;
              */
-            void createTempTable(const std::string existingTableName, const std::string tempTableName); 
+            void createTempTable(const std::string existingTableSchema, const std::string existingTableName, const std::string tempTableName); 
 
             /**
              *
              */
-            FieldMap getTableFields(const std::string tableName);
+            FieldMap getTableFields(const std::string tableSchema, const std::string tableName);
     };
 
 };

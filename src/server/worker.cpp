@@ -107,11 +107,11 @@ Worker::pull(Job::Ptr job)
         std::string tempTableName = "batyr_" + job->getId();
 
         // create a temp table to write the data to
-        transaction->createTempTable(layer->target_table, tempTableName);
+        transaction->createTempTable(layer->target_table_schema, layer->target_table_name, tempTableName);
 
         // fetch the column list from the target_table as the tempTable
         // does not have the constraints of the original table
-        auto tableFields = transaction->getTableFields(layer->target_table);
+        auto tableFields = transaction->getTableFields(layer->target_table_schema, layer->target_table_name);
 
         // check if the requirements of the primary key are satisfied
         // TODO: allow overriding the primarykey from the configfile

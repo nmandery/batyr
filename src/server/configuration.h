@@ -17,7 +17,8 @@ namespace Batyr
         std::string source;
         std::string source_layer;
         std::string description;
-        std::string target_table;
+        std::string target_table_name;
+        std::string target_table_schema;
 
         typedef std::shared_ptr<Layer> Ptr;
     };

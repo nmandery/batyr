@@ -3,6 +3,7 @@
 
 #include "server/db/transaction.h"
 #include "server/db/connection.h"
+#include "common/macros.h"
 
 
 using namespace Batyr::Db;
@@ -98,7 +99,7 @@ Transaction::checkResult(PGresultPtr & res)
 }
 
 void
-Transaction::createTempTable(const std::string existingTableName, const std::string tempTableName)
+Transaction::createTempTable(const std::string existingTableSchema, const std::string existingTableName, const std::string tempTableName)
 {
     std::stringstream querystream;
 
@@ -106,7 +107,7 @@ Transaction::createTempTable(const std::string existingTableName, const std::str
 
     // use a simple select into and not table inheritance
     querystream << "select * into temporary " << tempTableName
-                << " from " << existingTableName << " limit 0";
+                << " from \"" << existingTableSchema << "\".\"" << existingTableName << "\" limit 0";
     std::string query = querystream.str();
 
     // postgresql drops temporary tables when the connections ends. But the temporary
@@ -122,24 +123,31 @@ Transaction::createTempTable(const std::string existingTableName, const std::str
 }
 
 FieldMap
-Transaction::getTableFields(const std::string tableName)
+Transaction::getTableFields(const std::string tableSchema, const std::string tableName)
 {
     FieldMap fieldMap;
 
-    const char *paramValues[1] = { tableName.c_str() };
-    int paramLengths[1] = { static_cast<int>(tableName.length()) };
+    const char *paramValues[2] = { 
+            tableName.c_str(),
+            tableSchema.c_str()
+    };
+    int paramLengths[COUNT_OF(paramValues)] = {
+            static_cast<int>(tableName.length()),
+            static_cast<int>(tableSchema.length())
+    };
     auto res = execParams(
                 "select pa.attname, pt.typname, pt.oid, coalesce(is_pk.is_pk, 'N')::text as is_pk"
                 " from pg_catalog.pg_attribute pa"
                 " join pg_catalog.pg_class pc on pc.oid=pa.attrelid and pa.attnum>0"
+                " join pg_catalog.pg_namespace pns on pc.relnamespace = pns.oid"
                 " join pg_catalog.pg_type pt on pt.oid=pa.atttypid"
                 " left join ("
                 "    select pcs.conrelid as relid, unnest(conkey) as attnum, 'Y'::text as is_pk "
                 "        from pg_catalog.pg_constraint pcs"
                 "        where pcs.contype = 'p'"
                 " ) is_pk on is_pk.relid = pc.oid and is_pk.attnum=pa.attnum"
-                " where pc.oid = $1::regclass::oid",
-            1, NULL, paramValues, paramLengths, NULL, 1);
+                " where pc.relname = $1::text and pns.nspname = $2::text",
+            COUNT_OF(paramValues), NULL, paramValues, paramLengths, NULL, 1);
 
     for (int i; i < PQntuples(res.get()); i++) {
         auto attname = PQgetvalue(res.get(), i, 0);

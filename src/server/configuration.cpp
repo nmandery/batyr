@@ -1,5 +1,6 @@
 #include "server/configuration.h"
 #include "common/iniparser.h"
+#include "common/macros.h"
 #include "common/stringutils.h"
 
 #include <fstream>
@@ -168,8 +169,11 @@ Configuration::parse(const std::string & configFile)
                         else if (layerValuePair.first == "source_layer") {
                             layer->source_layer = layerValuePair.second;
                         }
-                        else if (layerValuePair.first == "target_table") {
-                            layer->target_table = layerValuePair.second;
+                        else if (layerValuePair.first == "target_table_schema") {
+                            layer->target_table_schema = layerValuePair.second;
+                        }
+                        else if (layerValuePair.first == "target_table_name") {
+                            layer->target_table_name = layerValuePair.second;
                         }
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
@@ -177,15 +181,16 @@ Configuration::parse(const std::string & configFile)
                     }
 
                     // check for missing mantatory settings
-                    if (layer->source.empty()) {
-                        throw ConfigurationError("Layer \"" + layer->name + "\" is missing the \"" "source" "\" setting");
+#define CHECK_STR_SETTING(LAYER, SETTING) if (LAYER->SETTING.empty()) { \
+                        throw ConfigurationError("Layer \"" + LAYER->name + "\" is missing the \"" STRINGIFY(SETTING) "\" setting"); \
                     }
-                    if (layer->source_layer.empty()) {
-                        throw ConfigurationError("Layer \"" + layer->name + "\" is missing the \"" "source_layer" "\" setting");
-                    }
-                    if (layer->target_table.empty()) {
-                        throw ConfigurationError("Layer \"" + layer->name + "\" is missing the \"" "target_table" "\" setting");
-                    }
+
+                    CHECK_STR_SETTING(layer, source); 
+                    CHECK_STR_SETTING(layer, source_layer); 
+                    CHECK_STR_SETTING(layer, target_table_name); 
+                    CHECK_STR_SETTING(layer, target_table_schema); 
+
+#undef CHECK_STR_SETTING
 
                     layers[layer->name] = layer;
                 }
