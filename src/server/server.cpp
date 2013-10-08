@@ -132,12 +132,12 @@ Server::defineOptions(Poco::Util::OptionSet & options)
 {
     Poco::Util::ServerApplication::defineOptions(options);
 
-    options.addOption( Poco::Util::Option("help", "h", "display help information")
+    options.addOption( Poco::Util::Option("help", "h", "Display help information and exit.")
             .required(false)
             .repeatable(false)
             .callback( Poco::Util::OptionCallback<Server>( this, &Server::handleHelp )));
 
-    options.addOption( Poco::Util::Option("configfile", "c", "path to the config file")
+    options.addOption( Poco::Util::Option("configfile", "c", "Path to the configuration file.")
             .required(true)
             .repeatable(false)
             .argument("file")
@@ -150,7 +150,7 @@ Server::displayHelp()
 {
     Poco::Util::HelpFormatter helpFormatter(options());
     helpFormatter.setCommand(commandName());
-    helpFormatter.setUsage("-c CONFIGFILE [OPTIONS]");
+    helpFormatter.setUsage("-c=CONFIGFILE [OPTIONS]");
     helpFormatter.setHeader("TODO ---- write some short description here");
     helpFormatter.format(std::cout);
 
