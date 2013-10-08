@@ -34,7 +34,7 @@ Transaction::~Transaction()
     }
 
     // run all exitSqls
-    for(auto exitSql: exitSqls) {
+    for(auto &exitSql: exitSqls) {
         try {
             poco_debug(logger, "Running Exit SQL: " + exitSql);
             exec(exitSql);

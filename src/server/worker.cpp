@@ -145,7 +145,7 @@ Worker::pull(Job::Ptr job)
         std::string geometryColumn;
         std::vector<std::string> insertColumns;
         std::vector<std::string> updateColumns;
-        for(auto tableFieldPair : tableFields) {
+        for(auto &tableFieldPair : tableFields) {
             if (tableFieldPair.second.isPrimaryKey) {
                 primaryKeyColumns.push_back(tableFieldPair.second.name);
             }
@@ -167,7 +167,7 @@ Worker::pull(Job::Ptr job)
             throw WorkerError("Got no primarykey for layer \"" + job->getLayerName() + "\"");
         }
         std::vector<std::string> missingPrimaryKeysSource;
-        for( auto primaryKeyCol : primaryKeyColumns) {
+        for( auto &primaryKeyCol : primaryKeyColumns) {
             if (ogrFields.find(primaryKeyCol) == ogrFields.end()) {
                 missingPrimaryKeysSource.push_back(primaryKeyCol);
             }
@@ -180,7 +180,7 @@ Worker::pull(Job::Ptr job)
         // prepare an insert query into the temporary table 
         std::vector<std::string> insertQueryValues;
         unsigned int idxColumn = 1;
-        for (std::string insertColumn : insertColumns) {
+        for (std::string &insertColumn : insertColumns) {
             std::stringstream colStream;
             colStream << "$" << idxColumn << "::" << tableFields[insertColumn].pgTypeName;
             insertQueryValues.push_back(colStream.str());
@@ -201,7 +201,7 @@ Worker::pull(Job::Ptr job)
         while( (ogrFeature = ogrLayer->GetNextFeature()) != nullptr) {
             std::vector<std::string> strValues;
 
-            for (std::string insertColumn : insertColumns) {
+            for (std::string &insertColumn : insertColumns) {
                 auto tableField = &tableFields[insertColumn];
 
                 if (tableField->pgTypeName == "geometry") {
@@ -268,35 +268,30 @@ Worker::pull(Job::Ptr job)
         std::stringstream updateStmt;
         updateStmt          << "update \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
                             << " set ";
-        bool firstIter = true;
-        for (std::string updateColumn : updateColumns) {
-            if (!firstIter) {
+        for (size_t i=0; i<updateColumns.size(); i++) {
+            if (i != 0) {
                 updateStmt << ", ";
             }
-            updateStmt << "\"" << updateColumn << "\" = \"" << tempTableName << "\".\"" << updateColumn << "\" ";
-            firstIter = false;
+            updateStmt << "\"" << updateColumns[i] << "\" = \"" << tempTableName << "\".\"" << updateColumns[i] << "\" ";
         }
         updateStmt          << " from \"" << tempTableName << "\""
                             << " where (";
-        firstIter = true;
-        for (std::string primaryKeyColumn : primaryKeyColumns) {
-            if (!firstIter) {
+        for (size_t i=0; i<primaryKeyColumns.size(); i++) {
+            if (i != 0) {
                 updateStmt << " and ";
             }
-            updateStmt  << "\""  << layer->target_table_name << "\".\"" << primaryKeyColumn 
-                        << "\" is not distinct from \"" << tempTableName << "\".\"" << primaryKeyColumn << "\"";
-            firstIter = false;
+            updateStmt  << "\""  << layer->target_table_name << "\".\"" << primaryKeyColumns[i]
+                        << "\" is not distinct from \"" << tempTableName << "\".\"" << primaryKeyColumns[i] << "\"";
         }
         updateStmt          << ") and (";
-        firstIter = true;
-        for (std::string updateColumn : updateColumns) {
-            if (!firstIter) {
+        // update only rows which are actual different
+        for (size_t i=0; i<updateColumns.size(); i++) {
+            if (i != 0) {
                 updateStmt << " or ";
             }
-            updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumn 
+            updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumns[i]
                         << "\" is distinct from  \"" 
-                        << tempTableName << "\".\"" << updateColumn << "\")";
-            firstIter = false;
+                        << tempTableName << "\".\"" << updateColumns[i] << "\")";
         }
         updateStmt          << ")";
         auto updateRes = transaction->exec(updateStmt.str());
@@ -369,6 +364,7 @@ Worker::run()
                 reconnectAttempts++;
                 std::this_thread::sleep_for( std::chrono::milliseconds( SERVER_DB_RECONNECT_WAIT ) );
             }
+            job->setMessage("");
 
             pull(job);
         }
