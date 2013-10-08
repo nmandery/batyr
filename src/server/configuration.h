@@ -10,7 +10,7 @@
 
 namespace Batyr
 {
-    
+
     struct Layer
     {
         std::string name;
@@ -19,15 +19,16 @@ namespace Batyr
         std::string description;
         std::string target_table_name;
         std::string target_table_schema;
+        bool allow_feature_deletion;
 
         typedef std::shared_ptr<Layer> Ptr;
     };
 
 
-    class ConfigurationError : public std::runtime_error 
+    class ConfigurationError : public std::runtime_error
     {
         public:
-            ConfigurationError(const std::string & message) 
+            ConfigurationError(const std::string & message)
                     : std::runtime_error(message)
             {
             };

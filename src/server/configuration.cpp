@@ -40,7 +40,7 @@ Configuration::getLayer(const std::string & _layer) const
 
 std::vector<Layer::Ptr>
 Configuration::getOrderedLayers() const
-{    
+{
     std::vector< Layer::Ptr > orderedLayers;
     orderedLayers.reserve(layers.size());
 
@@ -56,14 +56,14 @@ Configuration::getOrderedLayers() const
 }
 
 
-void 
+void
 static throwUnknownSetting(const std::string & sectionName, const std::string & settingName)
 {
     throw ConfigurationError("Unknown option \""+settingName+
                     "\" in section \""+sectionName+"\"");
 }
 
-static void 
+static void
 throwInvalidValue(const std::string & sectionName, const std::string & settingName,
         const std::string & value)
 {
@@ -86,6 +86,25 @@ valueToInt(const std::string & s, bool & ok)
     return i;
 }
 
+static bool
+valueToBool(const std::string & s, bool & ok)
+{
+    std::string sTrimmed = StringUtils::tolower(StringUtils::trim(s, trimChars));
+
+    bool result = false;
+    if ((sTrimmed == "true") || (sTrimmed == "yes") || (sTrimmed == "1") || (sTrimmed == "y") || (sTrimmed == "t")) {
+        ok = true;
+        result = true;
+    }
+    else if ((sTrimmed == "false") || (sTrimmed == "no") || (sTrimmed == "0") || (sTrimmed == "n") || (sTrimmed == "f")) {
+        ok = true;
+        result = false;
+    }
+    else {
+        ok = false;
+    }
+    return result;
+}
 
 void
 Configuration::parse(const std::string & configFile)
@@ -97,7 +116,7 @@ Configuration::parse(const std::string & configFile)
     }
 
     try {
-        
+
         Ini::Parser parser(ifs);
         Ini::Level toplevel = parser.top();
 
@@ -156,6 +175,7 @@ Configuration::parse(const std::string & configFile)
             else if (sectionPair.first == "LAYERS") {
                 for(auto const layerSectionPair : sectionPair.second.sections) {
                     auto layer = std::make_shared<Layer>();
+                    layer->allow_feature_deletion = false; // default
                     layer->name = layerSectionPair.first;
 
                     // collect layer infos
@@ -175,6 +195,15 @@ Configuration::parse(const std::string & configFile)
                         else if (layerValuePair.first == "target_table_name") {
                             layer->target_table_name = layerValuePair.second;
                         }
+                        else if (layerValuePair.first == "allow_feature_deletion") {
+                            bool ok = false;
+                            bool _allow_feature_deletion = valueToBool(layerValuePair.second, ok);
+                            if (!ok) {
+                                throw ConfigurationError("allow_feature_deletion must be a boolean value (true,false,yes,no,1,0).");
+                            }
+                            layer->allow_feature_deletion = _allow_feature_deletion;
+                        }
+
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
                         }
@@ -185,10 +214,10 @@ Configuration::parse(const std::string & configFile)
                         throw ConfigurationError("Layer \"" + LAYER->name + "\" is missing the \"" STRINGIFY(SETTING) "\" setting"); \
                     }
 
-                    CHECK_STR_SETTING(layer, source); 
-                    CHECK_STR_SETTING(layer, source_layer); 
-                    CHECK_STR_SETTING(layer, target_table_name); 
-                    CHECK_STR_SETTING(layer, target_table_schema); 
+                    CHECK_STR_SETTING(layer, source);
+                    CHECK_STR_SETTING(layer, source_layer);
+                    CHECK_STR_SETTING(layer, target_table_name);
+                    CHECK_STR_SETTING(layer, target_table_schema);
 
 #undef CHECK_STR_SETTING
 

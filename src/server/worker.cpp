@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cctype>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -54,6 +53,7 @@ Worker::pull(Job::Ptr job)
     }
 
     auto layer = configuration->getLayer(job->getLayerName());
+    bool allow_feature_deletion = layer->allow_feature_deletion;
 
     // open the dataset
     std::unique_ptr<OGRDataSource, void (*)(OGRDataSource*)> ogrDataset(
@@ -73,6 +73,11 @@ Worker::pull(Job::Ptr job)
     // set filter if set
     std::string filterString = job->getFilter();
     if (!filterString.empty()) {
+
+        // when a filter is set the deletion of features is always disabled to allow
+        // partial syncs without losing the rest of the data
+        allow_feature_deletion = false;
+
         CPLErrorReset();
         if (ogrLayer->SetAttributeFilter(filterString.c_str()) != OGRERR_NONE) {
             std::stringstream msgstream;
@@ -110,9 +115,7 @@ Worker::pull(Job::Ptr job)
 
         // lowercase column names -- TODO: this may cause problems when postgresqls column names
         // contain uppercase letters, but will do for a start
-        std::string fieldNameCased = std::string(ogrFieldDefn->GetNameRef());
-        std::string fieldName;
-        std::transform(fieldNameCased.begin(), fieldNameCased.end(), std::back_inserter(fieldName), ::tolower);
+        std::string fieldName = StringUtils::tolower(std::string(ogrFieldDefn->GetNameRef()));
 
 #ifdef _DEBUG
         {
@@ -327,15 +330,20 @@ Worker::pull(Job::Ptr job)
 
         // delete deprecated rows from the exisiting table
         // TODO: make this optional and skip when a filter is used
-        std::stringstream deleteRemovedStmt;
-        deleteRemovedStmt   << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
-                            << " where (\"" << StringUtils::join(primaryKeyColumns, "\", \"") << "\") not in ("
-                            << " select \"" << StringUtils::join(primaryKeyColumns, "\",\"") << "\" "
-                            << "       from \"" << tempTableName << "\""
-                            << ")";
-        auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
-        numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
-        deleteRemovedRes.reset(NULL); // immediately dispose the result
+        if (allow_feature_deletion) {
+            std::stringstream deleteRemovedStmt;
+            deleteRemovedStmt   << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+                                << " where (\"" << StringUtils::join(primaryKeyColumns, "\", \"") << "\") not in ("
+                                << " select \"" << StringUtils::join(primaryKeyColumns, "\",\"") << "\" "
+                                << "       from \"" << tempTableName << "\""
+                                << ")";
+            auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
+            numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
+            deleteRemovedRes.reset(NULL); // immediately dispose the result
+        }
+        else {
+            poco_information(logger, "job " + job->getId() + " feature deletion disabled");
+        }
 
         job->setStatus(Job::Status::FINISHED);
         job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);

@@ -1,8 +1,10 @@
 #include "stringutils.h"
 
 #include <algorithm>
-#include <sstream>
+#include <cctype>
 #include <iterator>
+#include <memory>
+#include <sstream>
 
 using namespace StringUtils;
 
@@ -25,7 +27,7 @@ StringUtils::trim(const std::string &s, const std::string & characters)
 }
 
 
-std::string 
+std::string
 StringUtils::join( const std::vector<std::string>& elements, const char* const separator)
 {
     switch (elements.size())
@@ -35,7 +37,7 @@ StringUtils::join( const std::vector<std::string>& elements, const char* const s
         case 1:
             return elements[0];
         default:
-            std::ostringstream os; 
+            std::ostringstream os;
             std::copy(elements.begin(), elements.end()-1, std::ostream_iterator<std::string>(os, separator));
             os << *elements.rbegin();
             return os.str();
@@ -65,3 +67,11 @@ void TextUtils::Split( const char pChr , std::vector<std::string> &pRet , const 
     pRet.insert( pRet.end() , std::string( beg , cur) );
 }
 */
+
+std::string
+StringUtils::tolower(const std::string &s)
+{
+    std::string result;
+    std::transform(s.begin(), s.end(), std::back_inserter(result), ::tolower);
+    return std::move(result);
+}
