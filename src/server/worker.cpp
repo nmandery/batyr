@@ -329,7 +329,6 @@ Worker::pull(Job::Ptr job)
         insertMissingRes.reset(NULL); // immediately dispose the result
 
         // delete deprecated rows from the exisiting table
-        // TODO: make this optional and skip when a filter is used
         if (allow_feature_deletion) {
             std::stringstream deleteRemovedStmt;
             deleteRemovedStmt   << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
