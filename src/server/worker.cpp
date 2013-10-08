@@ -43,11 +43,14 @@ Worker::~Worker()
 void
 Worker::pull(Job::Ptr job)
 {
-    if (job->getFilter().empty()) {
-        poco_information(logger, "pulling layer \""+job->getLayerName()+"\"");
-    }
-    else {
-        poco_information(logger, "pulling layer \""+job->getLayerName()+"\" using filter \""+job->getFilter()+"\"");
+    {
+        std::stringstream initialLogMsgStream;
+        initialLogMsgStream     << "job " << job->getId() 
+                                << ": pulling layer \"" << job->getLayerName() << "\"";
+        if (!job->getFilter().empty()) {
+            initialLogMsgStream << " using filter \""+job->getFilter()+"\"";
+        }
+        poco_information(logger, initialLogMsgStream.str().c_str());
     }
 
     auto layer = configuration->getLayer(job->getLayerName());
@@ -336,6 +339,14 @@ Worker::pull(Job::Ptr job)
 
         job->setStatus(Job::Status::FINISHED);
         job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
+
+        std::stringstream finalLogMsgStream;
+        finalLogMsgStream   << "job " << job->getId() << " finished. Stats: "
+                            << "pulled=" << numPulled << ", "
+                            << "created=" << numCreated << ", "
+                            << "updated=" << numUpdated << ", "
+                            << "deleted=" << numDeleted << "";
+        poco_information(logger, finalLogMsgStream.str().c_str());
     }
     else {
         std::string msg("Could not start a database transaction");
