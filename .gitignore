@@ -14,3 +14,7 @@ Makefile
 /src/web/static/css/font-awesome.css
 /src/common/libbatyrcommon.a
 /src/common/config.h
+/debian/batyr*
+/debian/files
+/install_manifest.txt
+/obj-*

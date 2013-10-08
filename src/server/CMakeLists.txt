@@ -47,5 +47,6 @@ target_link_libraries( ${PROJECT_NAME}
     batyrcommon
     )
 
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 # vim: ft=cmake

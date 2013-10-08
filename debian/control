@@ -1,0 +1,12 @@
+Source: batyr
+Section: misc
+Priority: optional
+Maintainer: Nico Mandery <nico.mandery@geops.de>
+Build-Depends: debhelper (>= 7.0.50~), build-essential, libpq5, libpq-dev, libpoco-dev ( >= 1.3.6), libpocofoundation9, libpoconet9, libpocoutil9, libgdal1, libgdal1-dev, cmake
+Standards-Version: 3.9.2
+Homepage: https://github.com/geops/batyr
+
+Package: batyr
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: TODO
