@@ -3,11 +3,10 @@
 --
 
 SET statement_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = off;
+SET client_encoding = 'SQL_ASCII';
+SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET escape_string_warning = off;
 
 --
 -- Name: test; Type: SCHEMA; Schema: -; Owner: batyr
@@ -29,13 +28,11 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE africa (
-    gid integer NOT NULL,
-    id character varying(4),
+    id character varying(4) NOT NULL,
     code character varying(4),
     country character varying(35),
     the_geom public.geometry,
     CONSTRAINT enforce_dims_the_geom CHECK ((public.st_ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((public.geometrytype(the_geom) = 'MULTIPOLYGON'::text) OR (the_geom IS NULL))),
     CONSTRAINT enforce_srid_the_geom CHECK ((public.st_srid(the_geom) = (-1)))
 );
 
@@ -43,39 +40,64 @@ CREATE TABLE africa (
 ALTER TABLE test.africa OWNER TO batyr;
 
 --
--- Name: africa_gid_seq; Type: SEQUENCE; Schema: test; Owner: batyr
+-- Name: dataset1; Type: TABLE; Schema: test; Owner: batyr; Tablespace: 
 --
 
-CREATE SEQUENCE africa_gid_seq
+CREATE TABLE dataset1 (
+    id integer NOT NULL,
+    title text,
+    ts timestamp without time zone,
+    t time without time zone,
+    d date,
+    dbl double precision,
+    geom public.geometry
+);
+
+
+ALTER TABLE test.dataset1 OWNER TO batyr;
+
+--
+-- Name: dataset1_id_seq; Type: SEQUENCE; Schema: test; Owner: batyr
+--
+
+CREATE SEQUENCE dataset1_id_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
-ALTER TABLE test.africa_gid_seq OWNER TO batyr;
+ALTER TABLE test.dataset1_id_seq OWNER TO batyr;
 
 --
--- Name: africa_gid_seq; Type: SEQUENCE OWNED BY; Schema: test; Owner: batyr
+-- Name: dataset1_id_seq; Type: SEQUENCE OWNED BY; Schema: test; Owner: batyr
 --
 
-ALTER SEQUENCE africa_gid_seq OWNED BY africa.gid;
-
-
---
--- Name: gid; Type: DEFAULT; Schema: test; Owner: batyr
---
-
-ALTER TABLE ONLY africa ALTER COLUMN gid SET DEFAULT nextval('africa_gid_seq'::regclass);
+ALTER SEQUENCE dataset1_id_seq OWNED BY dataset1.id;
 
 
 --
--- Name: africa_pkey; Type: CONSTRAINT; Schema: test; Owner: batyr; Tablespace: 
+-- Name: id; Type: DEFAULT; Schema: test; Owner: batyr
+--
+
+ALTER TABLE ONLY dataset1 ALTER COLUMN id SET DEFAULT nextval('dataset1_id_seq'::regclass);
+
+
+--
+-- Name: dataset1_pkey; Type: CONSTRAINT; Schema: test; Owner: batyr; Tablespace: 
+--
+
+ALTER TABLE ONLY dataset1
+    ADD CONSTRAINT dataset1_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pk_africa; Type: CONSTRAINT; Schema: test; Owner: batyr; Tablespace: 
 --
 
 ALTER TABLE ONLY africa
-    ADD CONSTRAINT africa_pkey PRIMARY KEY (gid);
+    ADD CONSTRAINT pk_africa PRIMARY KEY (id);
 
 
 --

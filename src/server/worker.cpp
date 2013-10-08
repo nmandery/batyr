@@ -1,13 +1,13 @@
-#include <thread>
-#include <chrono>
-#include <stdexcept>
-#include <cctype>
 #include <algorithm>
-#include <vector>
+#include <cctype>
+#include <chrono>
+#include <cstdio>
+#include <cstring>
 #include <map>
 #include <sstream>
-
-#include "ogrsf_frmts.h"
+#include <stdexcept>
+#include <thread>
+#include <vector>
 
 #include "common/config.h"
 #include "common/stringutils.h"
@@ -15,7 +15,7 @@
 
 using namespace Batyr;
 
-struct OgrField 
+struct OgrField
 {
     std::string name;
     unsigned int index;
@@ -89,7 +89,7 @@ Worker::pull(Job::Ptr job)
             throw WorkerError(msgstream.str());
         }
     }
-    
+
     auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
 
 #if GDAL_VERSION_MAJOR > 1
@@ -104,7 +104,7 @@ Worker::pull(Job::Ptr job)
     OgrFieldMap ogrFields;
     for(int i=0; i<ogrFeatureDefn->GetFieldCount(); i++) {
         auto ogrFieldDefn = ogrFeatureDefn->GetFieldDefn(i);
-        
+
         // lowercase column names -- TODO: this may cause problems when postgresqls column names
         // contain uppercase letters, but will do for a start
         std::string fieldNameCased = std::string(ogrFieldDefn->GetNameRef());
@@ -128,6 +128,9 @@ Worker::pull(Job::Ptr job)
         int numCreated = 0;
         int numUpdated = 0;
         int numDeleted = 0;
+
+        // set the postgresql date style
+        transaction->exec("set DateStyle to SQL, YMD");
 
         // build a unique name for the temporary table
         std::string tempTableName = "batyr_" + job->getId();
@@ -176,13 +179,19 @@ Worker::pull(Job::Ptr job)
             throw WorkerError("The source for layer \"" + job->getLayerName() + "\" is missing the following fields required "+
                     "by the primary key: " + StringUtils::join(missingPrimaryKeysSource, ", "));
         }
-        
-        // prepare an insert query into the temporary table 
+
+        // prepare an insert query into the temporary table
         std::vector<std::string> insertQueryValues;
         unsigned int idxColumn = 1;
         for (std::string &insertColumn : insertColumns) {
+            auto tableField = &tableFields[insertColumn];
             std::stringstream colStream;
-            colStream << "$" << idxColumn << "::" << tableFields[insertColumn].pgTypeName;
+            colStream   << "$" << idxColumn;
+            if (tableField->pgTypeName != "geometry") {
+                auto ogrField = &ogrFields[insertColumn];
+                colStream << "::" << getPostgresType(ogrField->type);
+            }
+            colStream   << "::" << tableFields[insertColumn].pgTypeName;
             insertQueryValues.push_back(colStream.str());
             idxColumn++;
         }
@@ -199,7 +208,7 @@ Worker::pull(Job::Ptr job)
 
         OGRFeature * ogrFeature = 0;
         while( (ogrFeature = ogrLayer->GetNextFeature()) != nullptr) {
-            std::vector<std::string> strValues;
+            std::vector<PgFieldValue> pgValues;
 
             for (std::string &insertColumn : insertColumns) {
                 auto tableField = &tableFields[insertColumn];
@@ -225,25 +234,16 @@ Worker::pull(Job::Ptr job)
                         throw WorkerError("Unable to allocate memory to convert geometry to hex");
                     }
                     OGRFree(buffer);
-                    strValues.push_back(std::string(hexBuffer));
+                    PgFieldValue pgVal;
+                    pgVal.first = (bufferSize == 0);
+                    pgVal.second = std::string(hexBuffer);
+                    pgValues.push_back(std::move(pgVal));
                     CPLFree(hexBuffer);
                 }
                 else {
                     auto ogrField = &ogrFields[insertColumn];
-                    switch (ogrField->type) {
-                        case OFTString:
-                            strValues.push_back(std::string(ogrFeature->GetFieldAsString(ogrField->index)));
-                            break; 
-                        case OFTInteger:
-                            strValues.push_back(std::to_string(ogrFeature->GetFieldAsInteger(ogrField->index)));
-                            break;
-                        case OFTReal:
-                            strValues.push_back(std::to_string(ogrFeature->GetFieldAsDouble(ogrField->index)));
-                            break;
-                        // TODO: implment all of the OGRFieldType types
-                        default:
-                            throw WorkerError("Unsupported OGR field type: " + std::to_string(static_cast<int>(ogrField->type)));
-                    }
+                    PgFieldValue pV = convertToString(ogrFeature, ogrField->index, ogrField->type, tableField->pgTypeName);
+                    pgValues.push_back( std::move(pV) );
                 }
             }
 
@@ -251,11 +251,21 @@ Worker::pull(Job::Ptr job)
             // convert to an array of c strings
             std::vector<const char*> cStrValues;
             std::vector<int> cStrValueLenghts;
-            std::transform(strValues.begin(), strValues.end(), std::back_inserter(cStrValues),
-                        [](std::string & s){ return s.c_str();});
-            std::transform(strValues.begin(), strValues.end(), std::back_inserter(cStrValueLenghts),
-                        [](std::string & s){ return s.length();});
-            
+            std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValues),
+                        [](PgFieldValue & pV) -> const char * {
+                            if (pV.first) {
+                                return NULL;
+                            }
+                            return pV.second.c_str();
+                    });
+            std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValueLenghts),
+                        [](PgFieldValue & pV) -> int {
+                            if (pV.first) {
+                                return 0;
+                            }
+                            return pV.second.length();
+                    });
+
             transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0], &cStrValueLenghts[0],
                         NULL, 1);
 
@@ -290,7 +300,7 @@ Worker::pull(Job::Ptr job)
                 updateStmt << " or ";
             }
             updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumns[i]
-                        << "\" is distinct from  \"" 
+                        << "\" is distinct from  \""
                         << tempTableName << "\".\"" << updateColumns[i] << "\")";
         }
         updateStmt          << ")";
@@ -389,4 +399,131 @@ Worker::run()
         }
     }
     poco_debug(logger, "leaving run method");
+}
+
+
+std::string
+Worker::getPostgresType(OGRFieldType fieldType)
+{
+    std::string pgFieldType;
+
+    switch (fieldType) {
+        case OFTString:
+            pgFieldType = "text";
+            break;
+        case OFTInteger:
+            pgFieldType = "integer";
+            break;
+        case OFTReal:
+            pgFieldType = "double precision";
+            break;
+        case OFTDate:
+            pgFieldType = "date";
+            break;
+        case OFTTime:
+            pgFieldType = "time";
+            break;
+        case OFTDateTime:
+            pgFieldType = "timestamp";
+            break;
+        case OFTIntegerList:
+            pgFieldType = "integer[]";
+            break;
+        case OFTRealList:
+            pgFieldType = "double precision[]";
+            break;
+        case OFTStringList:
+            pgFieldType = "text[]";
+            break;
+        case OFTBinary:
+            pgFieldType = "bytea";
+            break;
+        default:
+            throw WorkerError("Unsupported OGR field type: " + std::to_string(static_cast<int>(fieldType)));
+    }
+    return pgFieldType;
+}
+
+
+PgFieldValue
+Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldType fieldType, const std::string pgTypeName)
+{
+    PgFieldValue result;
+
+    switch (fieldType) {
+        case OFTString:
+            {
+                const char * fieldValue = ogrFeature->GetFieldAsString(fieldIdx);
+                result.first = (fieldValue == nullptr);
+                result.second = fieldValue;
+                break;
+            }
+        case OFTInteger:
+            result.first = false;
+            result.second = std::to_string(ogrFeature->GetFieldAsInteger(fieldIdx));
+            break;
+        case OFTReal:
+            result.first = false;
+            result.second = std::to_string(ogrFeature->GetFieldAsDouble(fieldIdx));
+            break;
+        case OFTDate:
+        case OFTTime:
+        case OFTDateTime:
+            {
+                int dtYear = 0;
+                int dtMonth = 0;
+                int dtDay = 0;
+                int dtHour = 0;
+                int dtMinute = 0;
+                int dtSecond = 0;
+                int dtTZFlag = 0;
+
+                if (ogrFeature->GetFieldAsDateTime(fieldIdx, &dtYear, &dtMonth, &dtDay,
+                            &dtHour, &dtMinute, &dtSecond, &dtTZFlag)) {
+                    char buf[128] = {0,};
+
+                    if (fieldType == OFTDate) {
+                        std::snprintf(buf, sizeof(buf), "%04d-%02d-%02d", dtYear, dtMonth, dtDay);
+                    }
+                    else if (fieldType == OFTTime) {
+                        std::snprintf(buf, sizeof(buf), "%02d:%02d:%09d.0", dtHour, dtMinute, dtSecond);
+                    }
+                    else if (fieldType == OFTDateTime) {
+                        std::snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%09d.0",
+                                 dtYear, dtMonth, dtDay, dtHour, dtMinute, dtSecond);
+                    }
+                    else {
+                        throw WorkerError("None of the implemented date/time/datetime types matched. This point should not be reacheable");
+                    }
+                    result.first = false;
+                    result.second = std::string(buf);
+                }
+                else {
+                    result.first = true;
+                    poco_debug(logger, "field at index " + std::to_string(fieldIdx) + " is null");
+                }
+                break;
+            }
+        // TODO: implement all of the OGRFieldType types
+        //  case OFTIntegerList:
+        //  case OFTRealList:
+        //  case OFTStringList:
+        //  case OFTBinary:
+        default:
+            throw WorkerError("Unsupported OGR field type: " + std::to_string(static_cast<int>(fieldType)));
+    }
+
+    // sanitize invalid values - empty time types are generaly invalid and most certainly result from
+    // string fields returned as empty strings
+    if (result.second.empty() && (
+                (pgTypeName == "timestamp") ||
+                (pgTypeName == "timestampz") ||
+                (pgTypeName == "time") ||
+                (pgTypeName == "date")
+            )) {
+        result.first = true;
+        result.second.clear();
+    }
+
+    return std::move(result);
 }
