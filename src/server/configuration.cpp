@@ -3,6 +3,7 @@
 #include "common/macros.h"
 #include "common/stringutils.h"
 
+#include <iostream>
 #include <fstream>
 #include <algorithm>
 
@@ -239,12 +240,15 @@ Configuration::parse(const std::string & configFile)
                         else if (loglevelStr == "information") {
                             loglevel = Poco::Message::PRIO_INFORMATION;
                         }
-#ifdef _DEBUG
                         // poco only enables this loglevel in debug builds
                         else if (loglevelStr == "debug") {
+#ifdef _DEBUG
                             loglevel = Poco::Message::PRIO_DEBUG;
-                        }
+#else
+                            std::cerr << "The loglevel \"debug\" is only available in debug build. Using level \"information\" instead." << std::endl;
+                            loglevel = Poco::Message::PRIO_INFORMATION;
 #endif
+                        }
                         else {
                             throw ConfigurationError("Unknown loglevel: \"" + valuePair.second + "\"");
                         }
