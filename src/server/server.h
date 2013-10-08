@@ -19,7 +19,7 @@ namespace Batyr {
             Configuration::Ptr configuration;
 
             /** initialize the logging system */
-            void initLogging();
+            bool initLogging();
 
             /* Commandline argument parsing -----------*/
 

@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include <Poco/Message.h>
 
 namespace Batyr
 {
@@ -66,10 +67,19 @@ namespace Batyr
                 return max_age_done_jobs;
             }
 
-
             std::string getDbConnectionString() const
             {
                 return db_connection_string;
+            }
+
+            Poco::Message::Priority getLogLevel() const
+            {
+                return loglevel;
+            }
+
+            std::string getLogFile() const
+            {
+                return logfile;
             }
 
             /**
@@ -87,6 +97,9 @@ namespace Batyr
             unsigned int num_worker_threads;
             unsigned int max_age_done_jobs;
             std::string db_connection_string;
+            Poco::Message::Priority loglevel;
+            std::string logfile;
+
 
             void parse(const std::string & configFile);
     };

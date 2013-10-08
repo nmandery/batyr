@@ -19,7 +19,9 @@ static const char trimChars[] = "'\"\r\n\t ";
 Configuration::Configuration(const std::string & configFile)
     :   http_port(9090),        // default value
         num_worker_threads(2),  // default value
-        max_age_done_jobs(600)  // default value
+        max_age_done_jobs(600),  // default value
+        loglevel(Poco::Message::PRIO_INFORMATION),  // default value
+        logfile("")
 {
     parse(configFile);
 }
@@ -225,6 +227,35 @@ Configuration::parse(const std::string & configFile)
                 }
             }
             else if (sectionPair.first == "LOGGING") {
+                for(auto const valuePair : sectionPair.second.values) {
+                    if (valuePair.first == "loglevel") {
+                        std::string loglevelStr = StringUtils::tolower(StringUtils::trim(valuePair.second, trimChars));
+                        if (loglevelStr == "error") {
+                            loglevel = Poco::Message::PRIO_ERROR;
+                        }
+                        else if (loglevelStr == "warning") {
+                            loglevel = Poco::Message::PRIO_WARNING;
+                        }
+                        else if (loglevelStr == "information") {
+                            loglevel = Poco::Message::PRIO_INFORMATION;
+                        }
+#ifdef _DEBUG
+                        // poco only enables this loglevel in debug builds
+                        else if (loglevelStr == "debug") {
+                            loglevel = Poco::Message::PRIO_DEBUG;
+                        }
+#endif
+                        else {
+                            throw ConfigurationError("Unknown loglevel: \"" + valuePair.second + "\"");
+                        }
+                    }
+                    else if (valuePair.first == "logfile") {
+                        logfile = StringUtils::trim(valuePair.second, trimChars);
+                    }
+                    else {
+                        throwUnknownSetting(sectionPair.first, valuePair.first);
+                    }
+                }
             }
             else {
                 throw ConfigurationError("Unknown section: \""+sectionPair.first+"\"");

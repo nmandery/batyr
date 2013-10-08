@@ -1,4 +1,5 @@
 #include <Poco/ConsoleChannel.h>
+#include <Poco/SimpleFileChannel.h>
 #include <Poco/FormattingChannel.h>
 #include <Poco/PatternFormatter.h>
 #include <Poco/Logger.h>
@@ -48,7 +49,9 @@ Server::main(const std::vector<std::string> & args)
         return Poco::Util::Application::EXIT_USAGE;
     }
 
-    initLogging();
+    if (!initLogging()) {
+        return Poco::Util::Application::EXIT_USAGE;
+    }
     Poco::Logger & logger = Poco::Logger::get("Server"); 
 
     // initialize ogr
@@ -81,26 +84,46 @@ Server::main(const std::vector<std::string> & args)
 };
 
 
-void
+bool
 Server::initLogging()
 {
     // initialize the logging system
-    Poco::AutoPtr<Poco::ConsoleChannel> pCons(new Poco::ConsoleChannel);
+    Poco::AutoPtr<Poco::Channel> pChan;
+    
+    std::string logfile = configuration->getLogFile();
+    if (logfile.empty()) {
+        pChan.assign(new Poco::ConsoleChannel);
+    }
+    else {
+        // MEMO: there is also the more sophisticated FileChannel logger
+        try {
+            pChan.assign(new Poco::SimpleFileChannel(logfile));
+
+            // try to set the flush property. not all versions of poco support this
+            try {
+                pChan->setProperty("flush", "true");
+            }
+            catch (...) {}
+
+            // immediately open the logfile to check here if the file can be written to
+            pChan->open();
+        }
+        catch (Poco::Exception &e) {
+            std::cerr << "Could not setup logfile: " << e.displayText() << std::endl;
+            return false;
+        }
+    }
     Poco::AutoPtr<Poco::PatternFormatter> pPF(new Poco::PatternFormatter);
 
     // formatting patterns 
     // see http://www.appinf.com/docs/poco/Poco.PatternFormatter.html
     pPF->setProperty("pattern", "%Y-%m-%d %H:%M:%S [%p] [%s] %t");
-    Poco::AutoPtr<Poco::FormattingChannel> pFC(new Poco::FormattingChannel(pPF, pCons));
+    Poco::AutoPtr<Poco::FormattingChannel> pFC(new Poco::FormattingChannel(pPF, pChan));
     Poco::Logger::root().setChannel(pFC);
 
-#ifdef _DEBUG
-    // allow logging on max. level in debug builds
-    Poco::Logger::root().setLevel(Poco::Message::PRIO_DEBUG);
-#else
-    Poco::Logger::root().setLevel(Poco::Message::PRIO_INFORMATION);
-#endif
+    Poco::Logger::root().setLevel(configuration->getLogLevel());
 
+    return true;
 }
 
 
