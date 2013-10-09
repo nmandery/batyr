@@ -178,7 +178,7 @@ Transaction::getTableFields(const std::string &tableSchema, const std::string &t
                 " where pc.relname = $1::text and pns.nspname = $2::text",
             COUNT_OF(paramValues), NULL, paramValues, paramLengths, NULL, 1);
 
-    for (int i; i < PQntuples(res.get()); i++) {
+    for (int i=0; i < PQntuples(res.get()); i++) {
         char * attname = PQgetvalue(res.get(), i, 0);
         char * typname = PQgetvalue(res.get(), i, 1);
         char * oid = PQgetvalue(res.get(), i, 2);
@@ -195,4 +195,39 @@ Transaction::getTableFields(const std::string &tableSchema, const std::string &t
         field->isPrimaryKey = (std::strcmp(isPk,"Y") == 0);
     }
     return std::move(fieldMap);
+}
+
+
+int
+Transaction::getGeometryColumnSRID(const std::string &tableSchema, const std::string &tableName, const std::string &columnName)
+{
+    int srid = 0;
+    const char *paramValues[3] = {
+            tableSchema.c_str(),
+            tableName.c_str(),
+            columnName.c_str()
+    };
+    int paramLengths[COUNT_OF(paramValues)] = {
+            static_cast<int>(tableSchema.length()),
+            static_cast<int>(tableName.length()),
+            static_cast<int>(columnName.length())
+    };
+    auto res = execParams(
+                "select gc.srid::text"
+                " from geometry_columns gc"
+                " where gc.f_table_schema = $1::text "
+                "   and gc.f_table_name = $2::text"
+                "   and gc.f_geometry_column = $3::text",
+            COUNT_OF(paramValues), NULL, paramValues, paramLengths, NULL, 1);
+
+    for (int i=0; i < PQntuples(res.get()); i++) {
+        char * sridC = PQgetvalue(res.get(), i, 0);
+        if (sridC != nullptr) {
+            srid = std::atoi(sridC);
+        }
+    }
+
+    // TODO: Maybe analyze existing geometries for their srid
+    
+    return srid;
 }
