@@ -48,7 +48,7 @@ Transaction::~Transaction()
 
 
 PGresultPtr
-Transaction::exec(const std::string _sql)
+Transaction::exec(const std::string &_sql)
 {
     PGresultPtr result( PQexec(connection->pgconn, _sql.c_str()), PQclear);
     checkResult(result);
@@ -57,7 +57,7 @@ Transaction::exec(const std::string _sql)
 
 
 PGresultPtr
-Transaction::execParams(const std::string _sql, int nParams, const Oid *paramTypes,
+Transaction::execParams(const std::string &_sql, int nParams, const Oid *paramTypes,
             const char * const *paramValues, const int *paramLengths, const int *paramFormats, int resultFormat)
 {
     PGresultPtr result( PQexecParams(connection->pgconn, _sql.c_str(),
@@ -74,7 +74,7 @@ Transaction::execParams(const std::string _sql, int nParams, const Oid *paramTyp
 
 
 PGresultPtr
-Transaction::prepare(const std::string stmtName, const std::string _sql, int nParams, const Oid *paramTypes)
+Transaction::prepare(const std::string &stmtName, const std::string &_sql, int nParams, const Oid *paramTypes)
 {
     PGresultPtr result( PQprepare(connection->pgconn, stmtName.c_str(), _sql.c_str(),
                 nParams,
@@ -86,7 +86,7 @@ Transaction::prepare(const std::string stmtName, const std::string _sql, int nPa
 
 
 PGresultPtr
-Transaction::execPrepared(const std::string stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
+Transaction::execPrepared(const std::string &stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
                          const int *paramFormats, int resultFormat)
 {
     PGresultPtr result( PQexecPrepared(connection->pgconn, stmtName.c_str(),
@@ -128,7 +128,7 @@ Transaction::checkResult(PGresultPtr & res)
 }
 
 void
-Transaction::createTempTable(const std::string existingTableSchema, const std::string existingTableName, const std::string tempTableName)
+Transaction::createTempTable(const std::string &existingTableSchema, const std::string &existingTableName, const std::string &tempTableName)
 {
     std::stringstream querystream;
 
@@ -152,7 +152,7 @@ Transaction::createTempTable(const std::string existingTableSchema, const std::s
 
 
 FieldMap
-Transaction::getTableFields(const std::string tableSchema, const std::string tableName)
+Transaction::getTableFields(const std::string &tableSchema, const std::string &tableName)
 {
     FieldMap fieldMap;
 

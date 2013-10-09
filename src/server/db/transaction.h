@@ -58,11 +58,11 @@ namespace Db
             /**
              * execute a sql query
              */
-            PGresultPtr exec(const std::string);
-            PGresultPtr execParams(const std::string _sql, int nParams, const Oid *paramTypes,
+            PGresultPtr exec(const std::string &);
+            PGresultPtr execParams(const std::string &_sql, int nParams, const Oid *paramTypes,
                         const char * const *paramValues, const int *paramLengths, const int *paramFormats, int resultFormat);
-            PGresultPtr prepare(const std::string stmtName, const std::string _sql, int nParams, const Oid *paramTypes);
-            PGresultPtr execPrepared(const std::string stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
+            PGresultPtr prepare(const std::string &stmtName, const std::string &_sql, int nParams, const Oid *paramTypes);
+            PGresultPtr execPrepared(const std::string &stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
                         const int *paramFormats, int resultFormat);
 
 
@@ -75,12 +75,12 @@ namespace Db
              * create a temporary table based upon the schema
              * of an existing table;
              */
-            void createTempTable(const std::string existingTableSchema, const std::string existingTableName, const std::string tempTableName); 
+            void createTempTable(const std::string &existingTableSchema, const std::string &existingTableName, const std::string &tempTableName); 
 
             /**
              *
              */
-            FieldMap getTableFields(const std::string tableSchema, const std::string tableName);
+            FieldMap getTableFields(const std::string &tableSchema, const std::string &tableName);
     };
 
 };
