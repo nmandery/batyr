@@ -257,8 +257,14 @@ Worker::pull(Job::Ptr job)
         std::string insertStmtName = "batyr_insert" + job->getId();
         auto resInsertStmt = transaction->prepare(insertStmtName, insertQueryStream.str(), insertColumns.size(), NULL);
 
-        OGRFeature * ogrFeature = 0;
-        while( (ogrFeature = ogrLayer->GetNextFeature()) != nullptr) {
+        OGRFeature * ogrFeatureP = 0;
+        // ensure that features get free'd by wraping them in a smart pointer
+        std::unique_ptr<OGRFeature, void (*)(OGRFeature*)> ogrFeature(
+                NULL ,  OGRFeature::DestroyFeature);
+
+        while( (ogrFeatureP = ogrLayer->GetNextFeature()) != nullptr) {
+            ogrFeature.reset(ogrFeatureP);
+
             std::vector<PgFieldValue> pgValues;
 
             for (std::string &insertColumn : insertColumns) {
@@ -293,7 +299,7 @@ Worker::pull(Job::Ptr job)
                 }
                 else {
                     auto ogrField = &ogrFields[insertColumn];
-                    PgFieldValue pV = convertToString(ogrFeature, ogrField->index, ogrField->type, tableField->pgTypeName);
+                    PgFieldValue pV = convertToString(ogrFeature.get(), ogrField->index, ogrField->type, tableField->pgTypeName);
                     pgValues.push_back( std::move(pV) );
                 }
             }
