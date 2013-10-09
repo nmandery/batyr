@@ -190,7 +190,7 @@ Example:
 
 
 
-## GET /jobs.json
+## GET /api/jobs.json
 
 A list of all jobs which are known to the server.
 
@@ -202,7 +202,7 @@ Example:
     }
 
 
-## GET /layers.json
+## GET /api/layers.json
 
 Returns all currently configured layers with their names and description.
 
@@ -222,7 +222,7 @@ Example:
     }
 
 
-## GET /status.json
+## GET /api/status.json
 
 This method returns an object with the configuration and the current state of the server.
 
@@ -238,7 +238,7 @@ Example:
     }
 
 
-## POST /create
+## POST /api/create
 
 Allows starting a new job by POSTing a JSON document to this URL. The `layerName` parameter is mandatory while the `filter` parameter is optional. The request will return a job object with the properties of the newly created job. Returns an HTTP status `200` if the request was successful and `400` if the send data was incorrect.
 
@@ -268,13 +268,14 @@ Corresponding response:
 # Software used
 
 * The [GDAL/OGR](http://gdal.org/) library
-* The [libpq](http://www.postgresql.org/docs/current/static/libpq.html) library to connect to PostgreSQL
-* [POCO Framework](http://pocoproject.org/) for its embedded HTTP server as well as a generic application framework
-* [cmake](http://www.cmake.org/) to build the software
-* [AngularJS](http://www.angularjs.org/) as the clientside javascript framework
-* [jQuery](http://jquery.com/) for some animations
-* [Pure CSS](http://purecss.io/) for its CSS styles
-* [Font Awesome](http://fortawesome.github.io/Font-Awesome/) as iconset
+* The [libpq](http://www.postgresql.org/docs/current/static/libpq.html) library to connect to PostgreSQL.
+* [POCO Framework](http://pocoproject.org/) for its embedded HTTP server as well as a generic application framework.
+* [cmake](http://www.cmake.org/) to build the software.
+* [AngularJS](http://www.angularjs.org/) as the clientside javascript framework.
+* [jQuery](http://jquery.com/) for animations.
+* [Moment.js](http://momentjs.com/) date and time formatting.
+* [Pure CSS](http://purecss.io/) for its CSS styles.
+* [Font Awesome](http://fortawesome.github.io/Font-Awesome/) as iconset.
 
 
 # Development
