@@ -44,7 +44,7 @@ Worker::pull(Job::Ptr job)
 {
     {
         std::stringstream initialLogMsgStream;
-        initialLogMsgStream     << "job " << job->getId() 
+        initialLogMsgStream     << "job " << job->getId()
                                 << ": pulling layer \"" << job->getLayerName() << "\"";
         if (!job->getFilter().empty()) {
             initialLogMsgStream << " using filter \""+job->getFilter()+"\"";
@@ -201,12 +201,48 @@ Worker::pull(Job::Ptr job)
         for (std::string &insertColumn : insertColumns) {
             auto tableField = &tableFields[insertColumn];
             std::stringstream colStream;
-            colStream   << "$" << idxColumn;
+
             if (tableField->pgTypeName != "geometry") {
                 auto ogrField = &ogrFields[insertColumn];
-                colStream << "::" << getPostgresType(ogrField->type);
+
+                colStream   << "$" << idxColumn
+                            << "::" << getPostgresType(ogrField->type)
+                            << "::" << tableField->pgTypeName;
             }
-            colStream   << "::" << tableFields[insertColumn].pgTypeName;
+            else {
+                std::stringstream logStream;
+                logStream << "job " << job->getId() << " geometry column " << insertColumn;
+
+                if (pgSrid == -1) {
+                    logStream   << " uses an undefined SRID (" << pgSrid
+                                << "). Can't do any reprojection here, so just assigning the SRID to the new geometries";
+
+                    colStream   << "st_setsrid($" << idxColumn << "::" << tableField->pgTypeName << ", "
+                                << pgSrid << ")";
+                }
+                else if (pgSrid == 0) {
+                    logStream   << " has no SRID information. "
+                                << "Using the SRID of the geometries as they are read from the source";
+
+                    colStream   <<  "$" << idxColumn << "::" << tableField->pgTypeName;
+                }
+                else {
+                    logStream   << " uses a known, defined SRID (" << pgSrid << "). "
+                                << "Reprojecting the geometries if they got a SRS assigned, otherwise assigning the SRID of the table.";
+
+                    // in case the geometries do not have a SRS, assign the one of the table to them
+                    colStream   << "(select "
+                                <<      "case when st_srid(foo.g) = -1 then "
+                                <<          " st_setsrid(foo.g, " << pgSrid << ") "
+                                <<      "else "
+                                <<          " st_transform(foo.g, " << pgSrid << ") "
+                                <<      "end"
+                                << " from ( select $" << idxColumn << "::" << tableField->pgTypeName << " as g "
+                                << " ) foo)";
+                }
+                poco_information(logger, logStream.str().c_str());
+            }
+
             insertQueryValues.push_back(colStream.str());
             idxColumn++;
         }
@@ -214,9 +250,9 @@ Worker::pull(Job::Ptr job)
         // TODO: include st_transform statement into insert if original table has a srid set in geometry_columns
         insertQueryStream   << "insert into \"" << tempTableName << "\" (\""
                             << StringUtils::join(insertColumns, "\", \"")
-                            << "\") values ("
-                            << StringUtils::join(insertQueryValues, ", ")
-                            << ")";
+                            << "\") "
+                            << "select "
+                            << StringUtils::join(insertQueryValues, ", ");
         poco_debug(logger, insertQueryStream.str().c_str());
         std::string insertStmtName = "batyr_insert" + job->getId();
         auto resInsertStmt = transaction->prepare(insertStmtName, insertQueryStream.str(), insertColumns.size(), NULL);
@@ -314,9 +350,27 @@ Worker::pull(Job::Ptr job)
             if (i != 0) {
                 updateStmt << " or ";
             }
-            updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumns[i]
-                        << "\" is distinct from  \""
-                        << tempTableName << "\".\"" << updateColumns[i] << "\")";
+
+            auto tableField = &tableFields[updateColumns[i]];
+
+            if (tableField->pgTypeName == "geometry") {
+                // update geometries always if the srid differs.
+                // MEMO: geometries with different SRIDs can not be compared with the "=" operator
+                updateStmt  << "("
+                            <<      "case when st_srid(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\")"
+                            <<                  " != st_srid(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") then "
+                            <<          " true "
+                            <<      " else "
+                            <<          "\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\" = "
+                            <<          "\""  << tempTableName << "\".\"" << updateColumns[i] << "\""
+                            <<      " end "
+                            << ")";
+            }
+            else {
+                updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumns[i]
+                            << "\" is distinct from  \""
+                            << tempTableName << "\".\"" << updateColumns[i] << "\")";
+            }
         }
         updateStmt          << ")";
         auto updateRes = transaction->exec(updateStmt.str());
