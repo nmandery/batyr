@@ -103,7 +103,7 @@ function LayersCtrl($scope, $http, NotificationService) {
     }
 }
 
-function JobsCtrl($scope, $http) {
+function JobsCtrl($scope, $http, $location) {
     $scope.joblist = {};
     var fetchJobs = function() {
         $http.get('api/jobs.json').success(function(data) {
@@ -116,7 +116,27 @@ function JobsCtrl($scope, $http) {
     $scope.refreshJobs = function() {
         fetchJobs();
     };
+
+    $scope.showJob = function(job) {
+        $location.path('/job/' + job.id);
+    }
 }
+
+function JobCtrl($scope, $http, $routeParams, NotificationService) {
+    $scope.job = {};
+    var fetchJob = function() {
+        $http.get('api/job/' + $routeParams.jobId + '.json').success(
+            function(data) {
+                $scope.job = data;
+            }).error(
+            function(res) {
+                NotificationService.notify("Job " + $routeParams.jobId + " does not exist (anymore).");
+            }
+        );
+    }
+    fetchJob();
+}
+
 
 
 /* vim: set ft=javascript */

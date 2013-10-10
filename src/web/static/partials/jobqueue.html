@@ -37,8 +37,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="job in joblist.jobs" class="{{job.status }}">
-                <!-- <td class="job-id">{{ job.id }}</td> -->
+            <tr ng-repeat="job in joblist.jobs" class="{{job.status }}" ng-click="showJob(job);">
                 <td>{{ job.layerName }}</td>
                 <td>{{ job.timeAdded | fromNow }} </td>
                 <td>{{ job.timeFinished | fromNow }}</td>

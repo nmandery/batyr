@@ -5,6 +5,7 @@ angular.module('batyrd', ['cgNotify']).
         when('/about', {templateUrl: 'partials/about.html', controller: AboutCtrl}).
         when('/jobqueue', {templateUrl: 'partials/jobqueue.html', controller: JobsCtrl}).
         when('/layers', {templateUrl: 'partials/layers.html', controller: LayersCtrl}).
+        when('/job/:jobId', {templateUrl: 'partials/job.html', controller: JobCtrl}).
         otherwise({redirectTo: '/status'});
     }]).
     filter('fromNow', function() {
@@ -16,6 +17,17 @@ angular.module('batyrd', ['cgNotify']).
                 return "";
             }
             return moment(date).fromNow();
+        }
+    }).
+    filter('timestamp', function() {
+        // return a natural language string describing the
+        // timestamp
+        // Input is expected to be a string in ISO-8601 format.
+        return function(date) {
+            if (!date) {
+                return "";
+            }
+            return moment(date).format("dddd, MMMM Do YYYY, hh:mm:ss");
         }
     }).
     filter('secondDuration', function() {

@@ -583,3 +583,7 @@ i {
 .notification-bg {
     background: #191818;
 }
+
+.job-detail-table {
+    width: 100%;
+}

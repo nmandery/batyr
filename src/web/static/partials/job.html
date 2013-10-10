@@ -1,0 +1,58 @@
+<div class="heroS">
+    <div class="heroS-titles">
+        <h1>Job details</h1>
+    </div>
+</div>
+
+<div class="l-vbox job-box">
+    <table class="pure-table job-table-bordered job-detail-table">
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Id</td>
+                <td>{{job.id}}</td>
+            </tr>
+            <tr>
+                <td>Layer</td>
+                <td>{{job.layerName}}</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>{{job.status}}</td>
+            </tr>
+            <tr>
+                <td>Time the job has been added</td>
+                <td>{{job.timeAdded | timestamp}}</td>
+            </tr>
+            <tr>
+                <td>Time the job has been finished</td>
+                <td>{{job.timeFinished | timestamp}}</td>
+            </tr>
+            <tr>
+                <td>Message</td>
+                <td>{{job.message}}</td>
+            </tr>
+            <tr>
+                <td>Number of features pulled from source</td>
+                <td>{{job.numPulled}}</td>
+            </tr>
+            <tr>
+                <td>Number of existing features updated</td>
+                <td>{{job.numUpdated}}</td>
+            </tr>
+            <tr>
+                <td>Number of features newly inserted</td>
+                <td>{{job.numCreated}}</td>
+            </tr>
+            <tr>
+                <td>Number of features deleted</td>
+                <td>{{job.numDeleted}}</td>
+            </tr>
+        </body>
+    </table>
+</div>
