@@ -238,6 +238,37 @@ Example:
     }
 
 
+## GET /api/job/[job id].json
+
+Fetch a job object by its id.
+
+Example request:
+
+GET /api/job/1ab8c197ed014a4cbc20a6dfc98a1b101b10.json
+
+Corresponding response when an existing job id was used:
+
+    {
+        "id": "1ab8c197ed014a4cbc20a6dfc98a1b101b10",
+        "timeAdded": "2013-10-10T07:23:49Z",
+        "timeFinished": "2013-10-10T07:23:49Z",
+        "status": "finished",
+        "layerName": "dataset1",
+        "filter": "",
+        "message": "",
+        "numCreated": 0,
+        "numUpdated": 2,
+        "numDeleted": 0,
+        "numPulled": 2
+    }
+
+Response when no such job exists:
+
+    {
+        "message": "No job with the id 1ab8c197ed014a4cbc20a6dfc98a1b101b10 found"
+    }
+
+
 ## POST /api/create
 
 Allows starting a new job by POSTing a JSON document to this URL. The `layerName` parameter is mandatory while the `filter` parameter is optional. The request will return a job object with the properties of the newly created job. Returns an HTTP status `200` if the request was successful and `400` if the send data was incorrect.

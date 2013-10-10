@@ -1,11 +1,13 @@
 #include <string>
 #include <cstring>
+#include <regex>
 
 #include "server/http/httprequesthandlerfactory.h"
 #include "server/http/createhandler.h"
 #include "server/http/statushandler.h"
 #include "server/http/notfoundhandler.h"
 #include "server/http/joblisthandler.h"
+#include "server/http/getjobhandler.h"
 #include "server/http/layerlisthandler.h"
 #include "common/config.h"
 
@@ -79,6 +81,18 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         statusHandler->setJobs(jobs);
         return statusHandler;
     }
+
+    if (endpoint.compare(0, 8, "api/job/") == 0) {
+        size_t posEndId = endpoint.find_first_not_of("abcdef0123456789", 8);
+        if ((endpoint.compare(posEndId, endpoint.length() - posEndId, ".json") == 0) && (posEndId != 8)) {
+            std::string jobId = endpoint.substr(8, posEndId - 8);
+
+            auto getJobHandler = new GetJobHandler(configuration, jobId);
+            getJobHandler->setJobs(jobs);
+            return getJobHandler;
+        }
+    }
+
 
 #ifdef ENABLE_HTTP_WEB_GUI
     // attempt to satisfy the request with one of the static resources

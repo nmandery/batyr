@@ -91,7 +91,7 @@ JobStorage::getJob(std::string _id)
 
     auto foundJob = jobMap.find(_id);
     if (foundJob == jobMap.end()) {
-        poco_error(logger, "Attempt to fetch a job from jobstorage which is not part of the list");
+        poco_debug(logger, "Attempt to fetch a job from jobstorage which is not part of the list");
         throw std::out_of_range("job is not contained in jobstorage");
     }
     return foundJob->second;
