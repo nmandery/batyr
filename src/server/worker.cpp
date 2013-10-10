@@ -56,7 +56,7 @@ Worker::pull(Job::Ptr job)
     bool allow_feature_deletion = layer->allow_feature_deletion;
 
     // open the dataset
-    std::unique_ptr<OGRDataSource, void (*)(OGRDataSource*)> ogrDataset(
+    std::unique_ptr<OGRDataSource, decltype((OGRDataSource::DestroyDataSource))> ogrDataset(
         OGRSFDriverRegistrar::Open(layer->source.c_str(), false),  OGRDataSource::DestroyDataSource);
     if (!ogrDataset) {
         throw WorkerError("Could not open dataset for layer \"" + layer->name + "\"");
@@ -259,7 +259,7 @@ Worker::pull(Job::Ptr job)
 
         OGRFeature * ogrFeatureP = 0;
         // ensure that features get free'd by wraping them in a smart pointer
-        std::unique_ptr<OGRFeature, void (*)(OGRFeature*)> ogrFeature(
+        std::unique_ptr<OGRFeature, decltype((OGRFeature::DestroyFeature))> ogrFeature(
                 NULL ,  OGRFeature::DestroyFeature);
 
         while( (ogrFeatureP = ogrLayer->GetNextFeature()) != nullptr) {
