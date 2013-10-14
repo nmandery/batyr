@@ -367,8 +367,8 @@ Worker::pull(Job::Ptr job)
                             <<                  " != st_srid(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") then "
                             <<          " true "
                             <<      " else "
-                            <<          "\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\" = "
-                            <<          "\""  << tempTableName << "\".\"" << updateColumns[i] << "\""
+                            <<          "not st_equals(\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\", "
+                            <<          "\""  << tempTableName << "\".\"" << updateColumns[i] << "\")"
                             <<      " end "
                             << ")";
             }

@@ -33,10 +33,9 @@ HTTPRequestHandlerFactory::normalizeUri(const std::string uri) const
     // cut of the request params and the beginning slash
     // to get the name of the endpoint / handler
     std::string endpoint = "";
-    size_t pos_start = 0;
     size_t pos_end = uri.length();
     if (pos_end > 0) {
-        pos_start = uri.find_first_not_of("./");
+        size_t pos_start = uri.find_first_not_of("./");
         if (pos_start == std::string::npos) {
             pos_start = 1;
         }
