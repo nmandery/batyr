@@ -1,4 +1,4 @@
-#include "server/http/createhandler.h"
+#include "server/http/pullhandler.h"
 #include "server/job.h"
 #include "server/error.h"
 #include "common/config.h"
@@ -11,16 +11,16 @@
 using namespace Batyr::Http;
 
 
-CreateHandler::CreateHandler(Configuration::Ptr _configuration)
+PullHandler::PullHandler(Configuration::Ptr _configuration)
     :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("Http::CreateHandler")),
+        logger(Poco::Logger::get("Http::PullHandler")),
         configuration(_configuration)
 {
 }
 
 
 void
-CreateHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
+PullHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
 {
     resp.set("Server", APP_NAME_SERVER_FULL);
     resp.setContentType("application/json");

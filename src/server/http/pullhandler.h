@@ -1,5 +1,5 @@
-#ifndef __batyr_http_createhandler_h__
-#define __batyr_http_createhandler_h__
+#ifndef __batyr_http_pullhandler_h__
+#define __batyr_http_pullhandler_h__
 
 
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -17,7 +17,7 @@ namespace Batyr
 namespace Http
 {
 
-    class CreateHandler : public Poco::Net::HTTPRequestHandler
+    class PullHandler : public Poco::Net::HTTPRequestHandler
     {
         private:
             std::weak_ptr<JobStorage> jobs;
@@ -25,7 +25,7 @@ namespace Http
             Configuration::Ptr configuration;
 
         public:
-            CreateHandler(Configuration::Ptr);
+            PullHandler(Configuration::Ptr);
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
 
             void setJobs(std::weak_ptr<JobStorage> _jobs)
@@ -38,4 +38,4 @@ namespace Http
 };
 };
 
-#endif // __batyr_http_createhandler_h__
+#endif // __batyr_http_pullhandler_h__

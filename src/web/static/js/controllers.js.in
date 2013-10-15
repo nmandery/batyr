@@ -86,7 +86,7 @@ function LayersCtrl($scope, $http, NotificationService) {
             layerName:  layer.name,
             filter:     layer.filter
         };
-        $http.post('api/v1/create', job).then(
+        $http.post('api/v1/pull', job).then(
             // success
             function(resp) {
                 NotificationService.notify(

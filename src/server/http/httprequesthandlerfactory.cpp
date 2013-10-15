@@ -3,7 +3,7 @@
 #include <regex>
 
 #include "server/http/httprequesthandlerfactory.h"
-#include "server/http/createhandler.h"
+#include "server/http/pullhandler.h"
 #include "server/http/statushandler.h"
 #include "server/http/notfoundhandler.h"
 #include "server/http/joblisthandler.h"
@@ -61,8 +61,8 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 #endif
 
     // dispatch to api handlers
-    if (endpoint == "api/v1/create") {
-        auto createHandler = new CreateHandler(configuration);
+    if (endpoint == "api/v1/pull") {
+        auto createHandler = new PullHandler(configuration);
         createHandler->setJobs(jobs);
         return createHandler;
     }
