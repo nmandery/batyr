@@ -28,24 +28,41 @@ Parser::err(const char* s)
 void
 Parser::parse(Level& l)
 {
+    std::string lastKey;
     while (std::getline(*stream_, line_)) {
         ++ln_;
         line_ = StringUtils::trim(line_);
 
         // skip lines without content
         if (line_.empty()) {
+            lastKey.clear();
             continue; 
         }
 
         // skip comments
         if (line_[0] == '#' || line_[0] == ';') {
+            lastKey.clear();
             continue;
+        }
+
+        if (line_[0] == '+') {
+            if (!lastKey.empty()) {
+                // strip of the leading "+" and append to the last key
+                l.values[lastKey].append("\n");
+                l.values[lastKey].append(line_.substr(1));
+                continue;
+            }
+            else {
+                err("no key to append to");
+            }
         }
 
         // line containing a section marker
         if (line_[0] == '[') {
             size_t depth = 0;
             std::string sectionName;
+
+            lastKey.clear();
 
             // find the name of the section 
             for (; depth < line_.length(); ++depth) {
@@ -85,18 +102,24 @@ Parser::parse(Level& l)
         }
         // key-value pair
         else {
+            lastKey.clear();
+
             size_t n = line_.find('=');
+
             if (n == std::string::npos) {
                 err("no '=' found");
             }
+
+            std::string key = StringUtils::trim(line_.substr(0, n));
             std::pair<Level::value_map_t::const_iterator, bool> res =
                 l.values.insert(std::make_pair(
-                            StringUtils::trim(line_.substr(0, n)),
+                            key,
                             StringUtils::trim(line_.substr(n+1, line_.length()-n-1))
                             ));
             if (!res.second) {
                 err("duplicated key found");
             }
+            lastKey = key;
             l.ordered_values.push_back(res.first);
         }
     }
