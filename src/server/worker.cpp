@@ -463,7 +463,11 @@ Worker::run()
             }
             job->setMessage("");
 
-            pull(job);
+            switch(job->getType()) {
+                case Job::Type::PULL:
+                    pull(job);
+                    break;
+            }
         }
         catch (Batyr::Db::DbError &e) {
             poco_error(logger, e.what());

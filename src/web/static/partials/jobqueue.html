@@ -25,7 +25,7 @@
     <table class="pure-table job-table">
         <thead>
             <tr>
-           <!--     <th>ID</th> -->
+                <th>Job type</th>
                 <th>Layer</th>
                 <th>Added</th>
                 <th>Finished</th>
@@ -38,6 +38,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="job in joblist.jobs" class="{{job.status }}" ng-click="showJob(job);">
+                <td>{{ job.type }}</td>
                 <td>{{ job.layerName }}</td>
                 <td>{{ job.timeAdded | fromNow }} </td>
                 <td>{{ job.timeFinished | fromNow }}</td>

@@ -39,7 +39,7 @@ PullHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPSer
     }
 
 
-    auto job = std::make_shared<Job>();
+    auto job = std::make_shared<Job>(Job::Type::PULL);
     try {
         // read the whole request body into memory
         std::stringstream bodystream;

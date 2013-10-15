@@ -163,10 +163,11 @@ The provided HTTP-API is the same which the integrated web interfaces uses and p
 The basic object the API deals with is called a `job` and posesses the following attributes:
 
 * `id`: Identifier of the job. This value is always present.
+* `type`: Type of job. This value is always present as possible values are: `pull`.
 * `timeAdded`: Timestamp when the job was received. Always present.
 * `status`: Status of the job. Possible values are `queued`, `in_progress`, `finished` and `failed`. Always present.
 * `layerName`: Name of the layer the job wants to pull.  Always present.
-* `filter`: Attribte filter. Optional.
+* `filter`: Attribute filter. Optional. Only used with pull-jobs.
 * `message`: A message from the server regarding this job. Mostly empty, but will contain an error message in case something went wrong.
 * `numPulled`: Number of features pulled/read from the source.
 * `numCreated`: Number of newly created features in the database.
@@ -177,6 +178,7 @@ Example:
 
     {
         "id": "c94a6c77c18649668fd780744ea745a645a6",
+        "type": "pull",
         "timeAdded": "2013-10-08T13:58:51Z",
         "status": "queued",
         "layerName": "africa",
@@ -250,6 +252,7 @@ Corresponding response when an existing job id was used:
 
     {
         "id": "1ab8c197ed014a4cbc20a6dfc98a1b101b10",
+        "type": "pull",
         "timeAdded": "2013-10-10T07:23:49Z",
         "timeFinished": "2013-10-10T07:23:49Z",
         "status": "finished",

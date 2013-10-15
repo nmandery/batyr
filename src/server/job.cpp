@@ -14,8 +14,9 @@
 using namespace Batyr;
 
 
-Job::Job()
-    :   status(QUEUED),
+Job::Job(Job::Type _type)
+    :   type(_type),
+        status(QUEUED),
         timeAdded(std::chrono::system_clock::now()),
         numCreated(0),
         numUpdated(0),
@@ -48,6 +49,16 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
         targetValue.AddMember("timeFinished", vTimeFinished, allocator);
     }
 
+    const char * typeString;
+    switch(type) {
+        case PULL:
+            typeString = "pull";
+            break;
+    }
+    rapidjson::Value vTypeString;
+    Batyr::Json::toValue(vTypeString, typeString, allocator);
+    targetValue.AddMember("type", vTypeString, allocator);
+
     const char * statusString;
     switch (status) {
         case QUEUED:
@@ -71,9 +82,11 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     Batyr::Json::toValue(vLayerName, layerName, allocator);
     targetValue.AddMember("layerName", vLayerName, allocator);
 
-    rapidjson::Value vFilter;
-    Batyr::Json::toValue(vFilter, filter, allocator);
-    targetValue.AddMember("filter", vFilter, allocator);
+    if (type == PULL) {
+        rapidjson::Value vFilter;
+        Batyr::Json::toValue(vFilter, filter, allocator);
+        targetValue.AddMember("filter", vFilter, allocator);
+    }
 
     rapidjson::Value vMessage;
     Batyr::Json::toValue(vMessage, message, allocator);

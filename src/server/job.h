@@ -15,7 +15,10 @@ namespace Batyr
     class Job
     {
         public:
-            Job();
+            /** type of job */
+            enum Type {
+                PULL
+            };
 
             enum Status {
                 QUEUED,
@@ -23,6 +26,8 @@ namespace Batyr
                 FINISHED,
                 FAILED
             };
+
+            Job(Job::Type);
 
             typedef std::shared_ptr<Job> Ptr;
 
@@ -92,7 +97,13 @@ namespace Batyr
                 numDeleted = _numDeleted;
             }
 
+            Job::Type getType() const
+            {
+                return type;
+            }
+
         private:
+            Job::Type type;
             std::string message;
             std::string layerName;
             std::string filter;
