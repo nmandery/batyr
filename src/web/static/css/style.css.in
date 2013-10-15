@@ -441,10 +441,11 @@ pre .string, pre .support.value  {
     font-size: 400%;
     font-weight: normal;
 }
-.status-dashboard .pure-u-1-3 {
-    /* need to check why the 33% need to be reduced*/
-    width: 30%;
+.status-dashboard .pure-u-1-4 {
+    /* need to check why the 25% need to be reduced*/
+    width: 22%;
 }
+
 
 
 /**

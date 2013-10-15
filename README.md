@@ -226,7 +226,7 @@ Example:
 
 ## GET /api/v1/status.json
 
-This method returns an object with the configuration and the current state of the server.
+This method returns an object with the configuration and the current state of the server. The key `numFailedJobs` might be used to monitor the server using a tool like for example nagios.
 
 Example:
 
@@ -236,6 +236,9 @@ Example:
         "appGitVersion": "96835a2f99",
         "numLayers": 2,
         "numQueuedJobs": 0,
+        "numFinishedJobs": 0,
+        "numFailedJobs": 0,
+        "numInProcessJobs": 0,
         "numWorkers": 4
     }
 

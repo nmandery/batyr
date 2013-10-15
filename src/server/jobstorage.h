@@ -20,6 +20,26 @@ namespace Batyr
 
     typedef QuitableQueue<Job::Ptr> JobQueue;
 
+
+    struct JobStats
+    {
+        size_t numQueuedJobs;
+        size_t numFailedJobs;
+        size_t numInProcessJobs;
+        size_t numFinishedJobs;
+
+
+        JobStats()
+                :   numQueuedJobs(0),
+                    numFailedJobs(0),
+                    numInProcessJobs(0),
+                    numFinishedJobs(0)
+        {
+        }
+
+        typedef std::unique_ptr<JobStats> Ptr;
+    };
+
     /**
      * TODO:
      *  * the internal map is not restricted in size. so there might occur a
@@ -66,6 +86,10 @@ namespace Batyr
              * get a job by its id
              */
             Job::Ptr getJob(std::string _id);
+
+            /**
+             */
+            JobStats::Ptr getStats();
 
             /**
              * get a list of jobs ordered by their timestamp

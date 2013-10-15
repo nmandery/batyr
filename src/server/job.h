@@ -69,6 +69,11 @@ namespace Batyr
                 return filter;
             }
 
+            Job::Status getStatus() const
+            {
+                return status;
+            }
+
             /**
              * true if the job is, successful or not, finished
              */

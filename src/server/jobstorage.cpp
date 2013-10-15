@@ -132,3 +132,31 @@ bool
 JobStorage::pop(Job::Ptr & _job) {
     return queue.pop(_job);
 }
+
+
+JobStats::Ptr
+JobStorage::getStats()
+{
+    std::lock_guard<std::mutex> lock(mapModificationMutex);
+    JobStats::Ptr jobStats(new JobStats);
+
+
+    for(auto &jobPair: jobMap) {
+        switch(jobPair.second->getStatus()) {
+            case Job::Status::FAILED:
+                jobStats->numFailedJobs++;
+                break;
+            case Job::Status::IN_PROCESS:
+                jobStats->numInProcessJobs++;
+                break;
+            case Job::Status::FINISHED:
+                jobStats->numFinishedJobs++;
+                break;
+            case Job::Status::QUEUED:
+                jobStats->numQueuedJobs++;
+                break;
+        }
+    }
+
+    return std::move(jobStats);
+}
