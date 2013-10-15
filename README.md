@@ -190,7 +190,7 @@ Example:
 
 
 
-## GET /api/jobs.json
+## GET /api/v1/jobs.json
 
 A list of all jobs which are known to the server.
 
@@ -202,7 +202,7 @@ Example:
     }
 
 
-## GET /api/layers.json
+## GET /api/v1/layers.json
 
 Returns all currently configured layers with their names and description.
 
@@ -222,7 +222,7 @@ Example:
     }
 
 
-## GET /api/status.json
+## GET /api/v1/status.json
 
 This method returns an object with the configuration and the current state of the server.
 
@@ -238,7 +238,7 @@ Example:
     }
 
 
-## GET /api/job/[job id].json
+## GET /api/v1/job/[job id].json
 
 Fetch a job object by its id.
 
@@ -269,7 +269,7 @@ Response when no such job exists:
     }
 
 
-## POST /api/create
+## POST /api/v1/create
 
 Allows starting a new job by POSTing a JSON document to this URL. The `layerName` parameter is mandatory while the `filter` parameter is optional. The request will return a job object with the properties of the newly created job. Returns an HTTP status `200` if the request was successful and `400` if the send data was incorrect.
 

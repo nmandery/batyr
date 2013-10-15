@@ -61,30 +61,31 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 #endif
 
     // dispatch to api handlers
-    if (endpoint == "api/create") {
+    if (endpoint == "api/v1/create") {
         auto createHandler = new CreateHandler(configuration);
         createHandler->setJobs(jobs);
         return createHandler;
     }
-    else if (endpoint == "api/jobs.json") {
+    else if (endpoint == "api/v1/jobs.json") {
         auto joblistHandler = new JoblistHandler(configuration);
         joblistHandler->setJobs(jobs);
         return joblistHandler;
     }
-    else if (endpoint == "api/layers.json") {
+    else if (endpoint == "api/v1/layers.json") {
         auto layerlistHandler = new LayerlistHandler(configuration);
         return layerlistHandler;
     }
-    else if (endpoint == "api/status.json") {
+    else if (endpoint == "api/v1/status.json") {
         auto statusHandler = new StatusHandler(configuration);
         statusHandler->setJobs(jobs);
         return statusHandler;
     }
 
-    if (endpoint.compare(0, 8, "api/job/") == 0) {
-        size_t posEndId = endpoint.find_first_not_of("abcdef0123456789", 8);
-        if ((endpoint.compare(posEndId, endpoint.length() - posEndId, ".json") == 0) && (posEndId != 8)) {
-            std::string jobId = endpoint.substr(8, posEndId - 8);
+    std::string getJobPath = "api/v1/job/";
+    if (endpoint.compare(0, getJobPath.length(), getJobPath) == 0) {
+        size_t posEndId = endpoint.find_first_not_of("abcdef0123456789", getJobPath.length());
+        if ((endpoint.compare(posEndId, endpoint.length() - posEndId, ".json") == 0) && (posEndId != getJobPath.length())) {
+            std::string jobId = endpoint.substr(getJobPath.length(), posEndId - getJobPath.length());
 
             auto getJobHandler = new GetJobHandler(configuration, jobId);
             getJobHandler->setJobs(jobs);

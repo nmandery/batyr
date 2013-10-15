@@ -30,7 +30,7 @@ function StatusCtrl($scope, $http, $timeout) {
     $scope.updateIntervalSecs = 5;
 
     var fetchStatus = function() {
-        $http.get('api/status.json').success(function(data) {
+        $http.get('api/v1/status.json').success(function(data) {
             $scope.status = data;
         });
     }
@@ -56,7 +56,7 @@ function StatusCtrl($scope, $http, $timeout) {
 
 function AboutCtrl($scope, $http) {
     var fetchStatus = function() {
-        $http.get('api/status.json').success(function(data) {
+        $http.get('api/v1/status.json').success(function(data) {
             $scope.status = data;
         });
     }
@@ -72,7 +72,7 @@ function LayersCtrl($scope, $http, NotificationService) {
         // the request bellow is finished
         $scope.layerlist = {};
 
-        $http.get('api/layers.json').success(function(data) {
+        $http.get('api/v1/layers.json').success(function(data) {
             $scope.layerlist = data;
         });
     }
@@ -86,7 +86,7 @@ function LayersCtrl($scope, $http, NotificationService) {
             layerName:  layer.name,
             filter:     layer.filter
         };
-        $http.post('api/create', job).then(
+        $http.post('api/v1/create', job).then(
             // success
             function(resp) {
                 NotificationService.notify(
@@ -106,7 +106,7 @@ function LayersCtrl($scope, $http, NotificationService) {
 function JobsCtrl($scope, $http, $location) {
     $scope.joblist = {};
     var fetchJobs = function() {
-        $http.get('api/jobs.json').success(function(data) {
+        $http.get('api/v1/jobs.json').success(function(data) {
             $scope.joblist = data;
         });
     }
@@ -125,7 +125,7 @@ function JobsCtrl($scope, $http, $location) {
 function JobCtrl($scope, $http, $routeParams, NotificationService) {
     $scope.job = {};
     var fetchJob = function() {
-        $http.get('api/job/' + $routeParams.jobId + '.json').success(
+        $http.get('api/v1/job/' + $routeParams.jobId + '.json').success(
             function(data) {
                 $scope.job = data;
             }).error(
