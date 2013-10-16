@@ -3,8 +3,8 @@
 using namespace Batyr::Http;
 
             
-BufferHandler::BufferHandler(std::string _contentType, std::string _etag, const unsigned char * _buffer, size_t _bufferLen)
-    :  Poco::Net::HTTPRequestHandler(),
+BufferHandler::BufferHandler(Configuration::Ptr _configuration, std::string _contentType, std::string _etag, const unsigned char * _buffer, size_t _bufferLen)
+    :  Handler(_configuration),
         contentType(_contentType),
         etag(_etag),
         buffer(_buffer),
@@ -15,7 +15,7 @@ BufferHandler::BufferHandler(std::string _contentType, std::string _etag, const 
 void
 BufferHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
 {
-    resp.set("Server", APP_NAME_SERVER_FULL);
+    prepareResponse(resp);
     resp.set("ETag", etag);
     resp.set("Cache-Control", "max-age=300, private");
 

@@ -1,7 +1,6 @@
 #include "server/http/getjobhandler.h"
 #include "server/json.h"
 #include "server/error.h"
-#include "common/config.h"
 #include "common/macros.h"
 
 #include "rapidjson/document.h"
@@ -13,9 +12,8 @@
 using namespace Batyr::Http;
 
 GetJobHandler::GetJobHandler(Configuration::Ptr _configuration, const std::string & _jobId)
-    :   Poco::Net::HTTPRequestHandler(),
+    :   Handler(_configuration),
         logger(Poco::Logger::get("Http::GetJobHandler")),
-        configuration(_configuration),
         jobId(_jobId)
 {
 }
@@ -26,9 +24,7 @@ GetJobHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
 {
     UNUSED(req)
 
-    resp.set("Server", APP_NAME_SERVER_FULL);
-    resp.set("Cache-Control", "no-cache");
-    resp.setContentType("application/json");
+    prepareApiResponse(resp);
 
     resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 

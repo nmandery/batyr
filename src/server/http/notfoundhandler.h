@@ -2,9 +2,7 @@
 #define __batyr_http_notfoundhandler_h__
 
 
-#include <Poco/Net/HTTPRequestHandler.h>
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
+#include "server/http/handler.h"
 
 
 namespace Batyr 
@@ -12,9 +10,10 @@ namespace Batyr
 namespace Http
 {
 
-    class NotFoundHandler : public Poco::Net::HTTPRequestHandler
+    class NotFoundHandler : public Handler
     {
         public:
+            NotFoundHandler(Configuration::Ptr _configuration);
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
     };
 

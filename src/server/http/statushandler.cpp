@@ -1,7 +1,7 @@
 #include "server/http/statushandler.h"
-#include "common/config.h"
-#include "common/macros.h"
 #include "server/json.h"
+#include "common/macros.h"
+#include "common/config.h"
 
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>
@@ -10,9 +10,8 @@ using namespace Batyr::Http;
 
 
 StatusHandler::StatusHandler(Configuration::Ptr _configuration)
-    :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("Http::StatusHandler")),
-        configuration(_configuration)
+    :   Handler(_configuration),
+        logger(Poco::Logger::get("Http::StatusHandler"))
 {
 }
 
@@ -21,9 +20,8 @@ StatusHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
 {
     UNUSED(req)
 
-    resp.set("Server", APP_NAME_SERVER_FULL);
-    resp.setContentType("application/json");
-    resp.set("Cache-Control", "no-cache");
+    prepareApiResponse(resp);
+
     resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 
     rapidjson::Document doc;

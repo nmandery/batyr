@@ -1,6 +1,5 @@
 #include "server/http/joblisthandler.h"
 #include "server/json.h"
-#include "common/config.h"
 #include "common/macros.h"
 
 #include "rapidjson/document.h"
@@ -11,9 +10,8 @@
 using namespace Batyr::Http;
 
 JoblistHandler::JoblistHandler(Configuration::Ptr _configuration)
-    :   Poco::Net::HTTPRequestHandler(),
-        logger(Poco::Logger::get("Http::JoblistHandler")),
-        configuration(_configuration)
+    :   Handler(_configuration),
+        logger(Poco::Logger::get("Http::JoblistHandler"))
 {
 }
 
@@ -23,9 +21,7 @@ JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTP
 {
     UNUSED(req)
 
-    resp.set("Server", APP_NAME_SERVER_FULL);
-    resp.set("Cache-Control", "no-cache");
-    resp.setContentType("application/json");
+    prepareApiResponse(resp);
 
     resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 

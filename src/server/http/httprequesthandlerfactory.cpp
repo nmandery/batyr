@@ -103,7 +103,7 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         struct resource_info * resource = &resources[resourceIndex];
 
         if ((endpoint == resource->filename) || (endpoint == "" && (strcmp("index.html", resource->filename) == 0))) {
-            return new BufferHandler(std::string(resource->mimetype),
+            return new BufferHandler(configuration, std::string(resource->mimetype),
                         std::string(resource->etag), resource->data, resource->size_in_bytes);
         }
         resourceIndex++;
@@ -111,5 +111,5 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
 #endif
 
     // at this point everything is just a 404 error
-    return new NotFoundHandler;
+    return new NotFoundHandler(configuration);
 }

@@ -1,21 +1,17 @@
 #ifndef __batyr_http_bufferhandler_h__
 #define __batyr_http_bufferhandler_h__
 
-#include <Poco/Net/HTTPRequestHandler.h>
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
-
 #include <string>
 #include <cstring>
 
-#include "common/config.h"
+#include "server/http/handler.h"
 
 namespace Batyr
 {
 namespace Http
 {
 
-    class BufferHandler : public Poco::Net::HTTPRequestHandler
+    class BufferHandler : public Handler
     {
         private:
             std::string contentType;
@@ -24,7 +20,7 @@ namespace Http
             size_t bufferLen;
 
         public:
-            BufferHandler(std::string _contentType, std::string _etag, const unsigned char * _buffer, size_t _bufferLen);
+            BufferHandler(Configuration::Ptr _configuration, std::string _contentType, std::string _etag, const unsigned char * _buffer, size_t _bufferLen);
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
     };
 
