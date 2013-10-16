@@ -9,15 +9,15 @@
 
 using namespace Batyr::Http;
 
-JoblistHandler::JoblistHandler(Configuration::Ptr _configuration)
+JobListHandler::JobListHandler(Configuration::Ptr _configuration)
     :   Handler(_configuration),
-        logger(Poco::Logger::get("Http::JoblistHandler"))
+        logger(Poco::Logger::get("Http::JobListHandler"))
 {
 }
 
 
 void
-JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
+JobListHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
 {
     UNUSED(req)
 

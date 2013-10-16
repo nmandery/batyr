@@ -4,6 +4,7 @@
 
 #include "server/http/httprequesthandlerfactory.h"
 #include "server/http/pullhandler.h"
+#include "server/http/removebyattributeshandler.h"
 #include "server/http/statushandler.h"
 #include "server/http/notfoundhandler.h"
 #include "server/http/joblisthandler.h"
@@ -66,13 +67,18 @@ HTTPRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerReque
         createHandler->setJobs(jobs);
         return createHandler;
     }
+    else if (endpoint == "api/v1/remove-by-attributes") {
+        auto rbaHandler = new RemoveByAttributesHandler(configuration);
+        rbaHandler->setJobs(jobs);
+        return rbaHandler;
+    }
     else if (endpoint == "api/v1/jobs.json") {
-        auto joblistHandler = new JoblistHandler(configuration);
+        auto joblistHandler = new JobListHandler(configuration);
         joblistHandler->setJobs(jobs);
         return joblistHandler;
     }
     else if (endpoint == "api/v1/layers.json") {
-        auto layerlistHandler = new LayerlistHandler(configuration);
+        auto layerlistHandler = new LayerListHandler(configuration);
         return layerlistHandler;
     }
     else if (endpoint == "api/v1/status.json") {

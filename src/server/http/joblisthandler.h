@@ -12,13 +12,13 @@ namespace Batyr
 namespace Http
 {
 
-    class JoblistHandler : public Handler
+    class JobListHandler : public Handler
     {
         private:
             Poco::Logger & logger;
 
         public:
-            JoblistHandler(Configuration::Ptr);
+            JobListHandler(Configuration::Ptr);
             virtual void handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp);
     };
 

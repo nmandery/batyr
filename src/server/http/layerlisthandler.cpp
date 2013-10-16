@@ -9,15 +9,15 @@
 
 using namespace Batyr::Http;
 
-LayerlistHandler::LayerlistHandler(Configuration::Ptr _configuration)
+LayerListHandler::LayerListHandler(Configuration::Ptr _configuration)
     :   Handler(_configuration),
-        logger(Poco::Logger::get("Http::LayerlistHandler"))
+        logger(Poco::Logger::get("Http::LayerListHandler"))
 {
 }
 
 
 void
-LayerlistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
+LayerListHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPServerResponse &resp)
 {
     UNUSED(req)
 

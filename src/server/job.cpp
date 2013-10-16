@@ -54,6 +54,9 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
         case PULL:
             typeString = "pull";
             break;
+        case REMOVE_BY_ATTRIBUTES:
+            typeString = "remove-by-attributes";
+            break;
     }
     rapidjson::Value vTypeString;
     Batyr::Json::toValue(vTypeString, typeString, allocator);

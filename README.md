@@ -164,7 +164,7 @@ The provided HTTP-API is the same which the integrated web interfaces uses and p
 The basic object the API deals with is called a `job` and posesses the following attributes:
 
 * `id`: Identifier of the job. This value is always present.
-* `type`: Type of job. This value is always present as possible values are: `pull`.
+* `type`: Type of job. This value is always present as possible values are: `pull` and `remove-by-attributes`.
 * `timeAdded`: Timestamp when the job was received. Always present.
 * `status`: Status of the job. Possible values are `queued`, `in_progress`, `finished` and `failed`. Always present.
 * `layerName`: Name of the layer the job wants to pull.  Always present.
@@ -291,6 +291,7 @@ Corresponding response:
 
     {
         "id": "c94a6c77c18649668fd780744ea745a645a6",
+        "type": "pull",
         "timeAdded": "2013-10-08T13:58:51Z",
         "status": "queued",
         "layerName": "africa",
@@ -301,6 +302,11 @@ Corresponding response:
         "numDeleted": 0,
         "numPulled": 0
     }
+
+
+## POST /api/v1/remove-by-attributes
+
+TODO
 
 
 # Software used

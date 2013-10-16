@@ -43,6 +43,7 @@ namespace Batyr
             Batyr::Db::Connection db;
 
             void pull(Job::Ptr job);
+            void removeByAttributes(Job::Ptr job);
 
             /**
              * convert the field at the given index with the given

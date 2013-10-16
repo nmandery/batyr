@@ -17,7 +17,8 @@ namespace Batyr
         public:
             /** type of job */
             enum Type {
-                PULL
+                PULL,
+                REMOVE_BY_ATTRIBUTES
             };
 
             enum Status {

@@ -435,6 +435,13 @@ Worker::pull(Job::Ptr job)
 
 
 void
+Worker::removeByAttributes(Job::Ptr job)
+{
+    job->setStatus(Job::Status::FAILED);
+}
+
+
+void
 Worker::run()
 {
     while (true) {
@@ -466,6 +473,9 @@ Worker::run()
             switch(job->getType()) {
                 case Job::Type::PULL:
                     pull(job);
+                    break;
+                case Job::Type::REMOVE_BY_ATTRIBUTES:
+                    removeByAttributes(job);
                     break;
             }
         }
