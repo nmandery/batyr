@@ -33,6 +33,7 @@ The valid values for each setting are documented in the example file bellow. For
     #
     # Syntax hints:
     #    - valid values for boolean settings are yes,no,true,false,1,0
+    #    - multiline values are possible by starting the line after the key with a "+"
     
     
     [MAIN]
