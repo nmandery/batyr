@@ -35,7 +35,7 @@ JoblistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTP
     if (auto jobList = jobs.lock()) {
         auto jobsVec = jobList->getOrderedJobs();
 
-        for(auto jobP : jobsVec) {
+        for(const auto jobP : jobsVec) {
             rapidjson::Value val;
             jobP->toJsonValue(val, doc.GetAllocator());
             vJobs.PushBack(val, doc.GetAllocator());

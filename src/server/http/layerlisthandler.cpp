@@ -32,7 +32,7 @@ LayerlistHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HT
     rapidjson::Value vLayers;
     vLayers.SetArray();
     auto layersVec = configuration->getOrderedLayers();
-    for(auto layerP : layersVec) {
+    for(const auto layerP : layersVec) {
         rapidjson::Value val;
         val.SetObject();
 

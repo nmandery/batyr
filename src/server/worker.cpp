@@ -154,7 +154,7 @@ Worker::pull(Job::Ptr job)
         std::string geometryColumn;
         std::vector<std::string> insertColumns;
         std::vector<std::string> updateColumns;
-        for(auto &tableFieldPair : tableFields) {
+        for(const auto &tableFieldPair : tableFields) {
             if (tableFieldPair.second.isPrimaryKey) {
                 primaryKeyColumns.push_back(tableFieldPair.second.name);
             }
@@ -176,7 +176,7 @@ Worker::pull(Job::Ptr job)
             throw WorkerError("Got no primarykey for layer \"" + job->getLayerName() + "\"");
         }
         std::vector<std::string> missingPrimaryKeysSource;
-        for( auto &primaryKeyCol : primaryKeyColumns) {
+        for( const auto &primaryKeyCol : primaryKeyColumns) {
             if (ogrFields.find(primaryKeyCol) == ogrFields.end()) {
                 missingPrimaryKeysSource.push_back(primaryKeyCol);
             }
@@ -198,7 +198,7 @@ Worker::pull(Job::Ptr job)
         // prepare an insert query into the temporary table
         std::vector<std::string> insertQueryValues;
         unsigned int idxColumn = 1;
-        for (std::string &insertColumn : insertColumns) {
+        for (const std::string &insertColumn : insertColumns) {
             auto tableField = &tableFields[insertColumn];
             std::stringstream colStream;
 
@@ -267,7 +267,7 @@ Worker::pull(Job::Ptr job)
 
             std::vector<PgFieldValue> pgValues;
 
-            for (std::string &insertColumn : insertColumns) {
+            for (const std::string &insertColumn : insertColumns) {
                 auto tableField = &tableFields[insertColumn];
 
                 if (tableField->pgTypeName == "geometry") {

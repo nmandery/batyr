@@ -141,7 +141,7 @@ JobStorage::getStats()
     JobStats::Ptr jobStats(new JobStats);
 
 
-    for(auto &jobPair: jobMap) {
+    for(const auto &jobPair: jobMap) {
         switch(jobPair.second->getStatus()) {
             case Job::Status::FAILED:
                 jobStats->numFailedJobs++;
