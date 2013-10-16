@@ -10,6 +10,7 @@
 #include "server/jobstorage.h"
 #include "server/configuration.h"
 #include "server/db/connection.h"
+#include "common/nullablevalue.h"
 
 #include "ogrsf_frmts.h"
 
@@ -28,11 +29,8 @@ namespace Batyr
 
     /**
      * a type for storing postgresql values.
-     *
-     * the bool indicates if the field is null or not and
-     * the string hold the binary value if there is any
      */
-    typedef std::pair<bool, std::string> PgFieldValue;
+    typedef NullableValue<std::string> PgFieldValue;
 
     class Worker
     {

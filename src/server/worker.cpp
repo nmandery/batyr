@@ -292,8 +292,10 @@ Worker::pull(Job::Ptr job)
                     }
                     OGRFree(buffer);
                     PgFieldValue pgVal;
-                    pgVal.first = (bufferSize == 0);
-                    pgVal.second = std::string(hexBuffer);
+                    pgVal.setIsNull(bufferSize == 0);
+                    if (!pgVal.isNull()) {
+                        pgVal.set(std::string(hexBuffer));
+                    }
                     pgValues.push_back(std::move(pgVal));
                     CPLFree(hexBuffer);
                 }
@@ -310,17 +312,17 @@ Worker::pull(Job::Ptr job)
             std::vector<int> cStrValueLenghts;
             std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValues),
                         [](PgFieldValue & pV) -> const char * {
-                            if (pV.first) {
+                            if (pV.isNull()) {
                                 return NULL;
                             }
-                            return pV.second.c_str();
+                            return pV.get().c_str();
                     });
             std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValueLenghts),
                         [](PgFieldValue & pV) -> int {
-                            if (pV.first) {
+                            if (pV.isNull()) {
                                 return 0;
                             }
-                            return pV.second.length();
+                            return pV.get().length();
                     });
 
             transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0], &cStrValueLenghts[0],
@@ -555,17 +557,19 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
         case OFTString:
             {
                 const char * fieldValue = ogrFeature->GetFieldAsString(fieldIdx);
-                result.first = (fieldValue == nullptr);
-                result.second = fieldValue;
+                result.setIsNull((fieldValue == nullptr));
+                if (!result.isNull()) {
+                    result.set(fieldValue);
+                }
                 break;
             }
         case OFTInteger:
-            result.first = false;
-            result.second = std::to_string(ogrFeature->GetFieldAsInteger(fieldIdx));
+            result.setIsNull(false);
+            result.set(std::to_string(ogrFeature->GetFieldAsInteger(fieldIdx)));
             break;
         case OFTReal:
-            result.first = false;
-            result.second = std::to_string(ogrFeature->GetFieldAsDouble(fieldIdx));
+            result.setIsNull(false);
+            result.set(std::to_string(ogrFeature->GetFieldAsDouble(fieldIdx)));
             break;
         case OFTDate:
         case OFTTime:
@@ -596,11 +600,11 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
                     else {
                         throw WorkerError("None of the implemented date/time/datetime types matched. This point should not be reacheable");
                     }
-                    result.first = false;
-                    result.second = std::string(buf);
+                    result.setIsNull(false);
+                    result.set(std::string(buf));
                 }
                 else {
-                    result.first = true;
+                    result.setIsNull(true);
                     poco_debug(logger, "field at index " + std::to_string(fieldIdx) + " is null");
                 }
                 break;
@@ -616,14 +620,13 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
 
     // sanitize invalid values - empty time types are generaly invalid and most certainly result from
     // string fields returned as empty strings
-    if (result.second.empty() && (
+    if (result.get().empty() && (
                 (pgTypeName == "timestamp") ||
                 (pgTypeName == "timestampz") ||
                 (pgTypeName == "time") ||
                 (pgTypeName == "date")
             )) {
-        result.first = true;
-        result.second.clear();
+        result.setIsNull(true);
     }
 
     return std::move(result);
