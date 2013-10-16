@@ -19,7 +19,7 @@ class NullableValue
             :   is_null(false), value(_value)
         {};
 
-        T & get()
+        T get() const
         {
             return value;
         }
@@ -34,7 +34,7 @@ class NullableValue
             is_null = _is_null;
         };
 
-        bool isNull()
+        bool isNull() const
         {
             return is_null;
         };

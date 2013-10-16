@@ -3,7 +3,11 @@
 
 #include "rapidjson/document.h"
 
+#include "common/nullablevalue.h"
+
 #include <string>
+#include <map>
+#include <vector>
 #include <iostream>
 #include <memory>
 #include <chrono>
@@ -31,6 +35,9 @@ namespace Batyr
             Job(Job::Type);
 
             typedef std::shared_ptr<Job> Ptr;
+
+            typedef NullableValue<std::string> AttributeValue;
+            typedef std::map<std::string, AttributeValue> AttributeSet;
 
             void setStatus(Status _status)
             {
@@ -108,7 +115,13 @@ namespace Batyr
                 return type;
             }
 
+            std::vector<AttributeSet> getAttributeSets() const
+            {
+                return attributeSets;
+            }
+
         private:
+
             Job::Type type;
             std::string message;
             std::string layerName;
@@ -117,6 +130,7 @@ namespace Batyr
             Job::Status status;
             std::chrono::system_clock::time_point timeAdded;
             std::chrono::system_clock::time_point timeFinished;
+            std::vector<AttributeSet> attributeSets;
 
             // statistics how many rows have been modified
             int numCreated;
