@@ -7,25 +7,36 @@
 
 
 <div class="pure-u status-dashboard">
-    <div class="pure-u-1-3">
+    <div class="pure-u-1-4">
         <div class="l-box">
-            <h4>Layers</h4>
-            <h1>{{status.numLayers}}<h1>
+            <h4>Finished jobs</h4>
+            <h1 class="finished-label">{{status.numFinishedJobs}}<h1>
         </div>
     </div>
-    <div class="pure-u-1-3">
+    <div class="pure-u-1-4">
+        <div class="l-box">
+            <h4>Failed jobs</h4>
+            <h1 class="failed-label">{{status.numFailedJobs}}<h1>
+        </div>
+    </div>
+    <div class="pure-u-1-4">
+        <div class="l-box">
+            <h4>Running jobs</h4>
+            <h1 class="in_process-label">{{status.numInProcessJobs}}<h1>
+        </div>
+    </div>
+    <div class="pure-u-1-4">
         <div class="l-box">
             <h4>Waiting jobs</h4>
-            <h1>{{status.numQueuedJobs}}<h1>
+            <h1 class="queued-label">{{status.numQueuedJobs}}<h1>
         </div>
     </div>
-    <div class="pure-u-1-3">
+    <div class="pure-u-4-4">
         <div class="l-box">
-            <h4>Workers</h4>
-            <h1>{{status.numWorkers}}<h1>
+            Handling {{status.numLayers}} layers using {{status.numWorkers}} database connections.
         </div>
     </div>
-    <div class="pure-u-3-3">
+    <div class="pure-u-4-4">
         <div class="l-box muted mini">
             This page is updated every {{ updateIntervalSecs }} seconds.</br>
             Running {{ status.appName }} version {{ status.appVersion }} [git: {{ status.appGitVersion }}]

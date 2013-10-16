@@ -35,13 +35,22 @@ StatusHandler::handleRequest(Poco::Net::HTTPServerRequest &req, Poco::Net::HTTPS
                 doc.GetAllocator());
 
     if (auto jobstorage = jobs.lock()) {
-        doc.AddMember("numQueuedJobs", jobstorage->queueSize(), doc.GetAllocator());
+        auto jobStats = jobstorage->getStats();
+
+        doc.AddMember("numQueuedJobs", jobStats->numQueuedJobs, doc.GetAllocator());
+        doc.AddMember("numFailedJobs", jobStats->numFailedJobs, doc.GetAllocator());
+        doc.AddMember("numInProcessJobs", jobStats->numInProcessJobs, doc.GetAllocator());
+        doc.AddMember("numFinishedJobs", jobStats->numFinishedJobs, doc.GetAllocator());
+
     }
     else {
         const char * emsg = "Could not get a lock on jobstorage";
         poco_warning(logger, emsg); // not a severe problem here
     
         doc.AddMember("numQueuedJobs", "?", doc.GetAllocator());
+        doc.AddMember("numFailedJobs", "?", doc.GetAllocator());
+        doc.AddMember("numInProcessJobs", "?", doc.GetAllocator());
+        doc.AddMember("numFinishedJobs", "?", doc.GetAllocator());
     }
     doc.AddMember("numWorkers", configuration->getNumWorkerThreads(),
                 doc.GetAllocator());
