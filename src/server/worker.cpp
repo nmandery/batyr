@@ -311,14 +311,14 @@ Worker::pull(Job::Ptr job)
             std::vector<const char*> cStrValues;
             std::vector<int> cStrValueLenghts;
             std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValues),
-                        [](PgFieldValue & pV) -> const char * {
+                        [](const PgFieldValue & pV) -> const char * {
                             if (pV.isNull()) {
                                 return NULL;
                             }
                             return pV.get().c_str();
                     });
             std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValueLenghts),
-                        [](PgFieldValue & pV) -> int {
+                        [](const PgFieldValue & pV) -> int {
                             if (pV.isNull()) {
                                 return 0;
                             }
@@ -423,7 +423,7 @@ Worker::pull(Job::Ptr job)
                             << "pulled=" << numPulled << ", "
                             << "created=" << numCreated << ", "
                             << "updated=" << numUpdated << ", "
-                            << "deleted=" << numDeleted << "";
+                            << "deleted=" << numDeleted;
         poco_information(logger, finalLogMsgStream.str().c_str());
     }
     else {
@@ -439,7 +439,112 @@ Worker::pull(Job::Ptr job)
 void
 Worker::removeByAttributes(Job::Ptr job)
 {
-    job->setStatus(Job::Status::FAILED);
+    {
+        std::stringstream initialLogMsgStream;
+        initialLogMsgStream     << "job " << job->getId()
+                                << ": remove-by-attributes on layer \"" << job->getLayerName() << "\"";
+        poco_information(logger, initialLogMsgStream.str().c_str());
+    }
+
+    auto layer = configuration->getLayer(job->getLayerName());
+
+    if (!layer->allow_feature_deletion) {
+        std::string msg = "Layer \"" + job->getLayerName() + "\" does not allow deletion of features.";
+        poco_warning(logger, msg.c_str());
+        job->setStatus(Job::Status::FAILED);
+        job->setMessage(msg);
+        return;
+    }
+
+
+
+    // perform the work in an transaction
+    if (auto transaction = db.getTransaction()) {
+
+        // set the postgresql date style
+        transaction->exec("set DateStyle to SQL, YMD");
+
+        // fetch the column list from the target_table as the tempTable
+        // does not have the constraints of the original table
+        auto tableFields = transaction->getTableFields(layer->target_table_schema, layer->target_table_name);
+
+        std::stringstream deleteStmt;
+        deleteStmt  << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+                    << " where ";
+
+        int numDeleted = 0;
+        std::vector<Job::AttributeValue> attrValues;
+        for(const auto & attributeSet: job->getAttributeSets()) {
+            if (attributeSet.size() > 0) {
+                int i = 0;
+                if (attrValues.size() > 0) {
+                    deleteStmt << " or ";
+                }
+                deleteStmt << " ( ";
+                for(const auto & attributePair: attributeSet) {
+                    auto tableFieldIt = tableFields.find(attributePair.first);
+                    if (tableFieldIt == tableFields.end()) {
+                        throw WorkerError("Layer \"" + job->getLayerName() + "\" has no field \""
+                                        + attributePair.first + "\"");
+                    }
+                    if (i > 0) {
+                        deleteStmt << " and ";
+                    }
+                    attrValues.push_back(attributePair.second);
+                    deleteStmt  << "(\"" << layer->target_table_name << "\".\"" << attributePair.first << "\""
+                                << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName << ")";
+                    ++i;
+                }
+                deleteStmt << " ) ";
+            }
+        }
+
+        if (attrValues.size() > 0) {
+            poco_debug(logger, deleteStmt.str().c_str());
+
+            // convert to an array of c strings
+            std::vector<const char*> cStrValues;
+            std::vector<int> cStrValueLenghts;
+            std::transform(attrValues.begin(), attrValues.end(), std::back_inserter(cStrValues),
+                        [](const Job::AttributeValue & aV) -> const char * {
+                            if (aV.isNull()) {
+                                return NULL;
+                            }
+                            return aV.get().c_str();
+                    });
+            std::transform(attrValues.begin(), attrValues.end(), std::back_inserter(cStrValueLenghts),
+                        [](const Job::AttributeValue & aV) -> int {
+                            if (aV.isNull()) {
+                                return 0;
+                            }
+                            return aV.get().length();
+                    });
+
+            auto deleteRes = transaction->execParams(deleteStmt.str(), cStrValues.size(), NULL, &cStrValues[0],
+                        &cStrValueLenghts[0], NULL, 1);
+            numDeleted = std::atoi(PQcmdTuples(deleteRes.get()));
+        }
+        else {
+            std::stringstream logMsgStream;
+            logMsgStream   << "job " << job->getId() << " : no attributes to remove features given. skipping";
+            poco_information(logger, logMsgStream.str().c_str());
+        }
+
+        job->setStatus(Job::Status::FINISHED);
+        job->setStatistics(0, 0, 0, numDeleted);
+
+        std::stringstream finalLogMsgStream;
+        finalLogMsgStream   << "job " << job->getId() << " finished. Stats: "
+                            << "deleted=" << numDeleted;
+        poco_information(logger, finalLogMsgStream.str().c_str());
+
+    }
+    else {
+        std::string msg("Could not start a database transaction");
+        poco_error(logger, msg.c_str());
+        job->setStatus(Job::Status::FAILED);
+        job->setMessage(msg);
+    }
 }
 
 
