@@ -306,7 +306,51 @@ Corresponding response:
 
 ## POST /api/v1/remove-by-attributes
 
-TODO
+Remove features from the database by matching their columns to attributes of JSON objects. It is possible mutiple criteria in one request
+
+Example Post:
+
+    {
+        "layerName":"africa"
+        "attributeSets": [
+            {
+                "column1": "some value",
+                "column2": null
+            },
+            {
+                "column3": "some other value"
+            }
+        ]
+    }
+
+This request will remove all features where the column1 is equal to "some value" and column2 is null as well
+as all features where column3 equals "some other value". Values for attribute have to be strings or `null`.
+
+
+Corresponding response:
+
+    {
+        "id": "c94a6c77c18649668fd780744ea745a645a6",
+        "type": "remove-by-attributes",
+        "timeAdded": "2013-10-08T13:58:51Z",
+        "status": "queued",
+        "layerName": "africa",
+        "attributeSets": [
+            {
+                "column1": "some value",
+                "column2": null
+            },
+            {
+                "column3": "some other value"
+            }
+        ],
+        "message": "",
+        "numCreated": 0,
+        "numUpdated": 0,
+        "numDeleted": 0,
+        "numPulled": 0
+    }
+
 
 
 # Software used
