@@ -271,33 +271,38 @@ Worker::pull(Job::Ptr job)
                 auto tableField = &tableFields[insertColumn];
 
                 if (tableField->pgTypeName == "geometry") {
-                    // TODO: Maybe use the implementation from OGRPGLayer::GeometryToHex
-                    GByte * buffer;
 
-                    auto ogrGeometry = ogrFeature->GetGeometryRef();
-                    int bufferSize = ogrGeometry->WkbSize();
-
-                    buffer = (GByte *) CPLMalloc(bufferSize);
-                    if (buffer == nullptr) {
-                        throw WorkerError("Unable to allocate memory to export geometry");
-                    }
-                    if (ogrGeometry->exportToWkb(wkbNDR, buffer) != OGRERR_NONE) {
-                        OGRFree(buffer);
-                        throw WorkerError("Could not export the geometry from feature #" + std::to_string(numPulled));
-                    }
-                    char * hexBuffer = CPLBinaryToHex(bufferSize, buffer);
-                    if (hexBuffer == nullptr) {
-                        OGRFree(buffer);
-                        throw WorkerError("Unable to allocate memory to convert geometry to hex");
-                    }
-                    OGRFree(buffer);
                     PgFieldValue pgVal;
-                    pgVal.setIsNull(bufferSize == 0);
-                    if (!pgVal.isNull()) {
-                        pgVal.set(std::string(hexBuffer));
+                    auto ogrGeometry = ogrFeature->GetGeometryRef();
+                    if (ogrGeometry != nullptr) {
+                        // TODO: Maybe use the implementation from OGRPGLayer::GeometryToHex
+                        GByte * buffer;
+                        int bufferSize = ogrGeometry->WkbSize();
+
+                        buffer = (GByte *) CPLMalloc(bufferSize);
+                        if (buffer == nullptr) {
+                            throw WorkerError("Unable to allocate memory to export geometry");
+                        }
+                        if (ogrGeometry->exportToWkb(wkbNDR, buffer) != OGRERR_NONE) {
+                            OGRFree(buffer);
+                            throw WorkerError("Could not export the geometry from feature #" + std::to_string(numPulled));
+                        }
+                        char * hexBuffer = CPLBinaryToHex(bufferSize, buffer);
+                        if (hexBuffer == nullptr) {
+                            OGRFree(buffer);
+                            throw WorkerError("Unable to allocate memory to convert geometry to hex");
+                        }
+                        OGRFree(buffer);
+                        pgVal.setIsNull(bufferSize == 0);
+                        if (!pgVal.isNull()) {
+                            pgVal.set(std::string(hexBuffer));
+                        }
+                        CPLFree(hexBuffer);
+                    }
+                    else {
+                        pgVal.setIsNull(true);
                     }
                     pgValues.push_back(std::move(pgVal));
-                    CPLFree(hexBuffer);
                 }
                 else {
                     auto ogrField = &ogrFields[insertColumn];
