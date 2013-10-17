@@ -54,7 +54,7 @@ function StatusCtrl($scope, $http, $timeout) {
     });
 }
 
-function AboutCtrl($scope, $http) {
+function ManualCtrl($scope, $http) {
     var fetchStatus = function() {
         $http.get('api/v1/status.json').success(function(data) {
             $scope.status = data;

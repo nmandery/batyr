@@ -588,3 +588,21 @@ i {
 .job-detail-table {
     width: 100%;
 }
+
+.manual {
+    font-size: 80%;
+}
+
+.manual h1,
+.manual h2,
+.manual h3,
+.manual h4 {
+    margin-bottom: 0.75em;
+    font-weight: normal;
+    font-family: "omnes-pro", sans-serif;
+    color: #1f8dd6;
+}
+
+.manual pre {
+    padding: 1em;
+}

@@ -2,7 +2,7 @@ angular.module('batyrd', ['cgNotify']).
     config(['$routeProvider', function($routeProvider) {
         $routeProvider.
         when('/status', {templateUrl: 'partials/status.html', controller: StatusCtrl}).
-        when('/about', {templateUrl: 'partials/about.html', controller: AboutCtrl}).
+        when('/manual', {templateUrl: 'partials/manual.html', controller: ManualCtrl}).
         when('/jobqueue', {templateUrl: 'partials/jobqueue.html', controller: JobsCtrl}).
         when('/layers', {templateUrl: 'partials/layers.html', controller: LayersCtrl}).
         when('/job/:jobId', {templateUrl: 'partials/job.html', controller: JobCtrl}).

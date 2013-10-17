@@ -12,6 +12,7 @@ Makefile
 /src/web/static/js/controllers.js
 /src/web/static/js/angular-notify.js
 /src/web/static/css/font-awesome.css
+/src/web/static/partials/manual.html
 /src/common/libbatyrcommon.a
 /src/common/config.h
 /debian/batyr*

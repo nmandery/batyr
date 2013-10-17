@@ -69,6 +69,6 @@ endif ()
 add_subdirectory(src)
 
 # install additional files
-install(FILES README.md batyrd.cfg DESTINATION share/${PROJECT_NAME}) 
+install(FILES README.md MANUAL.md DEVELOPMENT.md batyrd.cfg DESTINATION share/${PROJECT_NAME}) 
 
 # vim: ft=cmake
