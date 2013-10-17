@@ -88,6 +88,11 @@ Connection::reconnect(bool restore)
             setApplicationName();
         }
     }
+    if (connection_ok) {
+        if (PQsetClientEncoding(pgconn, "UTF8") != 0) {
+            poco_warning(logger, "Could not set the client_encoding for the database connection");
+        }
+    }
     return connection_ok;
 }
 
