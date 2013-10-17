@@ -191,7 +191,7 @@ Worker::pull(Job::Ptr job)
         if (!geometryColumn.empty()) {
             pgSrid = transaction->getGeometryColumnSRID(layer->target_table_schema,
                         layer->target_table_name, geometryColumn);
-            poco_information(logger, "table " + layer->target_table_schema + "." + layer->target_table_name +
+            poco_debug(logger, "table " + layer->target_table_schema + "." + layer->target_table_name +
                         " column " + geometryColumn + " uses SRID " + std::to_string(pgSrid));
         }
 
