@@ -151,7 +151,7 @@ Server::displayHelp()
     Poco::Util::HelpFormatter helpFormatter(options());
     helpFormatter.setCommand(commandName());
     helpFormatter.setUsage("-c=CONFIGFILE [OPTIONS]");
-    helpFormatter.setHeader("TODO ---- write some short description here");
+    helpFormatter.setHeader("Synchronsiation server for on-demand synchronization of vector datasources to a PostgreSQL/PostGIS database.");
     helpFormatter.format(std::cout);
 
 }
