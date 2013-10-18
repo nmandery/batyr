@@ -606,3 +606,9 @@ i {
 .manual pre {
     padding: 1em;
 }
+
+
+.job-table tbody tr td:hover,
+.job-table tbody tr td:active {
+    box-shadow: 0 0 0 1px rgba(0,0,0, 0.25) inset, 0 0 6px rgba(0,0,0, 0.30) inset;
+}
