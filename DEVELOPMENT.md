@@ -7,7 +7,7 @@ Creating a debug build:
 
 For a DEBUG build also the *.dbg packages of the POCO libraries are required :
  
-    sudo apt-get install libpocofoundation9-dbg libpoconet9-dbg libpocoutil9-dbg discount
+    sudo apt-get install libpocofoundation9-dbg libpoconet9-dbg libpocoutil9-dbg
 
 
 Verbose messages when running make:
