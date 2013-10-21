@@ -47,7 +47,7 @@ Worker::pull(Job::Ptr job)
         initialLogMsgStream     << "job " << job->getId()
                                 << ": pulling layer \"" << job->getLayerName() << "\"";
         if (!job->getFilter().empty()) {
-            initialLogMsgStream << " using filter \""+job->getFilter()+"\"";
+            initialLogMsgStream << " using client send filter \""+job->getFilter()+"\"";
         }
         poco_information(logger, initialLogMsgStream.str().c_str());
     }
@@ -70,8 +70,27 @@ Worker::pull(Job::Ptr job)
     }
     ogrLayer->ResetReading();
 
-    // set filter if set
-    std::string filterString = job->getFilter();
+    // set filter if there is one specified
+    std::string filterString;
+    {
+        std::stringstream filterStream;
+        if ( (!layer->filter.empty()) && (!job->getFilter().empty()) ) {
+            filterStream << "(";
+        }
+        if (!layer->filter.empty()) {
+            filterStream << layer->filter;
+        }
+        if ( (!layer->filter.empty()) && (!job->getFilter().empty()) ) {
+            filterStream << ") and (";
+        }
+        if (!job->getFilter().empty()) {
+            filterStream << job->getFilter();
+        }
+        if ( (!layer->filter.empty()) && (!job->getFilter().empty()) ) {
+            filterStream << ")";
+        }
+        filterString = filterStream.str();
+    }
     if (!filterString.empty()) {
 
         // when a filter is set the deletion of features is always disabled to allow
