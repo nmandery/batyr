@@ -65,8 +65,8 @@ Worker::pull(Job::Ptr job)
     // find the layer
     auto ogrLayer = ogrDataset->GetLayerByName(layer->source_layer.c_str());
     if (ogrLayer == nullptr) {
-        throw WorkerError("source_layer \"" +layer->source_layer+ "\" in dataset for layer \""
-                                + layer->name + "\" not found");
+        throw WorkerError("source_layer \"" +layer->source_layer+ "\" for configured layer \""
+                                + layer->name + "\" could not be found");
     }
     ogrLayer->ResetReading();
 
@@ -247,7 +247,6 @@ Worker::pull(Job::Ptr job)
             idxColumn++;
         }
         std::stringstream insertQueryStream;
-        // TODO: include st_transform statement into insert if original table has a srid set in geometry_columns
         insertQueryStream   << "insert into \"" << tempTableName << "\" (\""
                             << StringUtils::join(insertColumns, "\", \"")
                             << "\") "
