@@ -42,35 +42,10 @@ Worker::~Worker()
 void
 Worker::pull(Job::Ptr job)
 {
-    {
-        std::stringstream initialLogMsgStream;
-        initialLogMsgStream     << "job " << job->getId()
-                                << ": pulling layer \"" << job->getLayerName() << "\"";
-        if (!job->getFilter().empty()) {
-            initialLogMsgStream << " using client send filter \""+job->getFilter()+"\"";
-        }
-        poco_information(logger, initialLogMsgStream.str().c_str());
-    }
-
     auto layer = configuration->getLayer(job->getLayerName());
     bool allow_feature_deletion = layer->allow_feature_deletion;
 
-    // open the dataset
-    std::unique_ptr<OGRDataSource, decltype((OGRDataSource::DestroyDataSource))> ogrDataset(
-        OGRSFDriverRegistrar::Open(layer->source.c_str(), false),  OGRDataSource::DestroyDataSource);
-    if (!ogrDataset) {
-        throw WorkerError("Could not open dataset for layer \"" + layer->name + "\"");
-    }
-
-    // find the layer
-    auto ogrLayer = ogrDataset->GetLayerByName(layer->source_layer.c_str());
-    if (ogrLayer == nullptr) {
-        throw WorkerError("source_layer \"" +layer->source_layer+ "\" for configured layer \""
-                                + layer->name + "\" could not be found");
-    }
-    ogrLayer->ResetReading();
-
-    // set filter if there is one specified
+    // assemble the complete filter to filter the features od the source by
     std::string filterString;
     {
         std::stringstream filterStream;
@@ -91,6 +66,34 @@ Worker::pull(Job::Ptr job)
         }
         filterString = filterStream.str();
     }
+
+    // log the job
+    {
+        std::stringstream initialLogMsgStream;
+        initialLogMsgStream     << "job " << job->getId()
+                                << " pulling layer \"" << job->getLayerName() << "\"";
+        if (!filterString.empty()) {
+            initialLogMsgStream << " using filter \"" + filterString + "\"";
+        }
+        poco_information(logger, initialLogMsgStream.str().c_str());
+    }
+
+    // open the dataset
+    std::unique_ptr<OGRDataSource, decltype((OGRDataSource::DestroyDataSource))> ogrDataset(
+        OGRSFDriverRegistrar::Open(layer->source.c_str(), false),  OGRDataSource::DestroyDataSource);
+    if (!ogrDataset) {
+        throw WorkerError("Could not open dataset for layer \"" + layer->name + "\"");
+    }
+
+    // find the layer
+    auto ogrLayer = ogrDataset->GetLayerByName(layer->source_layer.c_str());
+    if (ogrLayer == nullptr) {
+        throw WorkerError("source_layer \"" +layer->source_layer+ "\" for configured layer \""
+                                + layer->name + "\" could not be found");
+    }
+    ogrLayer->ResetReading();
+
+    // set filter if there is one specified
     if (!filterString.empty()) {
 
         // when a filter is set the deletion of features is always disabled to allow
@@ -549,7 +552,7 @@ Worker::removeByAttributes(Job::Ptr job)
         }
         else {
             std::stringstream logMsgStream;
-            logMsgStream   << "job " << job->getId() << " : no attributes to remove features given. skipping";
+            logMsgStream   << "job " << job->getId() << ": no attributes to remove features given. skipping";
             poco_information(logger, logMsgStream.str().c_str());
         }
 
