@@ -42,18 +42,41 @@ Worker::~Worker()
 void
 Worker::pull(Job::Ptr job)
 {
+    auto layer = configuration->getLayer(job->getLayerName());
+    bool allow_feature_deletion = layer->allow_feature_deletion;
+
+    // assemble the complete filter to filter the features od the source by
+    std::string filterString;
+    {
+        std::stringstream filterStream;
+        if ( (!layer->filter.empty()) && (!job->getFilter().empty()) ) {
+            filterStream << "(";
+        }
+        if (!layer->filter.empty()) {
+            filterStream << layer->filter;
+        }
+        if ( (!layer->filter.empty()) && (!job->getFilter().empty()) ) {
+            filterStream << ") and (";
+        }
+        if (!job->getFilter().empty()) {
+            filterStream << job->getFilter();
+        }
+        if ( (!layer->filter.empty()) && (!job->getFilter().empty()) ) {
+            filterStream << ")";
+        }
+        filterString = filterStream.str();
+    }
+
+    // log the job
     {
         std::stringstream initialLogMsgStream;
         initialLogMsgStream     << "job " << job->getId()
-                                << ": pulling layer \"" << job->getLayerName() << "\"";
-        if (!job->getFilter().empty()) {
-            initialLogMsgStream << " using filter \""+job->getFilter()+"\"";
+                                << " pulling layer \"" << job->getLayerName() << "\"";
+        if (!filterString.empty()) {
+            initialLogMsgStream << " using filter \"" + filterString + "\"";
         }
         poco_information(logger, initialLogMsgStream.str().c_str());
     }
-
-    auto layer = configuration->getLayer(job->getLayerName());
-    bool allow_feature_deletion = layer->allow_feature_deletion;
 
     // open the dataset
     std::unique_ptr<OGRDataSource, decltype((OGRDataSource::DestroyDataSource))> ogrDataset(
@@ -70,8 +93,7 @@ Worker::pull(Job::Ptr job)
     }
     ogrLayer->ResetReading();
 
-    // set filter if set
-    std::string filterString = job->getFilter();
+    // set filter if there is one specified
     if (!filterString.empty()) {
 
         // when a filter is set the deletion of features is always disabled to allow
@@ -530,7 +552,7 @@ Worker::removeByAttributes(Job::Ptr job)
         }
         else {
             std::stringstream logMsgStream;
-            logMsgStream   << "job " << job->getId() << " : no attributes to remove features given. skipping";
+            logMsgStream   << "job " << job->getId() << ": no attributes to remove features given. skipping";
             poco_information(logger, logMsgStream.str().c_str());
         }
 

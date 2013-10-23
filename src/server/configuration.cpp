@@ -198,6 +198,9 @@ Configuration::parse(const std::string & configFile)
                         else if (layerValuePair.first == "target_table_name") {
                             layer->target_table_name = layerValuePair.second;
                         }
+                        else if (layerValuePair.first == "filter") {
+                            layer->filter = layerValuePair.second;
+                        }
                         else if (layerValuePair.first == "allow_feature_deletion") {
                             bool ok = false;
                             bool _allow_feature_deletion = valueToBool(layerValuePair.second, ok);

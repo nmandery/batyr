@@ -146,6 +146,21 @@ The valid values for each setting are documented in the example file bellow. For
     # Default: no
     allow_feature_deletion = yes
 
+    # Filter the features of the source by a criteria to pull only matching
+    # features in the db.
+    #
+    # The features might be further filtered by the "filter" parameter
+    # of a pull request
+    #
+    # Optional
+    # Type: Unquoted String. Attirbute filter as described in the OGR documentation
+    #       at http://www.gdal.org/ogr/ogr_sql.html in the section of the
+    #       WHERE-clause
+    # Default: empty
+    # Example: myattribute=3
+    filter = 1 = 1
+
+
 
 The layer section may be repeated for each layer with an unique name.
 

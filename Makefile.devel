@@ -3,6 +3,9 @@
 #
 #  rules to ease the development process
 
+LAST_VERSION:=$(shell git describe --abbrev=0 --tags --match 'v*')
+LAST_VERSION_NUMBER:=$(patsubst v%,%,$(LAST_VERSION))
+
 # existing cmakecache etc. files will cause an error because the sources can not
 # be found when buildings tha package. so remove them first
 deb: clean-cmake
@@ -13,5 +16,18 @@ clean-cmake:
 	find . -name 'CMakeFiles' -type d | xargs -L 1 rm -rf
 	find . -name 'CMakeCache.txt' -type f -delete
 	find . -name 'cmake_install.cmake' -type f -delete
+
+# changelog since last version tag suitable to paste into
+# debian/changelog file
+# just uses the last commiter as the author of the changelog entry
+changelog:
+	@echo "Changes since version ${LAST_VERSION}"
+	@echo ""
+	@echo "batyr ($(LAST_VERSION_NUMBER)*INCREASE*-0) unstable; urgency=low"
+	@echo ""
+	@git log --format="format:  * %s [%h]" $(LAST_VERSION)..HEAD
+	@echo ""
+	@echo " -- $$(git log --format="format:%an <%ae>" -n 1 HEAD)  $$(date --rfc-2822)"
+
 
 PHONY: clean-cmake
