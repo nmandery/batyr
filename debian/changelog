@@ -1,3 +1,14 @@
+batyr (0.1.1-0) unstable; urgency=low
+
+  * create configuration, home and log directories [d186d78]
+  * makefile target to generate changelog entries [ee5278f]
+  * log the complete filter applied to the pulled features [ab6b975]
+  * server-side filters [b288d9b]
+  * clearer wording in error message [a7d3c8c]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Wed, 23 Oct 2013 15:21:51 +0200
+
+
 batyr (0.1.0-0) unstable; urgency=low
 
   * first packaged version
