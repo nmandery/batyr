@@ -21,6 +21,8 @@ case "$1" in
         chown batyr:batyr /var/lib/batyr
 
         mkdir -p /etc/batyr
+        chmod 1775 /etc/batyr
+        chown batyr:batyr /etc/batyr
         ;;
     *)
         exit 0
