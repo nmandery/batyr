@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+. /usr/share/debconf/confmodule
+db_stop
+
+case "$1" in
+    configure|upgrade)
+        # Make sure the user exists
+        if ! getent passwd batyr > /dev/null; then
+            adduser --system --quiet --home /var/lib/batyr --no-create-home \
+                --shell /bin/bash --group --gecos "batyr system user" batyr
+        fi  
+
+        mkdir -p /var/log/batyr
+        chmod 1775 /var/log/batyr
+        chown batyr:batyr /var/log/batyr
+
+        mkdir -p /var/lib/batyr
+        chmod 1775 /var/lib/batyr
+        chown batyr:batyr /var/lib/batyr
+
+        mkdir -p /etc/batyr
+        chmod 1775 /etc/batyr
+        chown batyr:batyr /etc/batyr
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+#DEBHELPER#

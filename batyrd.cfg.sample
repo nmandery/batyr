@@ -116,6 +116,19 @@ target_table_schema = test
 # Default: no
 allow_feature_deletion = yes
 
+# Filter the features of the source by a criteria to pull only matching
+# features in the db.
+#
+# The features might be further filtered by the "filter" parameter
+# of a pull request
+#
+# Optional
+# Type: Unquoted String. Attirbute filter as described in the OGR documentation
+#       at http://www.gdal.org/ogr/ogr_sql.html in the section of the
+#       WHERE-clause
+# Default: empty
+# Example: myattribute=3
+filter = 1 = 1
 
 [[dataset1]]
 description= testing different values

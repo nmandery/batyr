@@ -19,6 +19,7 @@
 #include "server/server.h"
 #include "server/http/listener.h"
 #include "common/macros.h"
+#include "common/config.h"
 #include "server/broker.h"
 
 
@@ -151,7 +152,12 @@ Server::displayHelp()
     Poco::Util::HelpFormatter helpFormatter(options());
     helpFormatter.setCommand(commandName());
     helpFormatter.setUsage("-c=CONFIGFILE [OPTIONS]");
-    helpFormatter.setHeader("Synchronsiation server for on-demand synchronization of vector datasources to a PostgreSQL/PostGIS database.");
+    helpFormatter.setHeader(
+        "Synchronsiation server for on-demand synchronization of vector datasources to a PostgreSQL/PostGIS database."
+        "\n"
+        "\n"
+        "version: " VERSION_FULL " [git: " VERSION_GIT_FULL "]"
+    );
     helpFormatter.format(std::cout);
 
 }
