@@ -1,3 +1,14 @@
+batyr (0.1.2-0) unstable; urgency=low
+
+  * remove artifacts from last cmake run when building packages [1c92116]
+  * implement non-persistent database connections and make them configurable [615a4d1]
+  * output version number in help text on the command line [804a744]
+  * debian package: write permissions for batyr on /etc/batyr [e711e15]
+  * rename sample config [940b130]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Tue, 29 Oct 2013 14:45:33 +0100
+
+
 batyr (0.1.1-0) unstable; urgency=low
 
   * create configuration, home and log directories [d186d78]
