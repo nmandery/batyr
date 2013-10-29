@@ -129,8 +129,14 @@ JobStorage::push(Job::Ptr _job)
 
 
 bool
-JobStorage::pop(Job::Ptr & _job) {
-    return queue.pop(_job);
+JobStorage::popWait(Job::Ptr & _job) {
+    return queue.popWait(_job);
+}
+
+
+void
+JobStorage::popNoWait(Job::Ptr & _job) {
+    queue.popNoWait(_job);
 }
 
 

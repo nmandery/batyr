@@ -67,6 +67,15 @@ The valid values for each setting are documented in the example file bellow. For
     # Mandatory
     dsn = "dbname=batyr user=batyr password=batyr host=localhost"
     
+
+    # keep database connections open even when there are currently
+    # not jobs to handle
+    #
+    # Optional
+    # Type: boolean
+    # Default: yes
+    use_persistent_connections = yes
+    
     
     # Logging settings
     [LOGGING]
@@ -373,6 +382,7 @@ Corresponding response:
 * The [GDAL/OGR](http://gdal.org/) library
 * The [libpq](http://www.postgresql.org/docs/current/static/libpq.html) library to connect to PostgreSQL.
 * [POCO Framework](http://pocoproject.org/) for its embedded HTTP server as well as a generic application framework.
+* [rapidjson](https://code.google.com/p/rapidjson/) for parsing and generating JSON.
 * [cmake](http://www.cmake.org/) to build the software.
 * [AngularJS](http://www.angularjs.org/) as the clientside javascript framework.
 * [jQuery](http://jquery.com/) for animations.

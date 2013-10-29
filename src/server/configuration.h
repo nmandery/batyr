@@ -83,6 +83,11 @@ namespace Batyr
                 return logfile;
             }
 
+            bool usePersistentDbConnections() const
+            {
+                return use_persistent_connections;
+            }
+
             /**
              * get a vector with all layers ordered by their names
              */
@@ -100,6 +105,7 @@ namespace Batyr
             std::string db_connection_string;
             Poco::Message::Priority loglevel;
             std::string logfile;
+            bool use_persistent_connections;
 
 
             void parse(const std::string & configFile);

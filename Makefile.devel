@@ -16,6 +16,8 @@ clean-cmake:
 	find . -name 'CMakeFiles' -type d | xargs -L 1 rm -rf
 	find . -name 'CMakeCache.txt' -type f -delete
 	find . -name 'cmake_install.cmake' -type f -delete
+	rm -rf ./obj-*
+	rm -f ./src/common/config.h ./src/web/http_resources.h
 
 # changelog since last version tag suitable to paste into
 # debian/changelog file

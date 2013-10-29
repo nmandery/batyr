@@ -43,7 +43,7 @@ find_package( Poco REQUIRED Foundation Util Net)
 # version information
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
-set(VERSION_PATCH 1)
+set(VERSION_PATCH 2)
 
 # http://brianmilco.blogspot.de/2012/11/cmake-automatically-use-git-tags-as.html
 include(GetGitRevisionDescription)
@@ -69,6 +69,11 @@ endif ()
 add_subdirectory(src)
 
 # install additional files
-install(FILES README.md MANUAL.md DEVELOPMENT.md batyrd.cfg DESTINATION share/${PROJECT_NAME}) 
+install(FILES   README.md 
+                MANUAL.md 
+                DEVELOPMENT.md 
+                batyrd.cfg.sample
+    DESTINATION share/${PROJECT_NAME}
+) 
 
 # vim: ft=cmake
