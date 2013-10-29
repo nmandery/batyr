@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 
-set(BATYR_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(BATYR_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 # NOTE: the ordering of the subdirectories matters for cmake to find
 # all its dependencies

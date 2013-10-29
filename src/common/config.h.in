@@ -1,7 +1,7 @@
 #ifndef __batyr_config_h__
 #define __batyr_config_h__
 
-#include "macros.h"
+#include "common/macros.h"
 
 
 // version number ---------------------------------------------
