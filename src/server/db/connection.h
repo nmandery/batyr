@@ -65,6 +65,11 @@ namespace Db
              * setup or check and attempt to restore the database connection
              */
             bool reconnect(bool restore);
+
+            /**
+             * close the current connection
+             */
+            void close();
     };
 
 

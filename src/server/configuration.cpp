@@ -22,7 +22,8 @@ Configuration::Configuration(const std::string & configFile)
         num_worker_threads(2),  // default value
         max_age_done_jobs(600),  // default value
         loglevel(Poco::Message::PRIO_INFORMATION),  // default value
-        logfile("")
+        logfile(""),
+        use_persistent_connections(true)
 {
     parse(configFile);
 }
@@ -170,6 +171,14 @@ Configuration::parse(const std::string & configFile)
                     else if (valuePair.first == "dsn") {
                         db_connection_string = StringUtils::trim(valuePair.second, trimChars);
                     }
+                    else if (valuePair.first == "use_persistent_connections") {
+                        bool ok = false;
+                        bool _use_persistent_connections = valueToBool(valuePair.second, ok);
+                        if (!ok) {
+                            throw ConfigurationError("use_persistent_connections must be a boolean value (true,false,yes,no,1,0).");
+                        }
+                        use_persistent_connections = _use_persistent_connections;
+                    }
                     else {
                         throwUnknownSetting(sectionPair.first, valuePair.first);
                     }
@@ -209,7 +218,6 @@ Configuration::parse(const std::string & configFile)
                             }
                             layer->allow_feature_deletion = _allow_feature_deletion;
                         }
-
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
                         }

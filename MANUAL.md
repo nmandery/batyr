@@ -67,6 +67,15 @@ The valid values for each setting are documented in the example file bellow. For
     # Mandatory
     dsn = "dbname=batyr user=batyr password=batyr host=localhost"
     
+
+    # keep database connections open even when there are currently
+    # not jobs to handle
+    #
+    # Optional
+    # Type: boolean
+    # Default: yes
+    use_persistent_connections = yes
+    
     
     # Logging settings
     [LOGGING]

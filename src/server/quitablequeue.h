@@ -34,12 +34,12 @@ namespace Batyr {
 
                 /**
                  * set the item parameter to the next item in the queue
-                 *  and return true
-                 *  or return false if the quit method of the queue has been called
+                 * and return true
+                 * or return false if the quit method of the queue has been called
                  *
-                 *  Will block until any of these event occurs.
+                 * Will block until any of these event occurs.
                  */
-                bool pop(T& item)
+                bool popWait(T& item)
                 {
                     if (!continue_) {
                         return false;
@@ -56,6 +56,22 @@ namespace Batyr {
                     item = queue_.front();
                     queue_.pop();
                     return true;
+                }
+
+                
+                /**
+                 * pop the nex item from the queue
+                 *
+                 * will not block and wait for an item to be available
+                 * but instead return instantly without modifying the refernce
+                 * to the item parameter
+                 */
+                void popNoWait(T& item)
+                {
+                    std::unique_lock<std::mutex> mlock(mutex_);
+                    if (!queue_.empty()) {
+                        item = queue_.front();
+                    }
                 }
 
                 /**

@@ -25,8 +25,16 @@ Connection::Connection(Batyr::Configuration::Ptr _configuration)
 
 Connection::~Connection()
 {
+    close();
+}
+
+
+void
+Connection::close()
+{
     if (pgconn != nullptr) {
         PQfinish(pgconn);
+        pgconn = NULL;
     }
 }
 

@@ -37,6 +37,15 @@ max_age_done_jobs = 600
 dsn = "dbname=batyr user=batyr password=batyr host=localhost"
 
 
+# keep database connections open even when there are currently
+# not jobs to handle
+#
+# Optional
+# Type: boolean
+# Default: yes
+use_persistent_connections = yes
+
+
 # Logging settings
 [LOGGING]
 

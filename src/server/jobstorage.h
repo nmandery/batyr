@@ -104,7 +104,12 @@ namespace Batyr
             /**
              * block and wait until a new job is available
              */
-            bool pop(Job::Ptr & _job);
+            bool popWait(Job::Ptr & _job);
+
+            /**
+             * instantliy get the nex job if there is one available
+             */
+            void popNoWait(Job::Ptr & _job);
 
             /**
              * number of elements waiting in the queue

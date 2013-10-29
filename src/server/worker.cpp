@@ -580,14 +580,23 @@ Worker::run()
     while (true) {
         Job::Ptr job;
         try {
-            bool got_job = jobs->pop(job);
-            if (!got_job) {
-                // no job means the queue recieved a quit command, so the worker
+            jobs->popNoWait(job);
+            if (!job) {
+                // shut down the db connection if this behaviour is configured and
+                if (!configuration->usePersistentDbConnections()) {
+                    poco_debug(logger, "No jobs queued - closing db connection");
+                    db.close();
+                }
+
+                // wait for a new job to arrive
+                // getting still no job means the queue recieved a quit command, so the worker
                 // can be shut down
-                break;
+                jobs->popWait(job);
+                if (!job) {
+                    break;
+                }
             }
             poco_debug(logger, "Got job from queue");
-
             job->setStatus(Job::Status::IN_PROCESS);
 
             // check if we got a working database connection
