@@ -1,0 +1,27 @@
+Files: *
+Copyright: 2013 geOps
+License: BSD-3-clause
+
+Files: src/3rdparty/rapidjson
+Copyright: 2011 Milo Yip
+License: Expat
+
+Files: src/web/static/css/font-awesome.css.in
+Copyright: Dave Gandy
+License: Expat
+
+Files: src/web/static/font/*
+Copyright: Dave Gandy
+License: SIL OFL
+
+Files: src/web/static/js/jquery.min.js
+Copyright: 2013 The jQuery Foundation
+License: Expat
+
+Files: src/web/static/js/moment.min.js
+Copyright: 2011-2013 Tim Wood, Iskren Chernev, Moment.js contributors
+License: Expat
+
+Files: src/web/static/js/moment.min.js
+Copyright: 2010-2012 Google, Inc.
+License: Expat

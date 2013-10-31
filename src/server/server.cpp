@@ -153,7 +153,7 @@ Server::displayHelp()
     helpFormatter.setCommand(commandName());
     helpFormatter.setUsage("-c=CONFIGFILE [OPTIONS]");
     helpFormatter.setHeader(
-        "Synchronsiation server for on-demand synchronization of vector datasources to a PostgreSQL/PostGIS database."
+        "Server for on-demand synchronization of vector datasources to a PostgreSQL/PostGIS database."
         "\n"
         "\n"
         "version: " VERSION_FULL " [git: " VERSION_GIT_FULL "]"
