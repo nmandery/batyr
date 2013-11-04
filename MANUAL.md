@@ -1,19 +1,19 @@
 # batyr Manual
 
-This application is a server for on-demand synchronisation of vector datasources to a PostgreSQL/PostGIS database.
-It offers JSON-based HTTP REST webservice which may be called by external application to trigger the synchronisation of geodata
+This application is a server for on-demand synchronization of vector datasources to a PostgreSQL/PostGIS database.
+It offers JSON-based HTTP REST webservice which may be called by external application to trigger the synchronization of geodata
 into a PostgreSQL database. 
 
-The name "batyr" originates from an asian elephant who lived in a zoo in Kazakhstan. This elephant was claimed of being able to
+The name "batyr" originates from an Asian elephant who lived in a zoo in Kazakhstan. This elephant was claimed of being able to
 speak with a vocabulary of about 20 words. This ability and the fact that the official logo of the PostgreSQL also being an elephant
 made the name of the animal somewhat fitting for an application which main purpose is communicating with remote datasources to read
-their data into a PostgresQL database. For more information on this elephant refer to the corresponding 
+their data into a PostgreSQL database. For more information on this elephant refer to the corresponding 
 [Wikipedia article](https://en.wikipedia.org/wiki/Batyr).
 
 
-## The synchronisation process
+## The synchronization process
 
-The synchronisation process can be divided into six steps:
+The synchronization process can be divided into six steps:
 
 1. batyr creates a new temporary table in the database which uses the same schema definition as the target table.
 2. data is pulled from the source and gets written to the new temporary table.
@@ -26,7 +26,7 @@ These five steps a performed inside a transaction and will all get rolled back i
 
 The handling of different coordinate systems relies of the PostGIS geometry_columns view or - in older versions - table. batyr will use the SRID information from there to transform incoming geometries to the coordinate system of the target table. Incoming without coordinate system information will get this SRID assigned without an transformation.
 
-This synchronisation itself is performed asynchronously. This means that after a external application send a request to pull a layer,
+This synchronization itself is performed asynchronously. This means that after a external application send a request to pull a layer,
 the data in the database might not be already updated when the request is finished. Instead the request gets queued internally and
 will be worked upon in the background. The main purpose of this behavior is to avoid blocking the requesting application in the case
 if there is a lot of data to fetch or there are many other request batyr has also to handle.
@@ -48,7 +48,7 @@ The software can be build by the following commands:
 ## Command line arguments
 
     usage: batyrd -c=CONFIGFILE [OPTIONS]
-    Server for on-demand synchronisation of vector datasources to 
+    Server for on-demand synchronization of vector datasources to 
     a PostgreSQL/PostGIS database.
 
     version: 0.1.2 [git: 5e8d43ce50]
@@ -229,7 +229,7 @@ batyr will not create tables make any modifications of the database schema by it
 
 In general the mapping of fields in the source data to the columns of the target table works based on the name of the field. This means an attribute of an incoming feature will be written to the column with the corresponding name. If no such column exists, the attribute will simply be ignored. Columns of the target table which are also not part of the source features will also be left untouched. batyr will attempt to cast values to the datatype of the column table. This approach will work for most cases, but has a few limitations: Writing an attribute of the type text to a column in the target table of the type integer will work as long as the source only contains numeric values. When the source attribute may also contain letters or other non-numeric characters the sync will fail. This is something to keep in mind when designing the schema of the target table.
 
-The target table is required to have a primary key which is also part of the source data - this is quite important as the values of the primary key are the basis of the synchronisation.
+The target table is required to have a primary key which is also part of the source data - this is quite important as the values of the primary key are the basis of the synchronization.
 
 The geometry column of the table should have a constraint which defines the spatial reference system of the column to allow batyr to reproject incoming geometries to the correct coordinate system. Earlier PostGIS versions require this information to be also stored in the `geometry_columns` table, which may be automatically added using the [`Populate_Geometry_Columns`](http://postgis.org/docs/Populate_Geometry_Columns.html) function.
 
@@ -390,7 +390,7 @@ Allows starting a new job by POSTing a JSON document to this URL. The `layerName
 
 ## POST /api/v1/remove-by-attributes
 
-Remove features from the database by matching their columns to attributes of JSON objects. It is possible mutiple criteria in one request
+Remove features from the database by matching their columns to attributes of JSON objects. It is possible multiple criteria in one request
 
 This request is more or less an additional feature for applications which need to selectively remove features from the database. In general performing a full sync using the `pull` API method in the preferred way of ensuring consistent data.
 
