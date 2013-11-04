@@ -37,6 +37,9 @@ Also see "TODO" comments in the code.
 High priority
 -------------
 
+* Interval-based pulling. Example: Pull layer xyz every n seconds
+  This also requires a more intelligent queuing to estimate how long it would take
+  until all queued jobs are finished to ensure the interval is satisfied.
 
 Medium priority
 ---------------

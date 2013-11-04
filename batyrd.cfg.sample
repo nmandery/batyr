@@ -100,7 +100,7 @@ description = Countries of africa based on
 source = testdata/shapes/Africa.shp
 
 # the name of the layer in the datasource
-# This corresponds with the "layer" paramaeter of the ogrinfo program
+# This corresponds with the "layer" parameter of the ogrinfo program
 #
 # Mandatory
 source_layer = Africa
@@ -132,7 +132,7 @@ allow_feature_deletion = yes
 # of a pull request
 #
 # Optional
-# Type: Unquoted String. Attirbute filter as described in the OGR documentation
+# Type: Unquoted String. Attribute filter as described in the OGR documentation
 #       at http://www.gdal.org/ogr/ogr_sql.html in the section of the
 #       WHERE-clause
 # Default: empty
