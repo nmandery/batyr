@@ -31,7 +31,7 @@ Job::Job(Job::Type _type)
     // remove all dashes from the string for nicer looking URLs ;)
     // if the syntax of the id is changed, some ot the url parsing in 
     // the http/httprequesthandlerfactory.cpp needs to be changed as well
-    std::remove(id.begin(), id.end(), '-');
+    id.erase(std::remove(id.begin(), id.end(), '-'), id.end());
 }
 
 
