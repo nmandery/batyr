@@ -25,6 +25,8 @@ namespace Batyr
         bool ignore_failures;
 
         typedef std::shared_ptr<Layer> Ptr;
+
+        Layer();
     };
 
 

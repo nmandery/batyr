@@ -16,6 +16,12 @@ using namespace Batyr;
  */
 static const char trimChars[] = "'\"\r\n\t ";
 
+Layer::Layer()
+    :   allow_feature_deletion(false),
+        ignore_failures(false)
+{
+}
+
 
 Configuration::Configuration(const std::string & configFile)
     :   http_port(9090),        // default value
@@ -187,8 +193,6 @@ Configuration::parse(const std::string & configFile)
             else if (sectionPair.first == "LAYERS") {
                 for(auto const layerSectionPair : sectionPair.second.sections) {
                     auto layer = std::make_shared<Layer>();
-                    layer->allow_feature_deletion = false; // default
-                    layer->ignore_failures = false;
                     layer->name = layerSectionPair.first;
 
                     // collect layer infos
