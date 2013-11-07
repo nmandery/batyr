@@ -524,7 +524,7 @@ Worker::removeByAttributes(Job::Ptr job)
         for(const auto & attributeSet: job->getAttributeSets()) {
             if (attributeSet.size() > 0) {
                 int i = 0;
-                if (attrValues.size() > 0) {
+                if (!attrValues.empty()) {
                     deleteStmt << " or ";
                 }
                 deleteStmt << " ( ";
@@ -546,7 +546,7 @@ Worker::removeByAttributes(Job::Ptr job)
             }
         }
 
-        if (attrValues.size() > 0) {
+        if (!attrValues.empty()) {
             poco_debug(logger, deleteStmt.str().c_str());
 
             // convert to an array of c strings
