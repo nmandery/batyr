@@ -21,7 +21,8 @@ Job::Job(Job::Type _type)
         numCreated(0),
         numUpdated(0),
         numDeleted(0),
-        numPulled(0)
+        numPulled(0),
+        numIgnored(0)
 {
     // generate an UUID as id for the job
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
@@ -126,6 +127,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     targetValue.AddMember("numUpdated", numUpdated, allocator);
     targetValue.AddMember("numDeleted", numDeleted, allocator);
     targetValue.AddMember("numPulled", numPulled, allocator);
+    targetValue.AddMember("numIgnored", numIgnored, allocator);
 }
 
 

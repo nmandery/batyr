@@ -22,6 +22,7 @@ namespace Batyr
         std::string target_table_schema;
         std::string filter;
         bool allow_feature_deletion;
+        bool ignore_failures;
 
         typedef std::shared_ptr<Layer> Ptr;
     };

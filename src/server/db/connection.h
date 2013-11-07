@@ -12,20 +12,40 @@
 #include "server/configuration.h"
 #include "server/db/transaction.h"
 
-namespace Batyr 
+namespace Batyr
 {
 namespace Db
 {
-   
+
 //    class Transaction; // forward decl
 
-    class DbError : public std::runtime_error 
+    class DbError : public std::runtime_error
     {
+        private:
+            std::string sqlstate;
+
         public:
-            DbError(const std::string & message) 
-                    : std::runtime_error(message)
+            DbError(const std::string & message, std::string _sqlstate = "")
+                    :   std::runtime_error(message),
+                        sqlstate(_sqlstate)
+            {};
+
+            ~DbError() throw()
+            {};
+
+            std::string getSqlState()
             {
+                return sqlstate;
             };
+
+            /**
+             * is sqlstate of class 22 ("DataException")
+             * see http://www.postgresql.org/docs/8.4/static/errcodes-appendix.html
+             */
+            bool isDataException() const
+            {
+                return !sqlstate.empty() && (sqlstate.compare(0, 2, "22") == 0);
+            }
     };
 
 
@@ -33,7 +53,7 @@ namespace Db
 
         private:
             Poco::Logger & logger;
-            Batyr::Configuration::Ptr configuration; 
+            Batyr::Configuration::Ptr configuration;
 
             /**
              * the lpbpq connection pointer

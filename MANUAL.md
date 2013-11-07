@@ -205,7 +205,7 @@ The valid values for each setting are documented in the example file bellow. For
     # Type: boolean
     # Default: no
     allow_feature_deletion = yes
-
+    
     # Filter the features of the source by a criteria to pull only matching
     # features in the db.
     #
@@ -219,6 +219,16 @@ The valid values for each setting are documented in the example file bellow. For
     # Default: empty
     # Example: myattribute=3
     filter = 1 = 1
+    
+    # Ignore features with attributes which can not be cast to the datatype
+    # of the table. The default behaviour is failing the whole pull when one
+    # single feature can not be casted.
+    #
+    # Optional
+    # Type: boolean
+    # Default: no
+    ignore_failures = no
+
 
 
 The layer section may be repeated for each layer with a unique name.
@@ -257,6 +267,7 @@ The basic object the API deals with is called a `job` and possesses the followin
 * `numPulled`: Number of features pulled/read from the source.
 * `numCreated`: Number of newly created features in the database.
 * `numUpdated`: Number of existing features in the database which have been updated. Features will only be updated if they show differences.
+* `numIgnored`: Number of features ignored because of one or more of their attributes havig an type incompatible with the table in the database. This beviour has to be enabled in the configfile.
 * `numDeleted`: Number of features deleted by this job.
 
 ### Example
@@ -272,6 +283,7 @@ The basic object the API deals with is called a `job` and possesses the followin
         "numCreated": 0,
         "numUpdated": 0,
         "numDeleted": 0,
+        "numIgnored": 0,
         "numPulled": 0
     }
 
@@ -350,6 +362,7 @@ GET /api/job/1ab8c197ed014a4cbc20a6dfc98a1b101b10.json
         "numCreated": 0,
         "numUpdated": 2,
         "numDeleted": 0,
+        "numIgnored": 0,
         "numPulled": 2
     }
 
@@ -384,6 +397,7 @@ Allows starting a new job by POSTing a JSON document to this URL. The `layerName
         "numCreated": 0,
         "numUpdated": 0,
         "numDeleted": 0,
+        "numIgnored": 0,
         "numPulled": 0
     }
 
@@ -433,6 +447,7 @@ as all features where column3 equals "some other value". Values for attribute ha
         "numCreated": 0,
         "numUpdated": 0,
         "numDeleted": 0,
+        "numIgnored": 0,
         "numPulled": 0
     }
 

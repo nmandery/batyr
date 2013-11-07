@@ -139,6 +139,15 @@ allow_feature_deletion = yes
 # Example: myattribute=3
 filter = 1 = 1
 
+# Ignore features with attributes which can not be cast to the datatype
+# of the table. The default behaviour is failing the whole pull when one
+# single feature can not be casted.
+#
+# Optional
+# Type: boolean
+# Default: no
+ignore_failures = no
+
 [[dataset1]]
 description= testing different values
 

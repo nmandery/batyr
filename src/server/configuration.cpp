@@ -188,6 +188,7 @@ Configuration::parse(const std::string & configFile)
                 for(auto const layerSectionPair : sectionPair.second.sections) {
                     auto layer = std::make_shared<Layer>();
                     layer->allow_feature_deletion = false; // default
+                    layer->ignore_failures = false;
                     layer->name = layerSectionPair.first;
 
                     // collect layer infos
@@ -217,6 +218,14 @@ Configuration::parse(const std::string & configFile)
                                 throw ConfigurationError("allow_feature_deletion must be a boolean value (true,false,yes,no,1,0).");
                             }
                             layer->allow_feature_deletion = _allow_feature_deletion;
+                        }
+                        else if (layerValuePair.first == "ignore_failures") {
+                            bool ok = false;
+                            bool _ignore_failures = valueToBool(layerValuePair.second, ok);
+                            if (!ok) {
+                                throw ConfigurationError("ignore_failures must be a boolean value (true,false,yes,no,1,0).");
+                            }
+                            layer->ignore_failures = _ignore_failures;
                         }
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);

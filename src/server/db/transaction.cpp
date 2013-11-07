@@ -117,13 +117,15 @@ Transaction::checkResult(PGresultPtr & res)
         char * sqlstate = PQresultErrorField(res.get(), PG_DIAG_SQLSTATE);
         char * msg_primary = PQresultErrorField(res.get(), PG_DIAG_MESSAGE_PRIMARY);
 
+#ifdef _DEBUG
         std::stringstream msgstream;
         msgstream << "query failed: " << msg_primary << " [sqlstate: " << sqlstate << "]";
-        poco_error(logger, msgstream.str().c_str());
+        poco_debug(logger, msgstream.str().c_str());
+#endif
 
         rollback = true;
 
-        throw DbError(msgstream.str());
+        throw DbError(msg_primary, sqlstate);
     }
 }
 

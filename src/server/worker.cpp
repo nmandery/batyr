@@ -156,6 +156,7 @@ Worker::pull(Job::Ptr job)
         int numCreated = 0;
         int numUpdated = 0;
         int numDeleted = 0;
+        int numIgnored = 0;
 
         // set the postgresql date style
         transaction->exec("set DateStyle to SQL, YMD");
@@ -351,12 +352,32 @@ Worker::pull(Job::Ptr job)
                             return pV.get().length();
                     });
 
-            transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0], &cStrValueLenghts[0],
-                        NULL, 1);
+            if (layer->ignore_failures) {
+                try {
+                    transaction->exec("savepoint insertfeature;");
+                    transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0],
+                                &cStrValueLenghts[0], NULL, 1);
+                    transaction->exec("release savepoint insertfeature;");
+                }
+                catch (Batyr::Db::DbError &e) {
+                    if (!e.isDataException()) {
+                        throw;
+                    }
+                    numIgnored++;
+                    transaction->exec("rollback to savepoint insertfeature;");
 
+                    std::stringstream ignoreMsgStream;
+                    ignoreMsgStream << "Ignoring feature: " << e.what();
+                    poco_warning(logger, ignoreMsgStream.str().c_str());
+                }
+            }
+            else {
+                transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0],
+                            &cStrValueLenghts[0], NULL, 1);
+            }
             numPulled++;
         }
-        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
+        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted, numIgnored);
 
         // update the existing table only touching rows which have differences to prevent
         // slowdowns by triggers
@@ -442,7 +463,7 @@ Worker::pull(Job::Ptr job)
         }
 
         job->setStatus(Job::Status::FINISHED);
-        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
+        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted, numIgnored);
 
         std::stringstream finalLogMsgStream;
         finalLogMsgStream   << "job " << job->getId() << " finished. Stats: "
