@@ -51,7 +51,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
         targetValue.AddMember("timeFinished", vTimeFinished, allocator);
     }
 
-    const char * typeString;
+    const char * typeString = "";
     switch(type) {
         case PULL:
             typeString = "pull";
@@ -64,7 +64,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     Batyr::Json::toValue(vTypeString, typeString, allocator);
     targetValue.AddMember("type", vTypeString, allocator);
 
-    const char * statusString;
+    const char * statusString = "";
     switch (status) {
         case QUEUED:
             statusString = "queued";
