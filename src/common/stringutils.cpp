@@ -44,29 +44,26 @@ StringUtils::join( const std::vector<std::string>& elements, const char* const s
     }
 }
 
-/*
-void TextUtils::Split( const char pChr , std::vector<std::string> &pRet , const std::string &pPath )
+
+std::vector<std::string>
+StringUtils::split(const std::string &joined, const char seperator)
 {
-    std::string::const_iterator cur = pPath.begin();
-    std::string::const_iterator beg = pPath.begin();
-    bool added=false;
-    while ( cur < pPath.end() )
-    {
-        if ( *cur == pChr )
-        {
-            pRet.insert( pRet.end() , std::string( beg , cur) );
+    std::vector<std::string> elements;
+    std::string::const_iterator cur = joined.begin();
+    std::string::const_iterator beg = joined.begin();
+    while ( cur < joined.end() ) {
+        if ( *cur == seperator ) {
+            elements.push_back(std::string( beg , cur));
             beg = ++cur;
-            added=true;
         }
-        else
-        {
+        else {
             cur++;
         }
     }
-
-    pRet.insert( pRet.end() , std::string( beg , cur) );
+    elements.push_back(std::string( beg , cur));
+    return elements;
 }
-*/
+
 
 std::string
 StringUtils::tolower(const std::string &s)

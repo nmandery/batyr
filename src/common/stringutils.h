@@ -13,6 +13,8 @@ namespace StringUtils
 
     std::string join( const std::vector<std::string>& elements, const char* const separator);
 
+    std::vector<std::string> split(const std::string &joined, const char seperator);
+
     /**
      * convert a string to lowercase
      */

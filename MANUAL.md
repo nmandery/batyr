@@ -228,6 +228,14 @@ The valid values for each setting are documented in the example file bellow. For
     # Type: boolean
     # Default: no
     ignore_failures = no
+    
+    # Override/set the primary key for the table of this layer.
+    #
+    # Optional. The normal behaviour would be analyzing the schema of the table to find
+    #           the column(s) of the primary key
+    # Type: comma-seperated list of column names
+    # Default: empty
+    primary_key_columns = id
 
 
 

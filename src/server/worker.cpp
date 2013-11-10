@@ -172,7 +172,6 @@ Worker::pull(Job::Ptr job)
         auto tableFields = transaction->getTableFields(layer->target_table_schema, layer->target_table_name);
 
         // check if the requirements of the primary key are satisfied
-        // TODO: allow overriding the primarykey from the configfile
         std::vector<std::string> primaryKeyColumns;
         std::string geometryColumn;
         std::vector<std::string> insertColumns;
@@ -194,6 +193,16 @@ Worker::pull(Job::Ptr job)
             if (ogrFields.find(tableFieldPair.second.name) != ogrFields.end()) {
                 insertColumns.push_back(tableFieldPair.second.name);
             }
+        }
+        // allow overriding the primarykey from the configfile if there are alternatives cofigured there
+        if (!layer->primary_key_columns.empty()) {
+            for(const auto primary_key_column : layer->primary_key_columns) {
+                if (tableFields.find(primary_key_column) == tableFields.end()) {
+                    throw WorkerError("The configured primary key column \"" + primary_key_column + "\" does not exist in the table"
+                            " of layer \"" + job->getLayerName() + "\"");
+                }
+            }
+            primaryKeyColumns = layer->primary_key_columns;
         }
         if (primaryKeyColumns.empty()) {
             throw WorkerError("Got no primarykey for layer \"" + job->getLayerName() + "\"");

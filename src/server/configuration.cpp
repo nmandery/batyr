@@ -231,6 +231,16 @@ Configuration::parse(const std::string & configFile)
                             }
                             layer->ignore_failures = _ignore_failures;
                         }
+                        else if (layerValuePair.first == "primary_key_columns") {
+                            auto pk_columns_untrimmed = StringUtils::split(layerValuePair.second, ',');
+                            for(auto const pk_column_untrimmed : pk_columns_untrimmed) {
+                                auto trimmed =  StringUtils::trim(pk_column_untrimmed, trimChars);
+                                if (!trimmed.empty()) {
+                                    std::cout << trimmed << std::endl;
+                                    layer->primary_key_columns.push_back(trimmed);
+                                }
+                            }
+                        }
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
                         }
