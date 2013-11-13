@@ -102,12 +102,13 @@ namespace Batyr
             void toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorType & allocator) const;
 
 
-            void setStatistics(int _numPulled, int _numCreated, int _numUpdated, int _numDeleted)
+            void setStatistics(int _numPulled, int _numCreated, int _numUpdated, int _numDeleted, int _numIgnored = 0)
             {
                 numPulled = _numPulled;
                 numCreated = _numCreated;
                 numUpdated = _numUpdated;
                 numDeleted = _numDeleted;
+                numIgnored = _numIgnored;
             }
 
             Job::Type getType() const
@@ -137,6 +138,7 @@ namespace Batyr
             int numUpdated;
             int numDeleted;
             int numPulled;
+            int numIgnored;
 
 
     };

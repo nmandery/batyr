@@ -22,8 +22,12 @@ namespace Batyr
         std::string target_table_schema;
         std::string filter;
         bool allow_feature_deletion;
+        bool ignore_failures;
+        std::vector<std::string> primary_key_columns;
 
         typedef std::shared_ptr<Layer> Ptr;
+
+        Layer();
     };
 
 

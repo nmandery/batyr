@@ -21,7 +21,8 @@ Job::Job(Job::Type _type)
         numCreated(0),
         numUpdated(0),
         numDeleted(0),
-        numPulled(0)
+        numPulled(0),
+        numIgnored(0)
 {
     // generate an UUID as id for the job
     Poco::UUIDGenerator & uuidGen = Poco::UUIDGenerator::defaultGenerator();
@@ -31,7 +32,7 @@ Job::Job(Job::Type _type)
     // remove all dashes from the string for nicer looking URLs ;)
     // if the syntax of the id is changed, some ot the url parsing in 
     // the http/httprequesthandlerfactory.cpp needs to be changed as well
-    std::remove(id.begin(), id.end(), '-');
+    id.erase(std::remove(id.begin(), id.end(), '-'), id.end());
 }
 
 
@@ -51,7 +52,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
         targetValue.AddMember("timeFinished", vTimeFinished, allocator);
     }
 
-    const char * typeString;
+    const char * typeString = "";
     switch(type) {
         case PULL:
             typeString = "pull";
@@ -64,7 +65,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     Batyr::Json::toValue(vTypeString, typeString, allocator);
     targetValue.AddMember("type", vTypeString, allocator);
 
-    const char * statusString;
+    const char * statusString = "";
     switch (status) {
         case QUEUED:
             statusString = "queued";
@@ -126,6 +127,7 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     targetValue.AddMember("numUpdated", numUpdated, allocator);
     targetValue.AddMember("numDeleted", numDeleted, allocator);
     targetValue.AddMember("numPulled", numPulled, allocator);
+    targetValue.AddMember("numIgnored", numIgnored, allocator);
 }
 
 

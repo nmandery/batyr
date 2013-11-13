@@ -71,6 +71,7 @@ namespace Batyr {
                     std::unique_lock<std::mutex> mlock(mutex_);
                     if (!queue_.empty()) {
                         item = queue_.front();
+                        queue_.pop();
                     }
                 }
 

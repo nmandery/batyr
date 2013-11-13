@@ -100,7 +100,7 @@ description = Countries of africa based on
 source = testdata/shapes/Africa.shp
 
 # the name of the layer in the datasource
-# This corresponds with the "layer" paramaeter of the ogrinfo program
+# This corresponds with the "layer" parameter of the ogrinfo program
 #
 # Mandatory
 source_layer = Africa
@@ -132,12 +132,29 @@ allow_feature_deletion = yes
 # of a pull request
 #
 # Optional
-# Type: Unquoted String. Attirbute filter as described in the OGR documentation
+# Type: Unquoted String. Attribute filter as described in the OGR documentation
 #       at http://www.gdal.org/ogr/ogr_sql.html in the section of the
 #       WHERE-clause
 # Default: empty
 # Example: myattribute=3
 filter = 1 = 1
+
+# Ignore features with attributes which can not be cast to the datatype
+# of the table. The default behaviour is failing the whole pull when one
+# single feature can not be casted.
+#
+# Optional
+# Type: boolean
+# Default: no
+ignore_failures = no
+
+# Override/set the primary key for the table of this layer.
+#
+# Optional. The normal behaviour would be analyzing the schema of the table to find
+#           the column(s) of the primary key
+# Type: comma-seperated list of column names
+# Default: empty
+primary_key_columns = id
 
 [[dataset1]]
 description= testing different values

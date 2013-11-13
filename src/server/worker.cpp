@@ -156,6 +156,7 @@ Worker::pull(Job::Ptr job)
         int numCreated = 0;
         int numUpdated = 0;
         int numDeleted = 0;
+        int numIgnored = 0;
 
         // set the postgresql date style
         transaction->exec("set DateStyle to SQL, YMD");
@@ -171,7 +172,6 @@ Worker::pull(Job::Ptr job)
         auto tableFields = transaction->getTableFields(layer->target_table_schema, layer->target_table_name);
 
         // check if the requirements of the primary key are satisfied
-        // TODO: allow overriding the primarykey from the configfile
         std::vector<std::string> primaryKeyColumns;
         std::string geometryColumn;
         std::vector<std::string> insertColumns;
@@ -193,6 +193,16 @@ Worker::pull(Job::Ptr job)
             if (ogrFields.find(tableFieldPair.second.name) != ogrFields.end()) {
                 insertColumns.push_back(tableFieldPair.second.name);
             }
+        }
+        // allow overriding the primarykey from the configfile if there are alternatives cofigured there
+        if (!layer->primary_key_columns.empty()) {
+            for(const auto primary_key_column : layer->primary_key_columns) {
+                if (tableFields.find(primary_key_column) == tableFields.end()) {
+                    throw WorkerError("The configured primary key column \"" + primary_key_column + "\" does not exist in the table"
+                            " of layer \"" + job->getLayerName() + "\"");
+                }
+            }
+            primaryKeyColumns = layer->primary_key_columns;
         }
         if (primaryKeyColumns.empty()) {
             throw WorkerError("Got no primarykey for layer \"" + job->getLayerName() + "\"");
@@ -351,12 +361,32 @@ Worker::pull(Job::Ptr job)
                             return pV.get().length();
                     });
 
-            transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0], &cStrValueLenghts[0],
-                        NULL, 1);
+            if (layer->ignore_failures) {
+                try {
+                    transaction->exec("savepoint insertfeature;");
+                    transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0],
+                                &cStrValueLenghts[0], NULL, 1);
+                    transaction->exec("release savepoint insertfeature;");
+                }
+                catch (Batyr::Db::DbError &e) {
+                    if (!e.isDataException()) {
+                        throw;
+                    }
+                    numIgnored++;
+                    transaction->exec("rollback to savepoint insertfeature;");
 
+                    std::stringstream ignoreMsgStream;
+                    ignoreMsgStream << "Ignoring feature: " << e.what();
+                    poco_warning(logger, ignoreMsgStream.str().c_str());
+                }
+            }
+            else {
+                transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0],
+                            &cStrValueLenghts[0], NULL, 1);
+            }
             numPulled++;
         }
-        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
+        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted, numIgnored);
 
         // update the existing table only touching rows which have differences to prevent
         // slowdowns by triggers
@@ -442,7 +472,7 @@ Worker::pull(Job::Ptr job)
         }
 
         job->setStatus(Job::Status::FINISHED);
-        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted);
+        job->setStatistics(numPulled, numCreated, numUpdated, numDeleted, numIgnored);
 
         std::stringstream finalLogMsgStream;
         finalLogMsgStream   << "job " << job->getId() << " finished. Stats: "
@@ -503,7 +533,7 @@ Worker::removeByAttributes(Job::Ptr job)
         for(const auto & attributeSet: job->getAttributeSets()) {
             if (attributeSet.size() > 0) {
                 int i = 0;
-                if (attrValues.size() > 0) {
+                if (!attrValues.empty()) {
                     deleteStmt << " or ";
                 }
                 deleteStmt << " ( ";
@@ -525,7 +555,7 @@ Worker::removeByAttributes(Job::Ptr job)
             }
         }
 
-        if (attrValues.size() > 0) {
+        if (!attrValues.empty()) {
             poco_debug(logger, deleteStmt.str().c_str());
 
             // convert to an array of c strings

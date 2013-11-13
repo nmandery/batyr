@@ -16,6 +16,12 @@ using namespace Batyr;
  */
 static const char trimChars[] = "'\"\r\n\t ";
 
+Layer::Layer()
+    :   allow_feature_deletion(false),
+        ignore_failures(false)
+{
+}
+
 
 Configuration::Configuration(const std::string & configFile)
     :   http_port(9090),        // default value
@@ -119,6 +125,15 @@ Configuration::parse(const std::string & configFile)
         throw ConfigurationError("Could not open configfile at "+configFile);
     }
 
+#define GET_BOOLEAN_SETTING(TARGET_VAR, SETTING_NAME, STR_VALUE) { \
+            bool ok = false; \
+            bool _tmp_bool = valueToBool(STR_VALUE, ok); \
+            if (!ok) { \
+                throw ConfigurationError(SETTING_NAME + " must be a boolean value (true,false,yes,no,1,0)."); \
+            } \
+            TARGET_VAR = _tmp_bool; \
+        }
+
     try {
 
         Ini::Parser parser(ifs);
@@ -172,12 +187,7 @@ Configuration::parse(const std::string & configFile)
                         db_connection_string = StringUtils::trim(valuePair.second, trimChars);
                     }
                     else if (valuePair.first == "use_persistent_connections") {
-                        bool ok = false;
-                        bool _use_persistent_connections = valueToBool(valuePair.second, ok);
-                        if (!ok) {
-                            throw ConfigurationError("use_persistent_connections must be a boolean value (true,false,yes,no,1,0).");
-                        }
-                        use_persistent_connections = _use_persistent_connections;
+                        GET_BOOLEAN_SETTING(use_persistent_connections, valuePair.first, valuePair.second);
                     }
                     else {
                         throwUnknownSetting(sectionPair.first, valuePair.first);
@@ -187,7 +197,6 @@ Configuration::parse(const std::string & configFile)
             else if (sectionPair.first == "LAYERS") {
                 for(auto const layerSectionPair : sectionPair.second.sections) {
                     auto layer = std::make_shared<Layer>();
-                    layer->allow_feature_deletion = false; // default
                     layer->name = layerSectionPair.first;
 
                     // collect layer infos
@@ -211,12 +220,19 @@ Configuration::parse(const std::string & configFile)
                             layer->filter = layerValuePair.second;
                         }
                         else if (layerValuePair.first == "allow_feature_deletion") {
-                            bool ok = false;
-                            bool _allow_feature_deletion = valueToBool(layerValuePair.second, ok);
-                            if (!ok) {
-                                throw ConfigurationError("allow_feature_deletion must be a boolean value (true,false,yes,no,1,0).");
+                            GET_BOOLEAN_SETTING(layer->allow_feature_deletion, layerValuePair.first, layerValuePair.second);
+                        }
+                        else if (layerValuePair.first == "ignore_failures") {
+                            GET_BOOLEAN_SETTING(layer->ignore_failures, layerValuePair.first, layerValuePair.second);
+                        }
+                        else if (layerValuePair.first == "primary_key_columns") {
+                            auto pk_columns_untrimmed = StringUtils::split(layerValuePair.second, ',');
+                            for(auto const pk_column_untrimmed : pk_columns_untrimmed) {
+                                auto trimmed =  StringUtils::trim(pk_column_untrimmed, trimChars);
+                                if (!trimmed.empty()) {
+                                    layer->primary_key_columns.push_back(trimmed);
+                                }
                             }
-                            layer->allow_feature_deletion = _allow_feature_deletion;
                         }
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
@@ -224,16 +240,17 @@ Configuration::parse(const std::string & configFile)
                     }
 
                     // check for missing mantatory settings
-#define CHECK_STR_SETTING(LAYER, SETTING) if (LAYER->SETTING.empty()) { \
-                        throw ConfigurationError("Layer \"" + LAYER->name + "\" is missing the \"" STRINGIFY(SETTING) "\" setting"); \
+#define CHECK_LAYER_STR_SETTING(LAYER, SETTING) if (LAYER->SETTING.empty()) { \
+                        throw ConfigurationError("Layer \"" + LAYER->name + "\" is missing the \"" \
+                                STRINGIFY(SETTING) "\" setting"); \
                     }
 
-                    CHECK_STR_SETTING(layer, source);
-                    CHECK_STR_SETTING(layer, source_layer);
-                    CHECK_STR_SETTING(layer, target_table_name);
-                    CHECK_STR_SETTING(layer, target_table_schema);
+                    CHECK_LAYER_STR_SETTING(layer, source);
+                    CHECK_LAYER_STR_SETTING(layer, source_layer);
+                    CHECK_LAYER_STR_SETTING(layer, target_table_name);
+                    CHECK_LAYER_STR_SETTING(layer, target_table_schema);
 
-#undef CHECK_STR_SETTING
+#undef CHECK_LAYER_STR_SETTING
 
                     layers[layer->name] = layer;
                 }
@@ -256,7 +273,8 @@ Configuration::parse(const std::string & configFile)
 #ifdef _DEBUG
                             loglevel = Poco::Message::PRIO_DEBUG;
 #else
-                            std::cerr << "The loglevel \"debug\" is only available in debug build. Using level \"information\" instead." << std::endl;
+                            std::cerr << "The loglevel \"debug\" is only available in debug build. "
+                                      << "Using level \"information\" instead." << std::endl;
                             loglevel = Poco::Message::PRIO_INFORMATION;
 #endif
                         }
@@ -289,5 +307,7 @@ Configuration::parse(const std::string & configFile)
     catch( std::exception ) {
         throw ConfigurationError("Could not parse configuraton file");
     }
+
+#undef GET_BOOLEAN_SETTING
 }
 
