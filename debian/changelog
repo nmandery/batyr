@@ -1,3 +1,19 @@
+batyr (0.1.3-0) unstable; urgency=low
+
+  * do not use libc++ when using clang++ as libc++ is not packaged in debian/ubuntu. use libstdc++ instead [b379151]
+  * removing jobs from queue when using popNoWait [084edd2]
+  * remove debug ouput & use macro to fetch boolean values [1b39758]
+  * make primary key of target table configurable. fixes #1 [df544d7]
+  * moving initialization of layer default to contructor [7e0b02b]
+  * ignore invalid features by using savepoints to rollback after failing inserts. fixes #2 [2672015]
+  * initializing c-strings used in job serialization [b699864]
+  * fixing job id generation [fa0c32d]
+  * improving documentation [1272b40], [b8bb066], [ed7ba88], [1446656], [0cf021d]
+  * fixing typos and adding interval-based pulling to roadmap [f945656]
+  * documentation and licensing info [fffdbf5]
+ -- Nico Mandery <nico.mandery@geops.de>  Wed, 13 Nov 2013 17:03:13 +0100
+
+
 batyr (0.1.2-0) unstable; urgency=low
 
   * remove artifacts from last cmake run when building packages [1c92116]
@@ -25,3 +41,4 @@ batyr (0.1.0-0) unstable; urgency=low
   * first packaged version
 
  -- Nico Mandery <nico.mandery@geops.de>  Thu, 08 Oct 2013 13:08:21 +0100
+
