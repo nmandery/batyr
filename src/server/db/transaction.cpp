@@ -81,6 +81,13 @@ Transaction::prepare(const std::string &stmtName, const std::string &_sql, int n
                 paramTypes
             ), PQclear);
     checkResult(result);
+
+    // explicitly deallocate the prepared statement at the end of the transaction. otherwise
+    // the statement stays allocated until the end of the db session
+    std::stringstream deallocStmtStream;
+    deallocStmtStream << "deallocate " << stmtName << ";";
+    exitSqls.push_back(deallocStmtStream.str());
+
     return std::move(result);
 }
 
