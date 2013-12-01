@@ -166,6 +166,12 @@ The valid values for each setting are documented in the example file bellow. For
     # indentifier for the layer.
     [[africa]]
     
+    # enable/disable this layer. Each layer is enabled by default
+    #
+    # Optional
+    # Default: yes
+    enabled = true
+    
     # A optional description to show in the web interface
     # has to be in one line
     #

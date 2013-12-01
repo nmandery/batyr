@@ -24,6 +24,7 @@ namespace Batyr
         bool allow_feature_deletion;
         bool ignore_failures;
         std::vector<std::string> primary_key_columns;
+        bool enabled;
 
         typedef std::shared_ptr<Layer> Ptr;
 
