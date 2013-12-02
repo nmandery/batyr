@@ -164,6 +164,8 @@ Worker::pull(Job::Ptr job)
         // build a unique name for the temporary table
         std::string tempTableName = "batyr_" + job->getId();
 
+        auto versionPostgis = transaction->getPostGISVersion();
+
         // create a temp table to write the data to
         transaction->createTempTable(layer->target_table_schema, layer->target_table_name, tempTableName);
 
@@ -418,12 +420,31 @@ Worker::pull(Job::Ptr job)
             auto tableField = &tableFields[updateColumns[i]];
 
             if (tableField->pgTypeName == "geometry") {
-                // update geometries always if the srid differs.
+                // update geometries always if the srid differs or when they are collections
                 // MEMO: geometries with different SRIDs can not be compared with the "=" operator
+                // MEMO: collections can not be compared with st_equals
                 updateStmt  << "("
-                            <<      "case when st_srid(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\")"
-                            <<                  " != st_srid(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") then "
-                            <<          " true "
+                            <<      "case when (st_srid(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\")"
+                            <<                  " != st_srid(\"" << tempTableName << "\".\"" << updateColumns[i] << "\")) ";
+
+                if (std::get<0>(versionPostgis) >= 2) {
+                        // st_iscollection is only supported starting with postgis 2.0
+                        updateStmt  << " or st_iscollection(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\") "
+                                    << " or st_iscollection(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") ";
+                }
+                else {
+                        updateStmt  << " or ("
+                                    <<   "st_geometrytype(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\") = 'ST_GeometryCollection'"
+                                    <<   " or st_geometrytype(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\") like 'ST_Multi%'"
+                                    << ") "
+                                    << " or ("
+                                    <<   "st_geometrytype(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") = 'ST_GeometryCollection'"
+                                    <<   " or st_geometrytype(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") like 'ST_Multi%'"
+                                    << ") ";
+                }
+
+                updateStmt  <<          "then "
+                            <<              " true "
                             <<      " else "
                             <<          "not st_equals(\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\", "
                             <<          "\""  << tempTableName << "\".\"" << updateColumns[i] << "\")"

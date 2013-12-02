@@ -4,6 +4,7 @@
 #include "server/db/transaction.h"
 #include "server/db/connection.h"
 #include "common/macros.h"
+#include "common/stringutils.h"
 
 
 using namespace Batyr::Db;
@@ -239,4 +240,36 @@ Transaction::getGeometryColumnSRID(const std::string &tableSchema, const std::st
     // TODO: Maybe analyze existing geometries for their srid
     
     return srid;
+}
+
+
+VersionTuple
+Transaction::getPostGISVersion()
+{
+    auto res = execParams("select postgis_lib_version();",
+            0, NULL, NULL, NULL, NULL, 1);
+    
+    if (PQntuples(res.get()) == 0) {
+        throw DbError("postgis_lib_version returned nothing");
+    }
+    char * versionString = PQgetvalue(res.get(), 0, 0);
+    if (versionString == nullptr) {
+        throw DbError("postgis_lib_version returned an empty version string");
+    }
+    auto versionNumbers = StringUtils::split(versionString, '.');
+    int versionMajor = 0;
+    int versionMinor = 0;
+    int versionPatch = 0;
+
+    if (versionNumbers.size()>0) {
+        versionMajor = std::atoi(versionNumbers[0].c_str());
+    }
+    if (versionNumbers.size()>1) {
+        versionMinor = std::atoi(versionNumbers[1].c_str());
+    }
+    if (versionNumbers.size()>2) {
+        versionPatch = std::atoi(versionNumbers[2].c_str());
+    }
+
+    return VersionTuple(versionMajor, versionMinor, versionPatch);
 }
