@@ -98,6 +98,20 @@ namespace Db
              * get the version of the installed postgis extension
              */
             VersionTuple getPostGISVersion();
+
+
+            /** 
+             * quote all strings of the vector as identifiers using 
+             * postgresqls quote_ident function
+             */
+            std::vector<std::string> quoteIdent(const std::vector<std::string> &);
+            std::string quoteIdent(const std::string &);
+
+            /**
+             * return the value quoted with quote_ident and all parts joined together with a '.'
+             */
+            std::string quoteIdentJ(const std::string &, const std::string &);
+
     };
 
 };
