@@ -17,7 +17,7 @@ The synchronization process can be divided into six steps:
 
 1. batyr creates a new temporary table in the database which uses the same schema definition as the target table.
 2. data is pulled from the source and gets written to the new temporary table.
-3. batyr uses the primary key definition of the target table to update the contents of the target table using the newly fetched contents of the temporary table. The update will only affect rows where data actually differ to reduce the number of writes and the amount of possibly defined triggers firing. There is just the current limitation that multi-geometries (ST_GeometryCollection, ST_Multi*) may not be compared using the PostGIS ST_Equals function, so rows containing such geometries will always be updated.
+3. batyr uses the primary key definition of the target table to update the contents of the target table using the newly fetched contents of the temporary table. The update will only affect rows where data actually differ to reduce the number of writes and the amount of possibly defined triggers firing. There is just the current limitation that multi-geometries (ST_GeometryCollection, ST_Multi*) may not be compared using the PostGIS ST_Equals function, so rows containing such geometries will be compared using the binary representation of the geometries.
 4. batyr checks the temporary table for rows which are missing in the target table using the primary key and inserts these into the target table.
 5. batyr deletes all rows from the target table which are not part of the new data. This step is optional and may be disabled by the `allow_feature_deletion` setting and also is generally deactivated when a filter is used.
 6. The temporary table gets dropped again.

@@ -444,8 +444,12 @@ Worker::pull(Job::Ptr job)
                 }
 
                 updateStmt  <<          "then "
-                            <<              " true "
+                            // compare using the binary representation as ST_Equals can not be used in this case
+                            <<              "\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\"::bytea "
+                            <<              " is distinct from "
+                            <<              "\""  << tempTableName << "\".\"" << updateColumns[i] << "\"::bytea "
                             <<      " else "
+                            // compare using st_equals
                             <<          "not st_equals(\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\", "
                             <<          "\""  << tempTableName << "\".\"" << updateColumns[i] << "\")"
                             <<      " end "
