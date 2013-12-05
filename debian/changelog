@@ -1,3 +1,15 @@
+batyr (0.1.4-0) unstable; urgency=low
+
+  * quote postgresql column, table and schema names using quote_ident [4732250]
+  * compare geometries which are not comparable with ST_Equals using their
+    binary representation [c679df4], [49fee77]
+  * configuration switch to enable/disable layers. fixes #6 [b7860e4]
+  * re-use blogpost for README.md [ca1c462]
+  * deallocate prepared statement at the end of a transaction. #4 [ee0db91]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Thu, 05 Dec 2013 15:59:56 +0100
+
+
 batyr (0.1.3-0) unstable; urgency=low
 
   * do not use libc++ when using clang++ as libc++ is not packaged in debian/ubuntu. use libstdc++ instead [b379151]
@@ -11,6 +23,7 @@ batyr (0.1.3-0) unstable; urgency=low
   * improving documentation [1272b40], [b8bb066], [ed7ba88], [1446656], [0cf021d]
   * fixing typos and adding interval-based pulling to roadmap [f945656]
   * documentation and licensing info [fffdbf5]
+
  -- Nico Mandery <nico.mandery@geops.de>  Wed, 13 Nov 2013 17:03:13 +0100
 
 
