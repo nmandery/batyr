@@ -4,6 +4,7 @@
 #include "server/db/transaction.h"
 #include "server/db/connection.h"
 #include "common/macros.h"
+#include "common/stringutils.h"
 
 
 using namespace Batyr::Db;
@@ -81,6 +82,13 @@ Transaction::prepare(const std::string &stmtName, const std::string &_sql, int n
                 paramTypes
             ), PQclear);
     checkResult(result);
+
+    // explicitly deallocate the prepared statement at the end of the transaction. otherwise
+    // the statement stays allocated until the end of the db session
+    std::stringstream deallocStmtStream;
+    deallocStmtStream << "deallocate " << stmtName << ";";
+    exitSqls.push_back(deallocStmtStream.str());
+
     return std::move(result);
 }
 
@@ -138,7 +146,7 @@ Transaction::createTempTable(const std::string &existingTableSchema, const std::
 
     // use a simple select into and not table inheritance
     querystream << "select * into temporary " << tempTableName
-                << " from \"" << existingTableSchema << "\".\"" << existingTableName << "\" limit 0";
+                << " from " << quoteIdentJ(existingTableSchema, existingTableName) << " limit 0";
     std::string query = querystream.str();
 
     // postgresql drops temporary tables when the connections ends. But the temporary
@@ -232,4 +240,108 @@ Transaction::getGeometryColumnSRID(const std::string &tableSchema, const std::st
     // TODO: Maybe analyze existing geometries for their srid
     
     return srid;
+}
+
+
+VersionTuple
+Transaction::getPostGISVersion()
+{
+    auto res = execParams("select postgis_lib_version();",
+            0, NULL, NULL, NULL, NULL, 1);
+    
+    if (PQntuples(res.get()) == 0) {
+        throw DbError("postgis_lib_version returned nothing");
+    }
+    char * versionString = PQgetvalue(res.get(), 0, 0);
+    if (versionString == nullptr) {
+        throw DbError("postgis_lib_version returned an empty version string");
+    }
+    auto versionNumbers = StringUtils::split(versionString, '.');
+    int versionMajor = 0;
+    int versionMinor = 0;
+    int versionPatch = 0;
+
+    if (versionNumbers.size()>0) {
+        versionMajor = std::atoi(versionNumbers[0].c_str());
+    }
+    if (versionNumbers.size()>1) {
+        versionMinor = std::atoi(versionNumbers[1].c_str());
+    }
+    if (versionNumbers.size()>2) {
+        versionPatch = std::atoi(versionNumbers[2].c_str());
+    }
+
+    return VersionTuple(versionMajor, versionMinor, versionPatch);
+}
+
+
+std::vector<std::string> 
+Transaction::quoteIdent(const std::vector<std::string> & inStrings)
+{
+    std::vector<std::string> quotedStrings;
+    size_t inStringsSize = inStrings.size();
+
+    if (inStringsSize > 0) {
+        std::stringstream queryStrm;
+
+        size_t iParam = 0;
+        std::vector<const char *> paramValues;
+        paramValues.reserve(inStringsSize);
+        std::vector<int> paramLengths;
+        paramLengths.reserve(inStringsSize);
+
+        queryStrm << "select ";
+        while (iParam < inStringsSize) {
+            if (iParam > 0) {
+                queryStrm << ", ";
+            }
+            queryStrm << "quote_ident($" << iParam+1 << ")";
+            paramValues.push_back(inStrings[iParam].c_str());
+            paramLengths.push_back(inStrings[iParam].length());
+            ++iParam;
+        }
+
+        auto res = execParams(
+                queryStrm.str(),
+                paramValues.size(), NULL, &paramValues[0], &paramLengths[0], NULL, 1);
+
+        if (PQntuples(res.get()) != 1) {
+            throw DbError("Transaction::quoteIdent should only get one tuple from db");
+        }
+
+        for (size_t i=0; i < inStringsSize; i++) {
+            char * val = PQgetvalue(res.get(), 0, i);
+            quotedStrings.push_back(std::string(val));
+        }
+    }
+    return quotedStrings;
+}
+
+        
+std::string 
+Transaction::quoteIdent(const std::string & uq1)
+{
+    std::vector<std::string> uqv;
+    uqv.push_back(uq1);
+    
+    auto qv = quoteIdent(uqv);
+    if (qv.size() != 1) {
+        throw DbError("Quoted vector should contain excatly one element.");
+    }
+    return qv[0];
+}
+
+
+std::string
+Transaction::quoteIdentJ(const std::string & uq1, const std::string & uq2)
+{
+    std::vector<std::string> uqv;
+    uqv.push_back(uq1);
+    uqv.push_back(uq2);
+    
+    auto qv = quoteIdent(uqv);
+    if (qv.size() != 2) {
+        throw DbError("Quoted vector should contain exactly two elements.");
+    }
+    return StringUtils::join(qv, ".");
 }

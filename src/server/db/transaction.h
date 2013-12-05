@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <vector>
+#include <tuple>
 
 
 namespace Batyr 
@@ -22,6 +23,8 @@ namespace Db
      * smartpointer to free a PGresult on scope exit
      */
     typedef std::unique_ptr<PGresult, void (*)(PGresult*) > PGresultPtr;
+
+    typedef std::tuple<int, int, int> VersionTuple;
 
     class Transaction
     {
@@ -89,6 +92,26 @@ namespace Db
              * if no srid is found, 0 is returned
              */
             int getGeometryColumnSRID(const std::string &tableSchema, const std::string &tableName, const std::string &columnName);
+
+
+            /**
+             * get the version of the installed postgis extension
+             */
+            VersionTuple getPostGISVersion();
+
+
+            /** 
+             * quote all strings of the vector as identifiers using 
+             * postgresqls quote_ident function
+             */
+            std::vector<std::string> quoteIdent(const std::vector<std::string> &);
+            std::string quoteIdent(const std::string &);
+
+            /**
+             * return the value quoted with quote_ident and all parts joined together with a '.'
+             */
+            std::string quoteIdentJ(const std::string &, const std::string &);
+
     };
 
 };

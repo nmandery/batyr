@@ -18,7 +18,8 @@ static const char trimChars[] = "'\"\r\n\t ";
 
 Layer::Layer()
     :   allow_feature_deletion(false),
-        ignore_failures(false)
+        ignore_failures(false),
+        enabled(true)
 {
 }
 
@@ -225,6 +226,9 @@ Configuration::parse(const std::string & configFile)
                         else if (layerValuePair.first == "ignore_failures") {
                             GET_BOOLEAN_SETTING(layer->ignore_failures, layerValuePair.first, layerValuePair.second);
                         }
+                        else if (layerValuePair.first == "enabled") {
+                            GET_BOOLEAN_SETTING(layer->enabled, layerValuePair.first, layerValuePair.second);
+                        }
                         else if (layerValuePair.first == "primary_key_columns") {
                             auto pk_columns_untrimmed = StringUtils::split(layerValuePair.second, ',');
                             for(auto const pk_column_untrimmed : pk_columns_untrimmed) {
@@ -252,7 +256,12 @@ Configuration::parse(const std::string & configFile)
 
 #undef CHECK_LAYER_STR_SETTING
 
-                    layers[layer->name] = layer;
+                    if (layer->enabled) {
+                        layers[layer->name] = layer;
+                    }
+                    else {
+                        std::cout << "Layer \"" << layer->name << "\" is disabled." << std::endl;
+                    }
                 }
             }
             else if (sectionPair.first == "LOGGING") {

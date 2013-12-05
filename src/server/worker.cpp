@@ -164,6 +164,8 @@ Worker::pull(Job::Ptr job)
         // build a unique name for the temporary table
         std::string tempTableName = "batyr_" + job->getId();
 
+        auto versionPostgis = transaction->getPostGISVersion();
+
         // create a temp table to write the data to
         transaction->createTempTable(layer->target_table_schema, layer->target_table_name, tempTableName);
 
@@ -279,9 +281,9 @@ Worker::pull(Job::Ptr job)
             idxColumn++;
         }
         std::stringstream insertQueryStream;
-        insertQueryStream   << "insert into \"" << tempTableName << "\" (\""
-                            << StringUtils::join(insertColumns, "\", \"")
-                            << "\") "
+        insertQueryStream   << "insert into " << transaction->quoteIdent(tempTableName) << " ("
+                            << StringUtils::join(transaction->quoteIdent(insertColumns), ", ")
+                            << ") "
                             << "select "
                             << StringUtils::join(insertQueryValues, ", ");
         poco_debug(logger, insertQueryStream.str().c_str());
@@ -391,22 +393,24 @@ Worker::pull(Job::Ptr job)
         // update the existing table only touching rows which have differences to prevent
         // slowdowns by triggers
         std::stringstream updateStmt;
-        updateStmt          << "update \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+        updateStmt          << "update " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name) << " "
                             << " set ";
         for (size_t i=0; i<updateColumns.size(); i++) {
             if (i != 0) {
                 updateStmt << ", ";
             }
-            updateStmt << "\"" << updateColumns[i] << "\" = \"" << tempTableName << "\".\"" << updateColumns[i] << "\" ";
+            updateStmt  << transaction->quoteIdent(updateColumns[i]) << " = " 
+                        << transaction->quoteIdentJ(tempTableName, updateColumns[i]) << " ";
         }
-        updateStmt          << " from \"" << tempTableName << "\""
+        updateStmt          << " from " << transaction->quoteIdent(tempTableName) 
                             << " where (";
         for (size_t i=0; i<primaryKeyColumns.size(); i++) {
             if (i != 0) {
                 updateStmt << " and ";
             }
-            updateStmt  << "\""  << layer->target_table_name << "\".\"" << primaryKeyColumns[i]
-                        << "\" is not distinct from \"" << tempTableName << "\".\"" << primaryKeyColumns[i] << "\"";
+            updateStmt  << transaction->quoteIdentJ(layer->target_table_name, primaryKeyColumns[i])
+                        << " is not distinct from "
+                        << transaction->quoteIdentJ(tempTableName, primaryKeyColumns[i]);
         }
         updateStmt          << ") and (";
         // update only rows which are actual different
@@ -418,22 +422,45 @@ Worker::pull(Job::Ptr job)
             auto tableField = &tableFields[updateColumns[i]];
 
             if (tableField->pgTypeName == "geometry") {
-                // update geometries always if the srid differs.
+                std::string quotedTargetGeom =  transaction->quoteIdentJ(layer->target_table_name, updateColumns[i]);
+                std::string quotedTempGeom = transaction->quoteIdentJ(tempTableName, updateColumns[i]);
+
+                // update geometries always if the srid differs or when they are collections
                 // MEMO: geometries with different SRIDs can not be compared with the "=" operator
+                // MEMO: collections can not be compared with st_equals
                 updateStmt  << "("
-                            <<      "case when st_srid(\"" << layer->target_table_name << "\".\"" << updateColumns[i] << "\")"
-                            <<                  " != st_srid(\"" << tempTableName << "\".\"" << updateColumns[i] << "\") then "
-                            <<          " true "
-                            <<      " else "
-                            <<          "not st_equals(\""  << layer->target_table_name << "\".\"" << updateColumns[i] << "\", "
-                            <<          "\""  << tempTableName << "\".\"" << updateColumns[i] << "\")"
-                            <<      " end "
+                            <<      "case when "
+                            <<          "(st_srid(" << quotedTargetGeom << ") != st_srid(" << quotedTempGeom << ")) ";
+
+                if (std::get<0>(versionPostgis) >= 2) {
+                        // st_iscollection is only supported starting with postgis 2.0
+                        updateStmt  << " or st_iscollection(" << quotedTargetGeom << ") "
+                                    << " or st_iscollection(" << quotedTempGeom << ") ";
+                }
+                else {
+                        updateStmt  << " or ("
+                                    <<   "st_geometrytype(" << quotedTargetGeom << ") = 'ST_GeometryCollection'"
+                                    <<   " or st_geometrytype(" << quotedTargetGeom << ") like 'ST_Multi%'"
+                                    << ") "
+                                    << " or ("
+                                    <<   "st_geometrytype(" << quotedTempGeom << ") = 'ST_GeometryCollection'"
+                                    <<   " or st_geometrytype(" << quotedTempGeom << ") like 'ST_Multi%'"
+                                    << ") ";
+                }
+
+                updateStmt  <<  "then "
+                            // compare using the binary representation as ST_Equals can not be used in this case
+                            <<      quotedTargetGeom << "::bytea " << " is distinct from " << quotedTempGeom << "::bytea "
+                            <<  " else "
+                            // compare using st_equals
+                            <<      "not st_equals("  << quotedTargetGeom << ", " << quotedTempGeom << ")"
+                            <<  " end "
                             << ")";
             }
             else {
-                updateStmt  << "(\"" << layer->target_table_name << "\".\"" << updateColumns[i]
-                            << "\" is distinct from  \""
-                            << tempTableName << "\".\"" << updateColumns[i] << "\")";
+                updateStmt  << "(" << transaction->quoteIdentJ(layer->target_table_name, updateColumns[i])
+                            << " is distinct from "
+                            << transaction->quoteIdentJ(tempTableName, updateColumns[i]) << ")";
             }
         }
         updateStmt          << ")";
@@ -443,13 +470,13 @@ Worker::pull(Job::Ptr job)
 
         // insert missing rows in the exisiting table
         std::stringstream insertMissingStmt;
-        insertMissingStmt   << "insert into \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
-                            << " ( \"" << StringUtils::join(insertColumns, "\", \"") << "\") "
-                            << " select \"" << StringUtils::join(insertColumns, "\", \"") << "\" "
-                            << " from \"" << tempTableName << "\""
-                            << " where (\"" << StringUtils::join(primaryKeyColumns, "\", \"") << "\") not in ("
-                            << " select \"" << StringUtils::join(primaryKeyColumns, "\",\"") << "\" "
-                            << "       from \"" << layer->target_table_schema << "\".\""  << layer->target_table_name << "\""
+        insertMissingStmt   << "insert into " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
+                            << " ( " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << ") "
+                            << " select " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << " "
+                            << " from " << transaction->quoteIdent(tempTableName)
+                            << " where (" << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ") << ") not in ("
+                            << " select " << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ",") << " "
+                            << "       from " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
                             << ")";
         auto insertMissingRes = transaction->exec(insertMissingStmt.str());
         numCreated = std::atoi(PQcmdTuples(insertMissingRes.get()));
@@ -458,10 +485,11 @@ Worker::pull(Job::Ptr job)
         // delete deprecated rows from the exisiting table
         if (allow_feature_deletion) {
             std::stringstream deleteRemovedStmt;
-            deleteRemovedStmt   << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
-                                << " where (\"" << StringUtils::join(primaryKeyColumns, "\", \"") << "\") not in ("
-                                << " select \"" << StringUtils::join(primaryKeyColumns, "\",\"") << "\" "
-                                << "       from \"" << tempTableName << "\""
+            auto quotedPrimaryKeyColumnsStr = StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ");
+            deleteRemovedStmt   << "delete from " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
+                                << " where (" << quotedPrimaryKeyColumnsStr << ") not in ("
+                                << " select " << quotedPrimaryKeyColumnsStr << " "
+                                << "       from " << transaction->quoteIdent(tempTableName)
                                 << ")";
             auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
             numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
@@ -525,7 +553,7 @@ Worker::removeByAttributes(Job::Ptr job)
         auto tableFields = transaction->getTableFields(layer->target_table_schema, layer->target_table_name);
 
         std::stringstream deleteStmt;
-        deleteStmt  << "delete from \"" << layer->target_table_schema << "\".\"" << layer->target_table_name << "\" "
+        deleteStmt  << "delete from " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
                     << " where ";
 
         int numDeleted = 0;
@@ -547,7 +575,7 @@ Worker::removeByAttributes(Job::Ptr job)
                         deleteStmt << " and ";
                     }
                     attrValues.push_back(attributePair.second);
-                    deleteStmt  << "(\"" << layer->target_table_name << "\".\"" << attributePair.first << "\""
+                    deleteStmt  << transaction->quoteIdentJ(layer->target_table_name, attributePair.first)
                                 << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName << ")";
                     ++i;
                 }
