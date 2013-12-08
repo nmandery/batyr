@@ -153,6 +153,9 @@ Configuration::parse(const std::string & configFile)
                                         valuePair.second);
                         }
                     }
+                    else  if (valuePair.first == "access_control_allow_origin") {
+                        access_control_allow_origin = StringUtils::trim(valuePair.second, trimChars);
+                    }
                     else {
                         throwUnknownSetting(sectionPair.first, valuePair.first);
                     }

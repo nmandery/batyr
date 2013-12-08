@@ -23,4 +23,9 @@ Handler::prepareApiResponse(Poco::Net::HTTPServerResponse &resp)
     prepareResponse(resp);
     resp.setContentType("application/json");
     resp.set("Cache-Control", "no-cache");
+
+    if (!configuration->getAccessControlAllowOriginHeader().empty()) {
+        resp.set("Access-Control-Allow-Origin", configuration->getAccessControlAllowOriginHeader());
+    }
+
 }

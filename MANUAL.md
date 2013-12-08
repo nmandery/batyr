@@ -158,6 +158,17 @@ The valid values for each setting are documented in the example file bellow. For
     # Default: 9090
     port = 9091
     
+    # Value for the Access-Control-Allow-Origin header to be send with the HTTP
+    # api for allowing cross site HTTP-requests from javascript clients.
+    #
+    # For more information see https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS
+    # 
+    # When empty the header will be omitted. To allow request from everywhere use "*"
+    #
+    # Optional
+    # Default: <not set>
+    access_control_allow_origin =
+    
     
     # the layer configurations
     [LAYERS]
