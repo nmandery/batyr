@@ -46,7 +46,7 @@ Listener::~Listener()
 void
 Listener::run()
 {
-    poco_debug(logger, "Starting http listener");
+    poco_information(logger, "Listening on port " + std::to_string(configuration->getHttpPort()));
     if (!isRunning) {
 
         // set the joblist
