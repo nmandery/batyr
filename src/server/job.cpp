@@ -122,12 +122,13 @@ Job::toJsonValue(rapidjson::Value & targetValue, rapidjson::Document::AllocatorT
     Batyr::Json::toValue(vMessage, message, allocator);
     targetValue.AddMember("message", vMessage, allocator);
 
-
-    targetValue.AddMember("numCreated", numCreated, allocator);
-    targetValue.AddMember("numUpdated", numUpdated, allocator);
-    targetValue.AddMember("numDeleted", numDeleted, allocator);
-    targetValue.AddMember("numPulled", numPulled, allocator);
-    targetValue.AddMember("numIgnored", numIgnored, allocator);
+    if ((status == FINISHED) || (status == FAILED)) {
+        targetValue.AddMember("numCreated", numCreated, allocator);
+        targetValue.AddMember("numUpdated", numUpdated, allocator);
+        targetValue.AddMember("numDeleted", numDeleted, allocator);
+        targetValue.AddMember("numPulled", numPulled, allocator);
+        targetValue.AddMember("numIgnored", numIgnored, allocator);
+    }
 }
 
 
