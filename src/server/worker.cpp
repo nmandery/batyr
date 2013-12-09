@@ -681,6 +681,9 @@ Worker::run()
         }
         catch (Batyr::Db::DbError &e) {
             poco_error(logger, e.what());
+            if (e.hasContext()) {
+                poco_error(logger, "postgresql error context: " + e.getContext());
+            }
             job->setStatus(Job::Status::FAILED);
             job->setMessage(e.what());
         }
