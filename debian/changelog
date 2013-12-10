@@ -1,3 +1,14 @@
+batyr (0.1.5-0) unstable; urgency=low
+
+  * remove excess parenthesis from sql statement of remove-by-attributes method [61f6a22]
+  * log postgresql error context if it is available [2a212c6]
+  * configurable Access-Control-Allow-Origin header for HTTP access control [3b1ab52]
+  * logging the port the HttpListener uses [87422c5]
+  * only add num* attributes to job json when there is any meaningful data available (when status is finished or failed) [32fca88]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Tue, 10 Dec 2013 15:02:43 +0100
+
+
 batyr (0.1.4-0) unstable; urgency=low
 
   * quote postgresql column, table and schema names using quote_ident [4732250]
