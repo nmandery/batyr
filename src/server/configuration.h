@@ -98,6 +98,11 @@ namespace Batyr
              */
             std::vector<Layer::Ptr> getOrderedLayers() const;
 
+            std::string getAccessControlAllowOriginHeader() const
+            {
+                return access_control_allow_origin;
+            }
+
             typedef std::shared_ptr<Configuration> Ptr;
 
         private:
@@ -111,6 +116,7 @@ namespace Batyr
             Poco::Message::Priority loglevel;
             std::string logfile;
             bool use_persistent_connections;
+            std::string access_control_allow_origin;
 
 
             void parse(const std::string & configFile);

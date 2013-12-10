@@ -124,6 +124,7 @@ Transaction::checkResult(PGresultPtr & res)
     if (resStatus == PGRES_FATAL_ERROR) {
         char * sqlstate = PQresultErrorField(res.get(), PG_DIAG_SQLSTATE);
         char * msg_primary = PQresultErrorField(res.get(), PG_DIAG_MESSAGE_PRIMARY);
+        char * context = PQresultErrorField(res.get(), PG_DIAG_CONTEXT);
 
 #ifdef _DEBUG
         std::stringstream msgstream;
@@ -133,7 +134,11 @@ Transaction::checkResult(PGresultPtr & res)
 
         rollback = true;
 
-        throw DbError(msg_primary, sqlstate);
+        auto excep = DbError(msg_primary, sqlstate);
+        if (context != nullptr) {
+            excep.setContext(context);
+        }
+        throw excep;
     }
 }
 

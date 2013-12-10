@@ -158,6 +158,17 @@ The valid values for each setting are documented in the example file bellow. For
     # Default: 9090
     port = 9091
     
+    # Value for the Access-Control-Allow-Origin header to be send with the HTTP
+    # api for allowing cross site HTTP-requests from javascript clients.
+    #
+    # For more information see https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS
+    # 
+    # When empty the header will be omitted. To allow request from everywhere use "*"
+    #
+    # Optional
+    # Default: <not set>
+    access_control_allow_origin =
+    
     
     # the layer configurations
     [LAYERS]
@@ -278,11 +289,11 @@ The basic object the API deals with is called a `job` and possesses the followin
 * `layerName`: Name of the layer the job wants to pull.  Always present.
 * `filter`: Attribute filter. Optional. Only used with pull-jobs.
 * `message`: A message from the server regarding this job. Mostly empty, but will contain an error message in case something went wrong.
-* `numPulled`: Number of features pulled/read from the source.
-* `numCreated`: Number of newly created features in the database.
-* `numUpdated`: Number of existing features in the database which have been updated. Features will only be updated if they show differences.
-* `numIgnored`: Number of features ignored because of one or more of their attributes havig an type incompatible with the table in the database. This beviour has to be enabled in the configfile.
-* `numDeleted`: Number of features deleted by this job.
+* `numPulled`: Number of features pulled/read from the source. Attribute is available when `status` is `finished` or `failed`.
+* `numCreated`: Number of newly created features in the database. Attribute is available when `status` is `finished` or `failed`.
+* `numUpdated`: Number of existing features in the database which have been updated. Features will only be updated if they show differences. Attribute is available when `status` is `finished` or `failed`.
+* `numIgnored`: Number of features ignored because of one or more of their attributes havig an type incompatible with the table in the database. This beviour has to be enabled in the configfile. Attribute is available when `status` is `finished` or `failed`.
+* `numDeleted`: Number of features deleted by this job. Attribute is available when `status` is `finished` or `failed`.
 
 ### Example
 
@@ -290,7 +301,7 @@ The basic object the API deals with is called a `job` and possesses the followin
         "id": "c94a6c77c18649668fd780744ea745a645a6",
         "type": "pull",
         "timeAdded": "2013-10-08T13:58:51Z",
-        "status": "queued",
+        "status": "finished",
         "layerName": "africa",
         "filter": "id=\"4\"",
         "message": "",
@@ -407,12 +418,7 @@ Allows starting a new job by POSTing a JSON document to this URL. The `layerName
         "status": "queued",
         "layerName": "africa",
         "filter": "id=\"4\"",
-        "message": "",
-        "numCreated": 0,
-        "numUpdated": 0,
-        "numDeleted": 0,
-        "numIgnored": 0,
-        "numPulled": 0
+        "message": ""
     }
 
 
@@ -457,12 +463,7 @@ as all features where column3 equals "some other value". Values for attribute ha
                 "column3": "some other value"
             }
         ],
-        "message": "",
-        "numCreated": 0,
-        "numUpdated": 0,
-        "numDeleted": 0,
-        "numIgnored": 0,
-        "numPulled": 0
+        "message": ""
     }
 
 
