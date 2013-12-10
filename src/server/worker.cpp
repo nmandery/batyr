@@ -576,7 +576,7 @@ Worker::removeByAttributes(Job::Ptr job)
                     }
                     attrValues.push_back(attributePair.second);
                     deleteStmt  << transaction->quoteIdentJ(layer->target_table_name, attributePair.first)
-                                << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName << ")";
+                                << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName;
                     ++i;
                 }
                 deleteStmt << " ) ";
