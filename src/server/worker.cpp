@@ -576,7 +576,7 @@ Worker::removeByAttributes(Job::Ptr job)
                     }
                     attrValues.push_back(attributePair.second);
                     deleteStmt  << transaction->quoteIdentJ(layer->target_table_name, attributePair.first)
-                                << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName << ")";
+                                << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName;
                     ++i;
                 }
                 deleteStmt << " ) ";
@@ -681,6 +681,9 @@ Worker::run()
         }
         catch (Batyr::Db::DbError &e) {
             poco_error(logger, e.what());
+            if (e.hasContext()) {
+                poco_error(logger, "postgresql error context: " + e.getContext());
+            }
             job->setStatus(Job::Status::FAILED);
             job->setMessage(e.what());
         }

@@ -23,6 +23,7 @@ namespace Db
     {
         private:
             std::string sqlstate;
+            std::string context;
 
         public:
             DbError(const std::string & message, std::string _sqlstate = "")
@@ -45,6 +46,21 @@ namespace Db
             bool isDataException() const
             {
                 return !sqlstate.empty() && (sqlstate.compare(0, 2, "22") == 0);
+            }
+
+            bool hasContext() const
+            {
+                return !context.empty();
+            }
+
+            std::string getContext() const
+            {
+                return context;
+            }
+
+            void setContext(const std::string & c)
+            {
+                context = c;
             }
     };
 
