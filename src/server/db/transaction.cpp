@@ -145,20 +145,31 @@ Transaction::checkResult(PGresultPtr & res)
 void
 Transaction::createTempTable(const std::string &existingTableSchema, const std::string &existingTableName, const std::string &tempTableName)
 {
-    std::stringstream querystream;
 
     poco_debug(logger, "creating table " + tempTableName + " based on " + existingTableName);
+    std::string qTempTableName = quoteIdent(tempTableName);
+
+    std::stringstream querystream;
+    querystream << "create temporary";
+
+    // temporary tables will anyways be gone after a server crash so
+    // we can also benefit from unlogged tables and skip the WAL
+    if (connection->getVersion() >= 901000) {
+        querystream << " unlogged";
+    }
 
     // use a simple select into and not table inheritance
-    querystream << "select * into temporary " << tempTableName
-                << " from " << quoteIdentJ(existingTableSchema, existingTableName) << " limit 0";
+    querystream << " table " << qTempTableName << " as"
+                << " select * from"
+                << " " << quoteIdentJ(existingTableSchema, existingTableName)
+                << " limit 0";
     std::string query = querystream.str();
 
     // postgresql drops temporary tables when the connections ends. But the temporary
     // tables are not needed anymore when the transaction ends. ensuring that they
     // are dropped immetiately after the end of the transaction
     std::stringstream dropTableStream;
-    dropTableStream << "drop table if exists " << tempTableName;
+    dropTableStream << "drop table if exists " << qTempTableName;
     exitSqls.push_back(dropTableStream.str());
 
     // create the temporary table

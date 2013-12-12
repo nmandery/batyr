@@ -129,12 +129,26 @@ Connection::getTransaction()
 }
 
 
+int
+Connection::getVersion()
+{
+    int version = 0;
+    if (pgconn != nullptr) {
+        version = PQserverVersion(pgconn);
+    }
+    if (version == 0) {
+        throw DbError("could not determinate postgresql server version");
+    }
+    return version;
+}
+
+
 void
 Connection::setApplicationName()
 {
     if (pgconn != nullptr) {
         // setting exists only from version 9.0 on
-        if (PQserverVersion(pgconn) >= 90000) {
+        if (getVersion() >= 90000) {
 
             const char * batyr_name = APP_NAME_SERVER;
             char * batyr_name_e = PQescapeLiteral(pgconn, batyr_name, strlen(batyr_name));
