@@ -245,24 +245,24 @@ Worker::pull(Job::Ptr job)
             }
             else {
                 std::stringstream logStream;
-                logStream << "job " << job->getId() << " geometry column " << insertColumn;
+                logStream << "job " << job->getId() << " geometry_columns for " << insertColumn;
 
                 if (pgSrid == -1) {
-                    logStream   << " uses an undefined SRID (" << pgSrid
-                                << "). Can't do any reprojection here, so just assigning the SRID to the new geometries";
+                    logStream   << " returns SRID=" << pgSrid << " (undefined)."
+                                << " Reprojection is impossible -> assigning the SRID=" << pgSrid << " to the new geometries";
 
                     colStream   << "st_setsrid($" << idxColumn << "::" << tableField->pgTypeName << ", "
                                 << pgSrid << ")";
                 }
                 else if (pgSrid == 0) {
-                    logStream   << " has no SRID information. "
-                                << "Using the SRID of the geometries as they are read from the source";
+                    logStream   << " contains no SRID information."
+                                << " Reprojection is impossible -> using the SRID of the geometries as they are read from the source.";
 
                     colStream   <<  "$" << idxColumn << "::" << tableField->pgTypeName;
                 }
                 else {
-                    logStream   << " uses a known, defined SRID (" << pgSrid << "). "
-                                << "Reprojecting the geometries if they got a SRS assigned, otherwise assigning the SRID of the table.";
+                    logStream   << " returns SRID=" << pgSrid << "."
+                                << " Reprojecting geometries with a SRS, assigning SRID=" << pgSrid << " to incomming geometries without SRS.";
 
                     // in case the geometries do not have a SRS, assign the one of the table to them
                     colStream   << "(select "
