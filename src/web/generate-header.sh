@@ -5,18 +5,46 @@ set -eu
 
 pushd static >/dev/null
 
+DO_COMPRESS=yes
+
 echo "Generating header with the static resources"
 
+cat >css/batyr.css.in \
+    css/batyr.in/pure.css \
+    css/batyr.in/font-awesome.css \
+    css/batyr.in/style.css
+
 # compress css.in files
-find . -type f -name '*.css.in' | while read -r CSSIN; do
+find . -type f -name '*.css.in' ! -path '*.in/*' | while read -r CSSIN; do
     CSSOUT=${CSSIN%.*}
-    python ../tools/cssmin.py <"$CSSIN" >"$CSSOUT"
+    if [ "$DO_COMPRESS" == "yes" ]; then
+        python ../tools/cssmin.py <"$CSSIN" >"$CSSOUT"
+    else
+        cp "$CSSIN" "$CSSOUT"
+    fi
 done 
 
+
+cat >js/lib.js \
+    js/lib.in/jquery-1.10.2.min.js \
+    js/lib.in/moment.min.js \
+    js/lib.in/angular.min.js \
+    js/lib.in/angular-route.min.js
+
+cat >js/app.js.in \
+    js/app.in/angular-notify.js \
+    js/app.in/app.js \
+    js/app.in/controllers.js
+
 # compress js.in files
-find . -type f -name '*.js.in' | while read -r JSIN; do
+find . -type f -name '*.js.in' ! -path '*.in/*' | while read -r JSIN; do
     JSOUT=${JSIN%.*}
-    python ../tools/jsmin.py <"$JSIN" >"$JSOUT"
+    if [ "$DO_COMPRESS" == "yes" ]; then
+        python ../tools/jsmin.py <"$JSIN" >"$JSOUT"
+        #java -jar ../tools/closure-compiler.jar --js "$JSIN" --js_output_file "$JSOUT"
+    else
+        cp "$JSIN" "$JSOUT"
+    fi
 done
 
 
@@ -25,6 +53,6 @@ done
 # as possible
 python ../tools/resources-to-header.py \
 		--output ../http_resources.h \
-        $(find . -type f ! -name '*.in' | grep -v '.swp' |sed 's#^\./##g' | sort)
+        $(find . -type f ! -path '*.in' ! -name '*.swp' | sed 's#^\./##g' | sort)
 
 popd >/dev/null

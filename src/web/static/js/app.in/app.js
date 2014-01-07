@@ -1,4 +1,4 @@
-angular.module('batyrd', ['cgNotify']).
+angular.module('batyrd', ['ngRoute', 'cgNotify']).
     config(['$routeProvider', function($routeProvider) {
         $routeProvider.
         when('/status', {templateUrl: 'partials/status.html', controller: StatusCtrl}).

@@ -7,11 +7,11 @@ Makefile
 *.pyc
 /src/server/batyrd
 /src/web/http_resources.h
-/src/web/static/css/style.css
+/src/web/static/css/batyr.css
+/src/web/static/css/batyr.css.in
+/src/web/static/js/lib.js
 /src/web/static/js/app.js
-/src/web/static/js/controllers.js
-/src/web/static/js/angular-notify.js
-/src/web/static/css/font-awesome.css
+/src/web/static/js/app.js.in
 /src/web/static/partials/manual.html
 /src/common/libbatyrcommon.a
 /src/common/config.h
@@ -19,3 +19,4 @@ Makefile
 /debian/files
 /install_manifest.txt
 /obj-*
+
