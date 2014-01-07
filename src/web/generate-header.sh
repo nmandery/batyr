@@ -53,6 +53,6 @@ done
 # as possible
 python ../tools/resources-to-header.py \
 		--output ../http_resources.h \
-        $(find . -type f ! -path '*.in' ! -name '*.swp' | sed 's#^\./##g' | sort)
+        $(find . -type f ! -name '*.swp' | grep -v '.in/' | sed 's#^\./##g' | sort)
 
 popd >/dev/null
