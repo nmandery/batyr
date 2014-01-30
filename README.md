@@ -1,7 +1,5 @@
 # batyr
 
-[![Build Status](https://travis-ci.org/nmandery/batyr.png?branch=master)](https://travis-ci.org/nmandery/batyr)
-
 A server which connects all kinds of vector geodata sources to a PostgreSQL/PostGIS database and provides a structured way to synchronize external data to database tables.
 
 One common situation when dealing with geographic data is repeatedly exporting and importing this data to and from a PostGIS-enabled database. While the export is very well covered by products like Mapserver and GeoServer, importing is a bit more tricky. Common solutions consist mostly of custom scripts wrapping commands like shp2pgsql or ogr2ogr. These solutions often fail or at least need some tricky hacks if single rows of data should be updated instead of deleting and restoring the complete table content. It is also hard to account for slow or interrupted transactions and still make sure that the data stays synchronized as a whole. Using these import scripts requires either command line access or some custom code to hook them up to a job queue or even web interface to make them usable from within other applications.
