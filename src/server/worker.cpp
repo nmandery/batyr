@@ -123,9 +123,9 @@ Worker::pull(Job::Ptr job)
     auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
 
 #if GDAL_VERSION_MAJOR > 1
-    if (ogrFeatureDefn->GetGeomFieldCount() != 1) {
+    if (ogrFeatureDefn->GetGeomFieldCount() > 1) {
         std::string msg = "The source provides " + std::to_string(ogrFeatureDefn->GetGeomFieldCount()) +
-                "geometry fields. Currently only sources with on geoemtry field are supported";
+                "geometry fields. Currently only sources with no or only one geometry field are supported";
         throw WorkerError(msg);
     }
 #endif
