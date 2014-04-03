@@ -26,7 +26,7 @@ done
 
 
 cat >js/lib.js \
-    js/lib.in/jquery-1.10.2.min.js \
+    js/lib.in/jquery-1.11.0.min.js \
     js/lib.in/moment.min.js \
     js/lib.in/angular.min.js \
     js/lib.in/angular-route.min.js
