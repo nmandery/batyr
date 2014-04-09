@@ -20,6 +20,8 @@ namespace StringUtils
      */
     std::string tolower(const std::string &s);
 
+    size_t levenshteinDistance(const std::string &s1, const std::string &s2);
+
 };
 
 #endif /* __common_stringutils_h__ */

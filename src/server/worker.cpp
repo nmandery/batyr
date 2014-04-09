@@ -88,8 +88,56 @@ Worker::pull(Job::Ptr job)
     // find the layer
     auto ogrLayer = ogrDataset->GetLayerByName(layer->source_layer.c_str());
     if (ogrLayer == nullptr) {
-        throw WorkerError("source_layer \"" +layer->source_layer+ "\" for configured layer \""
-                                + layer->name + "\" could not be found");
+        // check if the layer exists and is just not readable
+        // and collect some info for better diagnosis of the 
+        // problem.
+        bool layerExists = false;
+        int layersNotOpenable = 0;
+        std::string closestMatch;
+        int ldClosestMatch = 5000; // initialize to a high value
+        for (int layerIdx=0; layerIdx<ogrDataset->GetLayerCount(); layerIdx++) {
+            auto searchLayer = ogrDataset->GetLayer(layerIdx);
+            if (searchLayer != nullptr) {
+                if (layer->source_layer == searchLayer->GetName()) {
+                    layerExists = true;
+                    break;
+                }
+
+                int ldSearchLayer = StringUtils::levenshteinDistance(
+                            layer->source_layer, searchLayer->GetName());
+                if (ldSearchLayer < ldClosestMatch) {
+                    ldClosestMatch = ldSearchLayer;
+                    closestMatch = searchLayer->GetName();
+                }
+            }
+            else {
+                layersNotOpenable++;
+            }
+        }
+
+        std::stringstream msgstream;
+        msgstream  << "source_layer \"" << layer->source_layer 
+                   << "\" for configured layer \"" << layer->name << "\" ";
+        if (layerExists) {
+            msgstream << "exists, but could not be opened.";
+        }
+        else {
+            msgstream << "does not exist.";
+
+            // info about next, best match if levensthein seems to be realistic to be
+            // the layer we are looking for. Should help to debug typos, ...
+            if (ldClosestMatch < 12) {
+                msgstream   << " HINT: The source has a layer named \""
+                            << closestMatch << "\".";
+            }
+
+            if (layersNotOpenable > 0) {
+                msgstream   << " HINT: " << layersNotOpenable 
+                            << " layer(s) could not be opened.";
+            }
+        }
+
+        throw WorkerError(msgstream.str());
     }
     ogrLayer->ResetReading();
 
