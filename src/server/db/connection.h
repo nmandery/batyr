@@ -106,6 +106,12 @@ namespace Db
              * close the current connection
              */
             void close();
+
+            /**
+             * version of the postgresql server
+             * according to the syntax of PQserverVersion
+             */
+            int getVersion();
     };
 
 

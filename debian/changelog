@@ -1,3 +1,21 @@
+batyr (0.2.0-0.wheezy) unstable; urgency=low
+
+  * offer some help and provide hints when debugging typos in source layer names [493d88c]
+  * update javascript libs to current versions (jquery 1.10.2->1.11.0, angular 1.2.5->1.2.15, moment 2.4.0->2.5.1) [addd5bc]
+  * allow using datasources without geometry column when using gdal >2.0 [08eaff0]
+  * Update README.md [0de45c2]
+  * add config for travis-ci [1b81cd3]
+  * do not compile in uncompressed JS and CSS [4da4903]
+  * Merge branch 'master' of github.com:nmandery/batyr [ce823a1]
+  * clearer wording of log messages regarding geometry reprojection [a90e278]
+  * updating angular to v1.2.5 [9c14041]
+  * make use of postgresql unlogged tables if the server supports them (>=9.1) [bc15429]
+  * log postgresqls notices to batyrs log file [110e6bf]
+  * remove unused zeromq cmake macros [baeb730]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Wed, 09 Apr 2014 14:15:59 +0200
+
+
 batyr (0.1.5-0.wheezy) unstable; urgency=low
 
   * remove excess parenthesis from sql statement of remove-by-attributes method [61f6a22]

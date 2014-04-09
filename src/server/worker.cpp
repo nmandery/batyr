@@ -88,8 +88,56 @@ Worker::pull(Job::Ptr job)
     // find the layer
     auto ogrLayer = ogrDataset->GetLayerByName(layer->source_layer.c_str());
     if (ogrLayer == nullptr) {
-        throw WorkerError("source_layer \"" +layer->source_layer+ "\" for configured layer \""
-                                + layer->name + "\" could not be found");
+        // check if the layer exists and is just not readable
+        // and collect some info for better diagnosis of the 
+        // problem.
+        bool layerExists = false;
+        int layersNotOpenable = 0;
+        std::string closestMatch;
+        int ldClosestMatch = 5000; // initialize to a high value
+        for (int layerIdx=0; layerIdx<ogrDataset->GetLayerCount(); layerIdx++) {
+            auto searchLayer = ogrDataset->GetLayer(layerIdx);
+            if (searchLayer != nullptr) {
+                if (layer->source_layer == searchLayer->GetName()) {
+                    layerExists = true;
+                    break;
+                }
+
+                int ldSearchLayer = StringUtils::levenshteinDistance(
+                            layer->source_layer, searchLayer->GetName());
+                if (ldSearchLayer < ldClosestMatch) {
+                    ldClosestMatch = ldSearchLayer;
+                    closestMatch = searchLayer->GetName();
+                }
+            }
+            else {
+                layersNotOpenable++;
+            }
+        }
+
+        std::stringstream msgstream;
+        msgstream  << "source_layer \"" << layer->source_layer 
+                   << "\" for configured layer \"" << layer->name << "\" ";
+        if (layerExists) {
+            msgstream << "exists, but could not be opened.";
+        }
+        else {
+            msgstream << "does not exist.";
+
+            // info about next, best match if levensthein seems to be realistic to be
+            // the layer we are looking for. Should help to debug typos, ...
+            if (ldClosestMatch < 12) {
+                msgstream   << " HINT: The source has a layer named \""
+                            << closestMatch << "\".";
+            }
+
+            if (layersNotOpenable > 0) {
+                msgstream   << " HINT: " << layersNotOpenable 
+                            << " layer(s) could not be opened.";
+            }
+        }
+
+        throw WorkerError(msgstream.str());
     }
     ogrLayer->ResetReading();
 
@@ -123,9 +171,9 @@ Worker::pull(Job::Ptr job)
     auto ogrFeatureDefn = ogrLayer->GetLayerDefn();
 
 #if GDAL_VERSION_MAJOR > 1
-    if (ogrFeatureDefn->GetGeomFieldCount() != 1) {
+    if (ogrFeatureDefn->GetGeomFieldCount() > 1) {
         std::string msg = "The source provides " + std::to_string(ogrFeatureDefn->GetGeomFieldCount()) +
-                "geometry fields. Currently only sources with on geoemtry field are supported";
+                "geometry fields. Currently only sources with no or only one geometry field are supported";
         throw WorkerError(msg);
     }
 #endif
@@ -245,24 +293,24 @@ Worker::pull(Job::Ptr job)
             }
             else {
                 std::stringstream logStream;
-                logStream << "job " << job->getId() << " geometry column " << insertColumn;
+                logStream << "job " << job->getId() << " geometry_columns for " << insertColumn;
 
                 if (pgSrid == -1) {
-                    logStream   << " uses an undefined SRID (" << pgSrid
-                                << "). Can't do any reprojection here, so just assigning the SRID to the new geometries";
+                    logStream   << " returns SRID=" << pgSrid << " (undefined)."
+                                << " Reprojection is impossible -> assigning the SRID=" << pgSrid << " to the new geometries";
 
                     colStream   << "st_setsrid($" << idxColumn << "::" << tableField->pgTypeName << ", "
                                 << pgSrid << ")";
                 }
                 else if (pgSrid == 0) {
-                    logStream   << " has no SRID information. "
-                                << "Using the SRID of the geometries as they are read from the source";
+                    logStream   << " contains no SRID information."
+                                << " Reprojection is impossible -> using the SRID of the geometries as they are read from the source.";
 
                     colStream   <<  "$" << idxColumn << "::" << tableField->pgTypeName;
                 }
                 else {
-                    logStream   << " uses a known, defined SRID (" << pgSrid << "). "
-                                << "Reprojecting the geometries if they got a SRS assigned, otherwise assigning the SRID of the table.";
+                    logStream   << " returns SRID=" << pgSrid << "."
+                                << " Reprojecting geometries with a SRS, assigning SRID=" << pgSrid << " to incomming geometries without SRS.";
 
                     // in case the geometries do not have a SRS, assign the one of the table to them
                     colStream   << "(select "

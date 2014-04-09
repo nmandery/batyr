@@ -3,9 +3,23 @@
 #include "server/db/connection.h"
 #include "server/db/transaction.h"
 #include "common/config.h"
+#include "common/stringutils.h"
 
 
 using namespace Batyr::Db;
+
+
+static void
+noticeProcessor(void *loggerptr, const char *message)
+{
+    if ((loggerptr != nullptr) && (message != nullptr)) {
+
+        // remove the linebreak at the end and spaces
+        std::string msg = StringUtils::trim(message);
+
+        poco_information(*static_cast<Poco::Logger *>(loggerptr), msg);
+    }
+}
 
 
 Connection::Connection(Batyr::Configuration::Ptr _configuration)
@@ -94,6 +108,8 @@ Connection::reconnect(bool restore)
             connection_ok = true;
             poco_debug(logger, "Successfully connected to the database");
             setApplicationName();
+
+            PQsetNoticeProcessor(pgconn, noticeProcessor, &logger);
         }
     }
     if (connection_ok) {
@@ -113,12 +129,26 @@ Connection::getTransaction()
 }
 
 
+int
+Connection::getVersion()
+{
+    int version = 0;
+    if (pgconn != nullptr) {
+        version = PQserverVersion(pgconn);
+    }
+    if (version == 0) {
+        throw DbError("could not determinate postgresql server version");
+    }
+    return version;
+}
+
+
 void
 Connection::setApplicationName()
 {
     if (pgconn != nullptr) {
         // setting exists only from version 9.0 on
-        if (PQserverVersion(pgconn) >= 90000) {
+        if (getVersion() >= 90000) {
 
             const char * batyr_name = APP_NAME_SERVER;
             char * batyr_name_e = PQescapeLiteral(pgconn, batyr_name, strlen(batyr_name));
