@@ -24,7 +24,6 @@ namespace Db
      */
     typedef std::unique_ptr<PGresult, void (*)(PGresult*) > PGresultPtr;
 
-    typedef std::tuple<int, int, int> VersionTuple;
 
     class Transaction
     {
@@ -84,21 +83,6 @@ namespace Db
              *
              */
             FieldMap getTableFields(const std::string &tableSchema, const std::string &tableName);
-
-            /**
-             * return the SRID of the given geoemtry coluumn by checking the geometry_columns
-             * table.
-             *
-             * if no srid is found, 0 is returned
-             */
-            int getGeometryColumnSRID(const std::string &tableSchema, const std::string &tableName, const std::string &columnName);
-
-
-            /**
-             * get the version of the installed postgis extension
-             */
-            VersionTuple getPostGISVersion();
-
 
             /** 
              * quote all strings of the vector as identifiers using 
