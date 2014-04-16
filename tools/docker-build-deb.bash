@@ -27,6 +27,8 @@ cd /root/src-cloned
 make -f Makefile.devel deb
 cd ..
 cp *.deb /root/src/packages/
+# set permissions
+chown $(id -u):$(id -g) /root/src/packages/*.deb
 EOF
 trap "rm -f $PACKAGE_DIR/build-$GIT_BRANCH-deb.sh" EXIT
 
