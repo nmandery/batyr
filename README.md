@@ -6,7 +6,7 @@ One common situation when dealing with geographic data is repeatedly exporting a
 
 Flaws like those were the reason for us to create batyr as a reusable solution for similar demands in the future.
 
-![Screenshot of the status page of the webinterface](images/statuspage_520b_1.png?raw=true)
+![Screenshot of the status page of the webinterface](doc/images/statuspage_520b_1.png?raw=true)
 
 batyr is a single server application providing the following:
 
@@ -19,7 +19,7 @@ batyr is a single server application providing the following:
 
 With these features it is possible to quickly integrate external geodata into your PostGIS database - without having to spend time creating custom code.
 
-![Screenshot of the jobqueue of the webinterface](images/jobqueue_520b_0.png?raw=true)
+![Screenshot of the jobqueue of the webinterface](doc/images/jobqueue_520b_0.png?raw=true)
 
 For the complete manual see the included MANUAL.md file.
 
