@@ -2,7 +2,7 @@ Source: batyr
 Section: misc
 Priority: optional
 Maintainer: Nico Mandery <nico.mandery@geops.de>
-Build-Depends: debhelper (>= 7.0.50~), build-essential, libpq5, libpq-dev, libpoco-dev ( >= 1.3.6), libpocofoundation9 ( >= 1.3.6), libpoconet9 ( >= 1.3.6), libpocoutil9 ( >= 1.3.6), libgdal1, libgdal1-dev, cmake (>= 2.8), g++ (>= 4.7), python, bash, discount
+Build-Depends: debhelper (>= 7.0.50~), build-essential, libpq5, libpq-dev, libpoco-dev ( >= 1.3.6), libpocofoundation9 ( >= 1.3.6), libpoconet9 ( >= 1.3.6), libpocoutil9 ( >= 1.3.6), libgdal1 | libgdal1h, libgdal1-dev, cmake (>= 2.8), g++ (>= 4.7), python, bash, discount
 Standards-Version: 3.9.2
 Homepage: https://github.com/geops/batyr
 

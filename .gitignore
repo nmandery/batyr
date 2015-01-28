@@ -21,3 +21,4 @@ Makefile
 /obj-*
 /batyr.cfg
 /batyrd.cfg
+/packages

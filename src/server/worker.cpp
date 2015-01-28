@@ -11,6 +11,7 @@
 #include "common/config.h"
 #include "common/stringutils.h"
 #include "server/worker.h"
+#include "server/db/postgis.h"
 
 using namespace Batyr;
 
@@ -212,7 +213,7 @@ Worker::pull(Job::Ptr job)
         // build a unique name for the temporary table
         std::string tempTableName = "batyr_" + job->getId();
 
-        auto versionPostgis = transaction->getPostGISVersion();
+        auto versionPostgis = Db::PostGis::getVersion(*(transaction.get()));
 
         // create a temp table to write the data to
         transaction->createTempTable(layer->target_table_schema, layer->target_table_name, tempTableName);
@@ -269,9 +270,11 @@ Worker::pull(Job::Ptr job)
         }
 
         // fetch the srid used for the column in postgis
-        int pgSrid = 0;
+        int pgSrid = POSTGIS_NO_SRID_FOUND;
+        int pgUndefinedSrid = Db::PostGis::getUndefinedSRIDValue(versionPostgis);
         if (!geometryColumn.empty()) {
-            pgSrid = transaction->getGeometryColumnSRID(layer->target_table_schema,
+            pgSrid = Db::PostGis::getGeometryColumnSRID(*(transaction.get()),
+                        layer->target_table_schema,
                         layer->target_table_name, geometryColumn);
             poco_debug(logger, "table " + layer->target_table_schema + "." + layer->target_table_name +
                         " column " + geometryColumn + " uses SRID " + std::to_string(pgSrid));
@@ -295,32 +298,36 @@ Worker::pull(Job::Ptr job)
                 std::stringstream logStream;
                 logStream << "job " << job->getId() << " geometry_columns for " << insertColumn;
 
-                if (pgSrid == -1) {
-                    logStream   << " returns SRID=" << pgSrid << " (undefined)."
-                                << " Reprojection is impossible -> assigning the SRID=" << pgSrid << " to the new geometries";
-
-                    colStream   << "st_setsrid($" << idxColumn << "::" << tableField->pgTypeName << ", "
-                                << pgSrid << ")";
-                }
-                else if (pgSrid == 0) {
+                if (pgSrid == POSTGIS_NO_SRID_FOUND) {
                     logStream   << " contains no SRID information."
                                 << " Reprojection is impossible -> using the SRID of the geometries as they are read from the source.";
 
                     colStream   <<  "$" << idxColumn << "::" << tableField->pgTypeName;
                 }
                 else {
-                    logStream   << " returns SRID=" << pgSrid << "."
-                                << " Reprojecting geometries with a SRS, assigning SRID=" << pgSrid << " to incomming geometries without SRS.";
+                    // all srids smaller than 1 are treated as undefined.
+                    // see http://lists.osgeo.org/pipermail/postgis-devel/2011-October/015413.html
+                    if (pgSrid <= 0) {
+                        logStream   << " returns SRID=" << pgSrid << " (undefined)."
+                                    << " Reprojection is impossible -> assigning the SRID=" << pgUndefinedSrid << " (native undefined) to the new geometries";
 
-                    // in case the geometries do not have a SRS, assign the one of the table to them
-                    colStream   << "(select "
-                                <<      "case when st_srid(foo.g) = -1 then "
-                                <<          " st_setsrid(foo.g, " << pgSrid << ") "
-                                <<      "else "
-                                <<          " st_transform(foo.g, " << pgSrid << ") "
-                                <<      "end"
-                                << " from ( select $" << idxColumn << "::" << tableField->pgTypeName << " as g "
-                                << " ) foo)";
+                        colStream   << "st_setsrid($" << idxColumn << "::" << tableField->pgTypeName << ", "
+                                    << pgUndefinedSrid << ")";
+                    }
+                    else {
+                        logStream   << " returns SRID=" << pgSrid << "."
+                                    << " Reprojecting geometries with a SRS, assigning SRID=" << pgSrid << " to incomming geometries without SRS.";
+
+                        // in case the geometries do not have a SRS, assign the one of the table to them
+                        colStream   << "(select "
+                                    <<      "case when st_srid(foo.g) = " << pgUndefinedSrid << " then "
+                                    <<          " st_setsrid(foo.g, " << pgSrid << ") "
+                                    <<      "else "
+                                    <<          " st_transform(foo.g, " << pgSrid << ") "
+                                    <<      "end"
+                                    << " from ( select $" << idxColumn << "::" << tableField->pgTypeName << " as g "
+                                    << " ) foo)";
+                    }
                 }
                 poco_information(logger, logStream.str().c_str());
             }
