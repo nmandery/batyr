@@ -1,3 +1,15 @@
+batyr (0.2.1-0) unstable; urgency=low
+
+  * debian package: use libgdal1h as alternative to libgdal1 [c66bdcd]
+  * add  missing images [a7671d2]
+  * use relative links in README [c6f5044]
+  * set user as owner on the generated DEBs [27f8c09]
+  * build packages for debian-wheezy using a docker container [f667db1]
+  * support for postgis 2.0 usage of 0 for an undefined srid [a3bccd8]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Wed, 28 Jan 2015 08:37:27 +0100
+ 
+
 batyr (0.2.0-0) unstable; urgency=low
 
   * offer some help and provide hints when debugging typos in source layer names [493d88c]
