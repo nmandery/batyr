@@ -3,6 +3,11 @@
 
 #include <string>
 
+/**
+ * A value which may contain an actual value or may be null
+ *
+ * This is more or less an implmentation of a Option/Maybe type.
+ */
 template <class T>
 class NullableValue
 {

@@ -1,5 +1,6 @@
 #include <sstream>
 #include <cstring>
+#include <algorithm>
 
 #include "server/db/transaction.h"
 #include "server/db/connection.h"
@@ -109,6 +110,55 @@ Transaction::execPrepared(const std::string &stmtName, int nParams, const char *
 }
 
 
+std::tuple<std::vector<const char*>, std::vector<int>>
+Transaction::transformQueryValues(const std::vector<QueryValue> &qValues)
+{
+    // convert to an array of c strings
+    std::vector<const char*> cStrValues;
+    std::vector<int> cStrValueLenghts;
+    std::transform(qValues.begin(), qValues.end(), std::back_inserter(cStrValues),
+                [](const QueryValue & pV) -> const char * {
+                    if (pV.isNull()) {
+                        return NULL;
+                    }
+                    return pV.get().c_str();
+            });
+    std::transform(qValues.begin(), qValues.end(), std::back_inserter(cStrValueLenghts),
+                [](const QueryValue & pV) -> int {
+                    if (pV.isNull()) {
+                        return 0;
+                    }
+                    return pV.get().length();
+            });
+
+    return std::make_tuple(std::move(cStrValues), std::move(cStrValueLenghts));
+}
+
+
+PGresultPtr
+Transaction::execPrepared(const std::string &stmtName, const std::vector<QueryValue> &qValues)
+{
+    // convert to an array of c strings
+    auto qValuesTransformed = this->transformQueryValues(qValues);
+    std::vector<const char*> cStrValues = std::get<0>(qValuesTransformed);
+    std::vector<int> cStrValueLenghts = std::get<1>(qValuesTransformed);
+
+    PGresultPtr result = this->execPrepared(stmtName, qValues.size(), &cStrValues[0], &cStrValueLenghts[0], NULL, 1);
+    return std::move(result);
+}
+
+
+PGresultPtr
+Transaction::execParams(const std::string &_sql, const std::vector<QueryValue> &qValues)
+{
+    // convert to an array of c strings
+    auto qValuesTransformed = this->transformQueryValues(qValues);
+    std::vector<const char*> cStrValues = std::get<0>(qValuesTransformed);
+    std::vector<int> cStrValueLenghts = std::get<1>(qValuesTransformed);
+
+    PGresultPtr result = this->execParams(_sql, qValues.size(), NULL, &cStrValues[0], &cStrValueLenghts[0], NULL, 1);
+    return std::move(result);
+}
 
 void
 Transaction::checkResult(PGresultPtr & res)
@@ -161,7 +211,7 @@ Transaction::createTempTable(const std::string &existingTableSchema, const std::
     // use a simple select into and not table inheritance
     querystream << " table " << qTempTableName << " as"
                 << " select * from"
-                << " " << quoteIdentJ(existingTableSchema, existingTableName)
+                << " " << quoteAndJoinIdent(existingTableSchema, existingTableName)
                 << " limit 0";
     std::string query = querystream.str();
 
@@ -282,7 +332,7 @@ Transaction::quoteIdent(const std::string & uq1)
 
 
 std::string
-Transaction::quoteIdentJ(const std::string & uq1, const std::string & uq2)
+Transaction::quoteAndJoinIdent(const std::string & uq1, const std::string & uq2)
 {
     std::vector<std::string> uqv;
     uqv.push_back(uq1);

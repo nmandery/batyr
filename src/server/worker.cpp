@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -353,14 +352,14 @@ Worker::pull(Job::Ptr job)
         while( (ogrFeatureP = ogrLayer->GetNextFeature()) != nullptr) {
             ogrFeature.reset(ogrFeatureP);
 
-            std::vector<PgFieldValue> pgValues;
+            std::vector<QueryValue> pgValues;
 
             for (const std::string &insertColumn : insertColumns) {
                 auto tableField = &tableFields[insertColumn];
 
                 if (tableField->pgTypeName == "geometry") {
 
-                    PgFieldValue pgVal;
+                    QueryValue pgVal;
                     auto ogrGeometry = ogrFeature->GetGeometryRef();
                     if (ogrGeometry != nullptr) {
                         // TODO: Maybe use the implementation from OGRPGLayer::GeometryToHex
@@ -394,35 +393,15 @@ Worker::pull(Job::Ptr job)
                 }
                 else {
                     auto ogrField = &ogrFields[insertColumn];
-                    PgFieldValue pV = convertToString(ogrFeature.get(), ogrField->index, ogrField->type, tableField->pgTypeName);
+                    QueryValue pV = convertToString(ogrFeature.get(), ogrField->index, ogrField->type, tableField->pgTypeName);
                     pgValues.push_back( std::move(pV) );
                 }
             }
 
-
-            // convert to an array of c strings
-            std::vector<const char*> cStrValues;
-            std::vector<int> cStrValueLenghts;
-            std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValues),
-                        [](const PgFieldValue & pV) -> const char * {
-                            if (pV.isNull()) {
-                                return NULL;
-                            }
-                            return pV.get().c_str();
-                    });
-            std::transform(pgValues.begin(), pgValues.end(), std::back_inserter(cStrValueLenghts),
-                        [](const PgFieldValue & pV) -> int {
-                            if (pV.isNull()) {
-                                return 0;
-                            }
-                            return pV.get().length();
-                    });
-
             if (layer->ignore_failures) {
                 try {
                     transaction->exec("savepoint insertfeature;");
-                    transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0],
-                                &cStrValueLenghts[0], NULL, 1);
+                    transaction->execPrepared(insertStmtName, pgValues);
                     transaction->exec("release savepoint insertfeature;");
                 }
                 catch (Batyr::Db::DbError &e) {
@@ -438,24 +417,24 @@ Worker::pull(Job::Ptr job)
                 }
             }
             else {
-                transaction->execPrepared(insertStmtName, cStrValues.size(), &cStrValues[0],
-                            &cStrValueLenghts[0], NULL, 1);
+                transaction->execPrepared(insertStmtName, pgValues);
             }
             numPulled++;
         }
         job->setStatistics(numPulled, numCreated, numUpdated, numDeleted, numIgnored);
 
-        // update the existing table only touching rows which have differences to prevent
-        // slowdowns by triggers
+        //
+        // update the existing/target table
+        //
         std::stringstream updateStmt;
-        updateStmt          << "update " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name) << " "
+        updateStmt          << "update " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name) << " "
                             << " set ";
         for (size_t i=0; i<updateColumns.size(); i++) {
             if (i != 0) {
                 updateStmt << ", ";
             }
             updateStmt  << transaction->quoteIdent(updateColumns[i]) << " = " 
-                        << transaction->quoteIdentJ(tempTableName, updateColumns[i]) << " ";
+                        << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << " ";
         }
         updateStmt          << " from " << transaction->quoteIdent(tempTableName) 
                             << " where (";
@@ -463,12 +442,16 @@ Worker::pull(Job::Ptr job)
             if (i != 0) {
                 updateStmt << " and ";
             }
-            updateStmt  << transaction->quoteIdentJ(layer->target_table_name, primaryKeyColumns[i])
+            updateStmt  << transaction->quoteAndJoinIdent(layer->target_table_name, primaryKeyColumns[i])
                         << " is not distinct from "
-                        << transaction->quoteIdentJ(tempTableName, primaryKeyColumns[i]);
+                        << transaction->quoteAndJoinIdent(tempTableName, primaryKeyColumns[i]);
         }
         updateStmt          << ") and (";
-        // update only rows which are actual different
+
+        // add more WHERE conditions to only update rows which are actually different.
+        // There is no purpose in performing updates when none of the colums changed. This will only 
+        // fire eventually exisiting triggers which would make the operation more expensive 
+        // ... and that should be avoided.
         for (size_t i=0; i<updateColumns.size(); i++) {
             if (i != 0) {
                 updateStmt << " or ";
@@ -477,10 +460,10 @@ Worker::pull(Job::Ptr job)
             auto tableField = &tableFields[updateColumns[i]];
 
             if (tableField->pgTypeName == "geometry") {
-                std::string quotedTargetGeom =  transaction->quoteIdentJ(layer->target_table_name, updateColumns[i]);
-                std::string quotedTempGeom = transaction->quoteIdentJ(tempTableName, updateColumns[i]);
+                std::string quotedTargetGeom =  transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i]);
+                std::string quotedTempGeom = transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]);
 
-                // update geometries always if the srid differs or when they are collections
+                // update geometries always when the srid differs or when they are collections. 
                 // MEMO: geometries with different SRIDs can not be compared with the "=" operator
                 // MEMO: collections can not be compared with st_equals
                 updateStmt  << "("
@@ -513,9 +496,9 @@ Worker::pull(Job::Ptr job)
                             << ")";
             }
             else {
-                updateStmt  << "(" << transaction->quoteIdentJ(layer->target_table_name, updateColumns[i])
+                updateStmt  << "(" << transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i])
                             << " is distinct from "
-                            << transaction->quoteIdentJ(tempTableName, updateColumns[i]) << ")";
+                            << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << ")";
             }
         }
         updateStmt          << ")";
@@ -523,25 +506,29 @@ Worker::pull(Job::Ptr job)
         numUpdated = std::atoi(PQcmdTuples(updateRes.get()));
         updateRes.reset(NULL); // immediately dispose the result
 
-        // insert missing rows in the exisiting table
+        //
+        // insert missing rows in the exisiting/target table
+        //
         std::stringstream insertMissingStmt;
-        insertMissingStmt   << "insert into " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
+        insertMissingStmt   << "insert into " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
                             << " ( " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << ") "
                             << " select " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << " "
                             << " from " << transaction->quoteIdent(tempTableName)
                             << " where (" << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ") << ") not in ("
                             << " select " << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ",") << " "
-                            << "       from " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
+                            << "       from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
                             << ")";
         auto insertMissingRes = transaction->exec(insertMissingStmt.str());
         numCreated = std::atoi(PQcmdTuples(insertMissingRes.get()));
         insertMissingRes.reset(NULL); // immediately dispose the result
 
-        // delete deprecated rows from the exisiting table
+        //
+        // delete deprecated rows from the exisiting/target table
+        // 
         if (allow_feature_deletion) {
             std::stringstream deleteRemovedStmt;
             auto quotedPrimaryKeyColumnsStr = StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ");
-            deleteRemovedStmt   << "delete from " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
+            deleteRemovedStmt   << "delete from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
                                 << " where (" << quotedPrimaryKeyColumnsStr << ") not in ("
                                 << " select " << quotedPrimaryKeyColumnsStr << " "
                                 << "       from " << transaction->quoteIdent(tempTableName)
@@ -549,9 +536,6 @@ Worker::pull(Job::Ptr job)
             auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
             numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
             deleteRemovedRes.reset(NULL); // immediately dispose the result
-        }
-        else {
-            poco_information(logger, "job " + job->getId() + " feature deletion disabled");
         }
 
         job->setStatus(Job::Status::FINISHED);
@@ -563,6 +547,9 @@ Worker::pull(Job::Ptr job)
                             << "created=" << numCreated << ", "
                             << "updated=" << numUpdated << ", "
                             << "deleted=" << numDeleted;
+        if (!allow_feature_deletion) {
+            finalLogMsgStream << " (feature deletion is disabled in configuration)";
+        }
         poco_information(logger, finalLogMsgStream.str().c_str());
     }
     else {
@@ -608,7 +595,7 @@ Worker::removeByAttributes(Job::Ptr job)
         auto tableFields = transaction->getTableFields(layer->target_table_schema, layer->target_table_name);
 
         std::stringstream deleteStmt;
-        deleteStmt  << "delete from " << transaction->quoteIdentJ(layer->target_table_schema, layer->target_table_name)
+        deleteStmt  << "delete from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
                     << " where ";
 
         int numDeleted = 0;
@@ -630,7 +617,7 @@ Worker::removeByAttributes(Job::Ptr job)
                         deleteStmt << " and ";
                     }
                     attrValues.push_back(attributePair.second);
-                    deleteStmt  << transaction->quoteIdentJ(layer->target_table_name, attributePair.first)
+                    deleteStmt  << transaction->quoteAndJoinIdent(layer->target_table_name, attributePair.first)
                                 << " is not distinct from $" << attrValues.size() << "::" << tableFieldIt->second.pgTypeName;
                     ++i;
                 }
@@ -641,26 +628,7 @@ Worker::removeByAttributes(Job::Ptr job)
         if (!attrValues.empty()) {
             poco_debug(logger, deleteStmt.str().c_str());
 
-            // convert to an array of c strings
-            std::vector<const char*> cStrValues;
-            std::vector<int> cStrValueLenghts;
-            std::transform(attrValues.begin(), attrValues.end(), std::back_inserter(cStrValues),
-                        [](const Job::AttributeValue & aV) -> const char * {
-                            if (aV.isNull()) {
-                                return NULL;
-                            }
-                            return aV.get().c_str();
-                    });
-            std::transform(attrValues.begin(), attrValues.end(), std::back_inserter(cStrValueLenghts),
-                        [](const Job::AttributeValue & aV) -> int {
-                            if (aV.isNull()) {
-                                return 0;
-                            }
-                            return aV.get().length();
-                    });
-
-            auto deleteRes = transaction->execParams(deleteStmt.str(), cStrValues.size(), NULL, &cStrValues[0],
-                        &cStrValueLenghts[0], NULL, 1);
+            auto deleteRes = transaction->execParams(deleteStmt.str(), attrValues);
             numDeleted = std::atoi(PQcmdTuples(deleteRes.get()));
         }
         else {
@@ -804,10 +772,10 @@ Worker::getPostgresType(OGRFieldType fieldType)
 }
 
 
-PgFieldValue
+QueryValue
 Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldType fieldType, const std::string pgTypeName)
 {
-    PgFieldValue result;
+    QueryValue result;
 
     switch (fieldType) {
         case OFTString:
