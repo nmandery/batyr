@@ -766,7 +766,7 @@ Worker::getPostgresType(OGRFieldType fieldType)
             pgFieldType = "bytea";
             break;
         default:
-            throw WorkerError("Unsupported OGR field type: " + std::to_string(static_cast<int>(fieldType)));
+            throw WorkerError("No supported PostgreSQL type for OGR field type: " + std::to_string(static_cast<int>(fieldType)));
     }
     return pgFieldType;
 }
@@ -833,13 +833,62 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
                 }
                 break;
             }
-        // TODO: implement all of the OGRFieldType types
-        //  case OFTIntegerList:
-        //  case OFTRealList:
-        //  case OFTStringList:
-        //  case OFTBinary:
+        case OFTIntegerList:
+        case OFTRealList:
+        case OFTStringList:
+            {
+                std::stringstream valueStream;
+                valueStream << "{";
+                if (fieldType == OFTIntegerList) {
+                    int listLen = 0;
+                    const int *listValues = ogrFeature->GetFieldAsIntegerList(fieldIdx, &listLen);
+                    for (int i=0; i<listLen; i++) {
+                        if (i>0) {
+                            valueStream << ",";
+                        }
+                        valueStream << listValues[i];
+                    }
+                }
+                else if (fieldType == OFTRealList) {
+                    int listLen = 0;
+                    const double *listValues = ogrFeature->GetFieldAsDoubleList(fieldIdx, &listLen);
+                    for (int i=0; i<listLen; i++) {
+                        if (i>0) {
+                            valueStream << ",";
+                        }
+                        valueStream << listValues[i];
+                    }
+                }
+                else if (fieldType == OFTStringList) {
+                    char **listValues = ogrFeature->GetFieldAsStringList(fieldIdx);
+                    int listLen = CSLCount(listValues);
+                    for (int i=0; i<listLen; i++) {
+                        if (i>0) {
+                            valueStream << ",";
+                        }
+                        std::string currentValue(listValues[i]);
+
+                        // escape backslash and quotes in the string with a backslash to 
+                        // build a valid array
+                        // TODO: Escape using postgresqls quite_literal? Will issue lots of queries
+                        StringUtils::replaceAll(currentValue, "\\", "\\\\");
+                        StringUtils::replaceAll(currentValue, "\"", "\\\"");
+
+                        valueStream << "\"" << currentValue << "\"";
+                    }
+                }
+                else {
+                    throw WorkerError("None of the implemented list types matched. This point should not be reacheable");
+                }
+
+                valueStream << "}";
+
+                result.setIsNull(false);
+                result.set(valueStream.str());
+            }
+        case OFTBinary:
         default:
-            throw WorkerError("Unsupported OGR field type: " + std::to_string(static_cast<int>(fieldType)));
+            throw WorkerError("Unsupported OGR field type to convert to string: " + std::to_string(static_cast<int>(fieldType)));
     }
 
     // sanitize invalid values - empty time types are generaly invalid and most certainly result from

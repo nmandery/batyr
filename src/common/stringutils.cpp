@@ -114,3 +114,17 @@ StringUtils::levenshteinDistance(const std::string &s1, const std::string &s2)
 
     return costs[n];
 }
+
+
+void 
+StringUtils::replaceAll(std::string &subject, const std::string &from, const std::string &to)
+{
+    if(from.empty()) {
+        return;
+    }
+    size_t start_pos = 0;
+    while((start_pos = subject.find(from, start_pos)) != std::string::npos) {
+        subject.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}

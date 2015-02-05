@@ -22,6 +22,8 @@ namespace StringUtils
 
     size_t levenshteinDistance(const std::string &s1, const std::string &s2);
 
+    void replaceAll(std::string &subject, const std::string &from, const std::string &to);
+
 };
 
 #endif /* __common_stringutils_h__ */
