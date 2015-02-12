@@ -58,6 +58,13 @@ Server::main(const std::vector<std::string> & args)
     // initialize ogr
     OGRRegisterAll();
 
+    // make GML attributes available. Otherwise some attibutes listed in the GML
+    // might not exist in the read features.
+    // This option is available with gdal 1.11, but it won't cause an issue if it
+    // is also set for earlier versions
+    // http://trac.osgeo.org/gdal/ticket/5418
+    CPLSetConfigOption("GML_ATTRIBUTES_TO_OGR_FIELDS", "YES");
+
     try {
         Broker broker(configuration);
 
