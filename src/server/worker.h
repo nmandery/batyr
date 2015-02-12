@@ -10,7 +10,7 @@
 #include "server/jobstorage.h"
 #include "server/configuration.h"
 #include "server/db/connection.h"
-#include "common/nullablevalue.h"
+#include "server/db/queryvalue.h"
 
 #include "ogrsf_frmts.h"
 
@@ -27,11 +27,6 @@ namespace Batyr
             };
     };
 
-    /**
-     * a type for storing postgresql values.
-     */
-    typedef NullableValue<std::string> PgFieldValue;
-
     class Worker
     {
         private:
@@ -47,7 +42,7 @@ namespace Batyr
              * convert the field at the given index with the given
              * OGRFieldType to a postgresql compatible string
              */
-            PgFieldValue convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldType fieldType, const std::string pgTypeName);
+            QueryValue convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldType fieldType, const std::string pgTypeName);
 
             std::string getPostgresType(OGRFieldType fieldType);
 

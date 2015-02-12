@@ -6,6 +6,7 @@
 #include <libpq-fe.h>
 
 #include "server/db/field.h"
+#include "server/db/queryvalue.h"
 
 #include <memory>
 #include <vector>
@@ -51,6 +52,11 @@ namespace Db
              * or throw a meaningful DbError
              **/
             void checkResult(PGresultPtr & res);
+            
+            /**
+             *
+             */
+            std::tuple<std::vector<const char*>, std::vector<int>> transformQueryValues(const std::vector<QueryValue> &qValues);
 
         public:
             friend class Connection;
@@ -63,9 +69,11 @@ namespace Db
             PGresultPtr exec(const std::string &);
             PGresultPtr execParams(const std::string &_sql, int nParams, const Oid *paramTypes,
                         const char * const *paramValues, const int *paramLengths, const int *paramFormats, int resultFormat);
+            PGresultPtr execParams(const std::string &_sql, const std::vector<QueryValue> &qValues);
             PGresultPtr prepare(const std::string &stmtName, const std::string &_sql, int nParams, const Oid *paramTypes);
             PGresultPtr execPrepared(const std::string &stmtName, int nParams, const char * const *paramValues, const int *paramLengths,
                         const int *paramFormats, int resultFormat);
+            PGresultPtr execPrepared(const std::string &stmtName, const std::vector<QueryValue> &qValues);
 
 
             void discard()
@@ -74,13 +82,15 @@ namespace Db
             }
 
             /**
-             * create a temporary table based upon the schema
+             * Create a temporary table based upon the schema
              * of an existing table;
+             *
+             * The table will be dropped when the Transsction object is destroyed.
              */
             void createTempTable(const std::string &existingTableSchema, const std::string &existingTableName, const std::string &tempTableName); 
 
             /**
-             *
+             * Return a FieldMap describing the columns of the given table.
              */
             FieldMap getTableFields(const std::string &tableSchema, const std::string &tableName);
 
@@ -94,7 +104,7 @@ namespace Db
             /**
              * return the value quoted with quote_ident and all parts joined together with a '.'
              */
-            std::string quoteIdentJ(const std::string &, const std::string &);
+            std::string quoteAndJoinIdent(const std::string &, const std::string &);
 
     };
 
