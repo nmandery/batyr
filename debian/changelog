@@ -1,3 +1,11 @@
+batyr (0.2.2-0) unstable; urgency=low
+
+  * make all GML attributes visible by setting the OGR option GML_ATTRIBUTES_TO_OGR_FIELDS (gdal >= 1.11.0) [9e0c37b]
+  * improve inline comments and refactor duplicate transforms of queryparameters to c strings [65c95d7]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Thu, 12 Feb 2015 16:01:16 +0100
+
+
 batyr (0.2.1-0) unstable; urgency=low
 
   * debian package: use libgdal1h as alternative to libgdal1 [c66bdcd]
