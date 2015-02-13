@@ -5,6 +5,7 @@
 #include "server/db/transaction.h"
 #include "server/db/connection.h"
 #include "common/macros.h"
+#include "common/config.h"
 #include "common/stringutils.h"
 
 
@@ -281,6 +282,22 @@ Transaction::quoteIdent(const std::vector<std::string> & inStrings)
     size_t inStringsSize = inStrings.size();
 
     if (inStringsSize > 0) {
+#ifdef HAVE_PQ_ESCAPE_IDENTIFIER
+        for(auto &inString: inStrings) {
+            char * escaped = PQescapeIdentifier(connection->pgconn, inString.c_str(), 
+                        inString.length());
+            if (escaped != nullptr) {
+                quotedStrings.push_back(std::string(escaped));
+                PQfreemem(escaped);
+            }
+            else {
+                std::string msg = "quoting sql identifier <" + inString 
+                            + "> failed: " + std::string(PQerrorMessage(connection->pgconn));
+                poco_error(logger, msg.c_str());
+                throw DbError(msg);
+            }
+        }
+#else
         std::stringstream queryStrm;
 
         size_t iParam = 0;
@@ -312,6 +329,7 @@ Transaction::quoteIdent(const std::vector<std::string> & inStrings)
             char * val = PQgetvalue(res.get(), 0, i);
             quotedStrings.push_back(std::string(val));
         }
+#endif
     }
     return quotedStrings;
 }

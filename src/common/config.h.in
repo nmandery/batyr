@@ -22,6 +22,8 @@
 
 // internal server configuration -------------------------------
 
+#cmakedefine HAVE_PQ_ESCAPE_IDENTIFIER
+
 /**
  * compile the http web gui in the server when this define is set
  **/

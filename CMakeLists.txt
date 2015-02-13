@@ -30,10 +30,21 @@ else ()
     message(FATAL_ERROR "Your C++ compiler does not support C++11.")
 endif ()
 
+include(CheckLibraryExists)
+
 find_package( Threads REQUIRED)
-#find_package( ZeroMQ REQUIRED)
+
 find_package( GDAL REQUIRED)
+
 find_package( Postgres REQUIRED)
+# PQescapeIdentifier exists starting with libpq version 9.0+
+CHECK_LIBRARY_EXISTS(pq PQescapeIdentifier "libpq-fe.h" HAVE_PQ_ESCAPE_IDENTIFIER)
+if (HAVE_PQ_ESCAPE_IDENTIFIER)
+    message(STATUS "Escaping SQL Identifiers locally using libpq")
+else ()
+    message(STATUS "Escaping SQL Identifiers remotely on the database server")
+endif ()
+
 find_package( Poco REQUIRED Foundation Util Net)
 
 
