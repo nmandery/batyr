@@ -39,13 +39,14 @@ PostGis::getVersion(Transaction &transaction)
 }
 
 
-bool
+int
 PostGis::getUndefinedSRIDValue(const VersionTuple &versionPostgis)
 {
+    int undefinedSrid = 0;
     if (std::get<0>(versionPostgis) < 2) {
-        return -1;
+        undefinedSrid = -1;
     }
-    return 0;
+    return undefinedSrid;
 }
 
 
