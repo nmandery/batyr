@@ -1,3 +1,9 @@
+batyr (0.2.3-0.wheezy) unstable; urgency=low
+
+  * fix wrong returntype of getUndefinedSRIDValue and the resulting srid transformation [259d351]
+
+ -- Nico Mandery <nico.mandery@geops.de>  Mon, 16 Feb 2015 12:30:23 +0100
+
 batyr (0.2.2-0.whezzy) unstable; urgency=low
 
   * make all GML attributes visible by setting the OGR option GML_ATTRIBUTES_TO_OGR_FIELDS (gdal >= 1.11.0) [9e0c37b]
