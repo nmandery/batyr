@@ -30,12 +30,12 @@ else ()
     message(FATAL_ERROR "Your C++ compiler does not support C++11.")
 endif ()
 
-find_package( PythonInterp REQUIRED)
 find_package( Threads REQUIRED)
 #find_package( ZeroMQ REQUIRED)
 find_package( GDAL REQUIRED)
 find_package( Postgres REQUIRED)
 find_package( Poco REQUIRED Foundation Util Net)
+
 
 #
 # Manual project configuration
