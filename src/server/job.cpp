@@ -7,7 +7,7 @@
 
 #include "server/job.h"
 #include "server/json.h"
-#include "common/stringutils.h"
+#include "core/stringutils.h"
 
 #include "rapidjson/document.h"
 

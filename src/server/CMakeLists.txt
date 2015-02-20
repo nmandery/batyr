@@ -44,7 +44,6 @@ target_link_libraries( ${PROJECT_NAME}
     ${POSTGRES_LIBRARY} 
     ${GDAL_LIBRARY} 
     ${CMAKE_THREAD_LIBS_INIT}
-    batyrcommon
     batyrcore
     )
 

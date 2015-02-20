@@ -2,7 +2,7 @@
 #include <algorithm>
 
 #include "server/jobstorage.h"
-#include "common/config.h"
+#include "core/config.h"
 
 
 using namespace Batyr;

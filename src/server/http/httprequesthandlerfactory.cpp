@@ -10,7 +10,7 @@
 #include "server/http/joblisthandler.h"
 #include "server/http/getjobhandler.h"
 #include "server/http/layerlisthandler.h"
-#include "common/config.h"
+#include "core/config.h"
 
 #ifdef ENABLE_HTTP_WEB_GUI
 #include "server/http/bufferhandler.h"

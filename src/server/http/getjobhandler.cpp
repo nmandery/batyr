@@ -1,7 +1,7 @@
 #include "server/http/getjobhandler.h"
 #include "server/json.h"
 #include "server/error.h"
-#include "common/macros.h"
+#include "core/macros.h"
 
 #include "rapidjson/document.h"
 

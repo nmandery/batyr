@@ -1,7 +1,7 @@
 #include "server/http/statushandler.h"
 #include "server/json.h"
-#include "common/macros.h"
-#include "common/config.h"
+#include "core/macros.h"
+#include "core/config.h"
 
 #include <Poco/Net/HTTPResponse.h>
 #include <iostream>

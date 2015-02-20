@@ -1,6 +1,6 @@
 #include "server/http/layerlisthandler.h"
 #include "server/json.h"
-#include "common/macros.h"
+#include "core/macros.h"
 
 #include "rapidjson/document.h"
 

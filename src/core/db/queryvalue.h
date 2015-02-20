@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "common/nullablevalue.h"
+#include "core/nullablevalue.h"
 
 namespace Batyr
 {

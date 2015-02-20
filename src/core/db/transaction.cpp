@@ -4,9 +4,9 @@
 
 #include "core/db/transaction.h"
 #include "core/db/connection.h"
-#include "common/macros.h"
-#include "common/config.h"
-#include "common/stringutils.h"
+#include "core/macros.h"
+#include "core/config.h"
+#include "core/stringutils.h"
 
 
 using namespace Batyr::Db;

@@ -18,8 +18,8 @@
 
 #include "server/server.h"
 #include "server/http/listener.h"
-#include "common/macros.h"
-#include "common/config.h"
+#include "core/macros.h"
+#include "core/config.h"
 #include "server/broker.h"
 
 

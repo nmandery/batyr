@@ -3,7 +3,7 @@
 
 #include "rapidjson/document.h"
 
-#include "common/nullablevalue.h"
+#include "core/nullablevalue.h"
 
 #include <string>
 #include <map>

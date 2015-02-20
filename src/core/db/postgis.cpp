@@ -1,9 +1,9 @@
 #include <libpq-fe.h>
 
 #include "core/db/postgis.h"
-#include "common/stringutils.h"
+#include "core/stringutils.h"
 #include "core/db/connection.h"
-#include "common/macros.h"
+#include "core/macros.h"
 
 using namespace Batyr::Db;
 

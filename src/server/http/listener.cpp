@@ -1,5 +1,5 @@
 #include "server/http/listener.h"
-#include "common/config.h"
+#include "core/config.h"
 
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Exception.h>

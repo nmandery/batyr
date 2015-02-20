@@ -7,8 +7,8 @@
 #include <thread>
 #include <vector>
 
-#include "common/config.h"
-#include "common/stringutils.h"
+#include "core/config.h"
+#include "core/stringutils.h"
 #include "server/worker.h"
 #include "core/db/postgis.h"
 

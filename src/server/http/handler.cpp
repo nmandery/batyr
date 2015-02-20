@@ -1,5 +1,5 @@
 #include "server/http/handler.h"
-#include "common/config.h"
+#include "core/config.h"
 
 using namespace Batyr::Http;
 

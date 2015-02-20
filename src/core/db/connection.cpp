@@ -2,8 +2,8 @@
 
 #include "core/db/connection.h"
 #include "core/db/transaction.h"
-#include "common/config.h"
-#include "common/stringutils.h"
+#include "core/config.h"
+#include "core/stringutils.h"
 
 
 using namespace Batyr::Db;

@@ -1,7 +1,7 @@
 #include "core/configuration.h"
-#include "common/iniparser.h"
-#include "common/macros.h"
-#include "common/stringutils.h"
+#include "core/iniparser.h"
+#include "core/macros.h"
+#include "core/stringutils.h"
 
 #include <iostream>
 #include <fstream>
