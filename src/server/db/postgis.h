@@ -29,7 +29,7 @@ namespace PostGis
      * This value changed with version 2.0.
      * see https://trac.osgeo.org/postgis/ticket/286
      */
-    bool getUndefinedSRIDValue(const VersionTuple &versionPostgis);
+    int getUndefinedSRIDValue(const VersionTuple &versionPostgis);
 
 
     /**
