@@ -11,6 +11,7 @@ add_subdirectory(3rdparty)
 
 # include files shared by all projects
 add_subdirectory(common)
+add_subdirectory(core)
 
 # the web gui for the server. static html/css/js/... files
 if (ENABLE_HTTP_WEB_GUI)

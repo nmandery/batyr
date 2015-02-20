@@ -5,8 +5,8 @@
 
 #include <libpq-fe.h>
 
-#include "server/db/field.h"
-#include "server/db/queryvalue.h"
+#include "core/db/field.h"
+#include "core/db/queryvalue.h"
 
 #include <memory>
 #include <vector>

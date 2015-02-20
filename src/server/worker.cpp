@@ -10,7 +10,7 @@
 #include "common/config.h"
 #include "common/stringutils.h"
 #include "server/worker.h"
-#include "server/db/postgis.h"
+#include "core/db/postgis.h"
 
 using namespace Batyr;
 

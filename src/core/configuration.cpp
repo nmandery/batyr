@@ -1,4 +1,4 @@
-#include "server/configuration.h"
+#include "core/configuration.h"
 #include "common/iniparser.h"
 #include "common/macros.h"
 #include "common/stringutils.h"

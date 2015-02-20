@@ -8,9 +8,9 @@
 #include <stdexcept>
 
 #include "server/jobstorage.h"
-#include "server/configuration.h"
-#include "server/db/connection.h"
-#include "server/db/queryvalue.h"
+#include "core/configuration.h"
+#include "core/db/connection.h"
+#include "core/db/queryvalue.h"
 
 #include "ogrsf_frmts.h"
 

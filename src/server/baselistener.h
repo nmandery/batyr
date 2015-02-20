@@ -4,7 +4,7 @@
 #include <Poco/Logger.h>
 
 #include "server/jobstorage.h"
-#include "server/configuration.h"
+#include "core/configuration.h"
 
 #include <memory>
 

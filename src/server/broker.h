@@ -9,7 +9,7 @@
 #include "server/baselistener.h"
 #include "server/worker.h"
 #include "server/jobstorage.h"
-#include "server/configuration.h"
+#include "core/configuration.h"
 
 namespace Batyr {
    

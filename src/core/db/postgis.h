@@ -1,7 +1,7 @@
 #ifndef __batyr_db_postgis_h__
 #define __batyr_db_postgis_h__
 
-#include "server/db/transaction.h"
+#include "core/db/transaction.h"
 
 
 // magic value no srid info in postgis

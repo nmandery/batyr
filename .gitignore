@@ -14,6 +14,7 @@ Makefile
 /src/web/static/js/app.js.in
 /src/web/static/partials/manual.html
 /src/common/libbatyrcommon.a
+/src/core/libbatyrcore.a
 /src/common/config.h
 /debian/batyr*
 /debian/files

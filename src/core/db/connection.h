@@ -9,8 +9,8 @@
 #include <memory>
 #include <stdexcept>
 
-#include "server/configuration.h"
-#include "server/db/transaction.h"
+#include "core/configuration.h"
+#include "core/db/transaction.h"
 
 namespace Batyr
 {

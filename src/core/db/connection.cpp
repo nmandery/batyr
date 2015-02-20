@@ -1,7 +1,7 @@
 #include <cstring>
 
-#include "server/db/connection.h"
-#include "server/db/transaction.h"
+#include "core/db/connection.h"
+#include "core/db/transaction.h"
 #include "common/config.h"
 #include "common/stringutils.h"
 

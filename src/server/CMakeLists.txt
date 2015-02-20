@@ -45,6 +45,7 @@ target_link_libraries( ${PROJECT_NAME}
     ${GDAL_LIBRARY} 
     ${CMAKE_THREAD_LIBS_INIT}
     batyrcommon
+    batyrcore
     )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

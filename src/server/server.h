@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 
-#include "server/configuration.h"
+#include "core/configuration.h"
 
 namespace Batyr {
 
