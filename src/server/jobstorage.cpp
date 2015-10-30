@@ -24,8 +24,6 @@ JobStorage::JobStorage(std::chrono::duration<int> _maxAgeDoneJobs)
             // from the cleaning
             auto minTime = std::chrono::system_clock::now() - storage->maxAgeDoneJobs;
 
-            poco_debug(storage->logger, "Starting to remove deprecated jobs");
-
             size_t numRemovedJobs = 0;
             for (auto it = storage->jobMap.begin(), ite = storage->jobMap.end(); it != ite;) {
                 if (it->second->isDone()) {
