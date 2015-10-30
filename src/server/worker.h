@@ -44,6 +44,11 @@ namespace Batyr
              */
             QueryValue convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldType fieldType, const std::string pgTypeName);
 
+            /**
+             * convert the feature's fid to a postgresql compatible string
+             */
+            QueryValue convertFidToString(OGRFeature * ogrFeature);
+
             std::string getPostgresType(OGRFieldType fieldType);
 
         public:

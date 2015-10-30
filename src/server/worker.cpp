@@ -89,7 +89,7 @@ Worker::pull(Job::Ptr job)
     auto ogrLayer = ogrDataset->GetLayerByName(layer->source_layer.c_str());
     if (ogrLayer == nullptr) {
         // check if the layer exists and is just not readable
-        // and collect some info for better diagnosis of the 
+        // and collect some info for better diagnosis of the
         // problem.
         bool layerExists = false;
         int layersNotOpenable = 0;
@@ -116,7 +116,7 @@ Worker::pull(Job::Ptr job)
         }
 
         std::stringstream msgstream;
-        msgstream  << "source_layer \"" << layer->source_layer 
+        msgstream  << "source_layer \"" << layer->source_layer
                    << "\" for configured layer \"" << layer->name << "\" ";
         if (layerExists) {
             msgstream << "exists, but could not be opened.";
@@ -132,7 +132,7 @@ Worker::pull(Job::Ptr job)
             }
 
             if (layersNotOpenable > 0) {
-                msgstream   << " HINT: " << layersNotOpenable 
+                msgstream   << " HINT: " << layersNotOpenable
                             << " layer(s) could not be opened.";
             }
         }
@@ -176,6 +176,19 @@ Worker::pull(Job::Ptr job)
                 "geometry fields. Currently only sources with no or only one geometry field are supported";
         throw WorkerError(msg);
     }
+#endif
+
+
+#ifdef _DEBUG
+        {
+            if (strlen(ogrLayer->GetFIDColumn()) > 0) {
+                std::stringstream msg;
+                msg << "ogr layer provides the column "
+                    << ogrLayer->GetFIDColumn()
+                    << " (via fid)";
+                poco_debug(logger, msg.str());
+            }
+        }
 #endif
 
     // collect the columns of the dataset
@@ -240,7 +253,8 @@ Worker::pull(Job::Ptr job)
                 geometryColumn = tableFieldPair.second.name;
                 insertColumns.push_back(tableFieldPair.second.name);
             }
-            if (ogrFields.find(tableFieldPair.second.name) != ogrFields.end()) {
+            if (ogrFields.find(tableFieldPair.second.name) != ogrFields.end() ||
+                ogrLayer->GetFIDColumn() == tableFieldPair.second.name) {
                 insertColumns.push_back(tableFieldPair.second.name);
             }
         }
@@ -258,8 +272,9 @@ Worker::pull(Job::Ptr job)
             throw WorkerError("Got no primarykey for layer \"" + job->getLayerName() + "\"");
         }
         std::vector<std::string> missingPrimaryKeysSource;
-        for( const auto &primaryKeyCol : primaryKeyColumns) {
-            if (ogrFields.find(primaryKeyCol) == ogrFields.end()) {
+        for (const auto &primaryKeyCol : primaryKeyColumns) {
+            if (ogrFields.find(primaryKeyCol) == ogrFields.end() &&
+                ogrLayer->GetFIDColumn() != primaryKeyCol) {
                 missingPrimaryKeysSource.push_back(primaryKeyCol);
             }
         }
@@ -392,9 +407,16 @@ Worker::pull(Job::Ptr job)
                     pgValues.push_back(std::move(pgVal));
                 }
                 else {
-                    auto ogrField = &ogrFields[insertColumn];
-                    QueryValue pV = convertToString(ogrFeature.get(), ogrField->index, ogrField->type, tableField->pgTypeName);
-                    pgValues.push_back( std::move(pV) );
+                    if (ogrLayer->GetFIDColumn() == insertColumn) {
+                        // handle special case where insertColumn is the fid
+                        // with index = -1
+                        QueryValue pV = convertFidToString(ogrFeature.get());
+                        pgValues.push_back( std::move(pV) );
+                    } else {
+                        auto ogrField = &ogrFields[insertColumn];
+                        QueryValue pV = convertToString(ogrFeature.get(), ogrField->index, ogrField->type, tableField->pgTypeName);
+                        pgValues.push_back( std::move(pV) );
+                    }
                 }
             }
 
@@ -433,10 +455,10 @@ Worker::pull(Job::Ptr job)
             if (i != 0) {
                 updateStmt << ", ";
             }
-            updateStmt  << transaction->quoteIdent(updateColumns[i]) << " = " 
+            updateStmt  << transaction->quoteIdent(updateColumns[i]) << " = "
                         << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << " ";
         }
-        updateStmt          << " from " << transaction->quoteIdent(tempTableName) 
+        updateStmt          << " from " << transaction->quoteIdent(tempTableName)
                             << " where (";
         for (size_t i=0; i<primaryKeyColumns.size(); i++) {
             if (i != 0) {
@@ -449,8 +471,8 @@ Worker::pull(Job::Ptr job)
         updateStmt          << ") and (";
 
         // add more WHERE conditions to only update rows which are actually different.
-        // There is no purpose in performing updates when none of the colums changed. This will only 
-        // fire eventually exisiting triggers which would make the operation more expensive 
+        // There is no purpose in performing updates when none of the colums changed. This will only
+        // fire eventually exisiting triggers which would make the operation more expensive
         // ... and that should be avoided.
         for (size_t i=0; i<updateColumns.size(); i++) {
             if (i != 0) {
@@ -463,7 +485,7 @@ Worker::pull(Job::Ptr job)
                 std::string quotedTargetGeom =  transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i]);
                 std::string quotedTempGeom = transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]);
 
-                // update geometries always when the srid differs or when they are collections. 
+                // update geometries always when the srid differs or when they are collections.
                 // MEMO: geometries with different SRIDs can not be compared with the "=" operator
                 // MEMO: collections can not be compared with st_equals
                 updateStmt  << "("
@@ -524,7 +546,7 @@ Worker::pull(Job::Ptr job)
 
         //
         // delete deprecated rows from the exisiting/target table
-        // 
+        //
         if (allow_feature_deletion) {
             std::stringstream deleteRemovedStmt;
             auto quotedPrimaryKeyColumnsStr = StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ");
@@ -852,6 +874,20 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
             )) {
         result.setIsNull(true);
     }
+
+    return std::move(result);
+}
+
+QueryValue
+Worker::convertFidToString(OGRFeature * ogrFeature)
+{
+    QueryValue result;
+
+    // fid is always an integer
+    // http://www.gdal.org/classOGRFeature.html#a45da957be1eb8aa824e3ee9dbfb9604c
+
+    result.setIsNull(false);
+    result.set(std::to_string(ogrFeature->GetFID()));
 
     return std::move(result);
 }
