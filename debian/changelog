@@ -1,3 +1,9 @@
+batyr (0.2.6-0) unstable; urgency=low
+
+  * fixed bug where null values were written as empty values (0, 0.0, "", …) TRAFGDWH-18
+
+ -- Thomas Rinklin | geOps <thomas.rinklin@geops.de>  Fri, 13 May 2016 11:58:47 +0200
+
 batyr (0.2.5-0) unstable; urgency=low
 
   * set version to 0.2.5 [c24d514]
