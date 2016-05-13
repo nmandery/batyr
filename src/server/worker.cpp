@@ -3,7 +3,6 @@
 #include <cstring>
 #include <map>
 #include <sstream>
-#include <stdexcept>
 #include <thread>
 #include <vector>
 
@@ -258,7 +257,7 @@ Worker::pull(Job::Ptr job)
                 insertColumns.push_back(tableFieldPair.second.name);
             }
         }
-        // allow overriding the primarykey from the configfile if there are alternatives cofigured there
+        // allow overriding the primarykey from the configfile if there are alternatives configured there
         if (!layer->primary_key_columns.empty()) {
             for(const auto primary_key_column : layer->primary_key_columns) {
                 if (tableFields.find(primary_key_column) == tableFields.end()) {
@@ -801,21 +800,23 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
 
     switch (fieldType) {
         case OFTString:
-            {
+            result.setIsNull(ogrFeature->IsFieldSet(fieldIdx) == 0);
+            if (!result.isNull()) {
                 const char * fieldValue = ogrFeature->GetFieldAsString(fieldIdx);
-                result.setIsNull((fieldValue == nullptr));
-                if (!result.isNull()) {
-                    result.set(fieldValue);
-                }
-                break;
+                result.set(fieldValue);
             }
+            break;
         case OFTInteger:
-            result.setIsNull(false);
-            result.set(std::to_string(ogrFeature->GetFieldAsInteger(fieldIdx)));
+            result.setIsNull(ogrFeature->IsFieldSet(fieldIdx) == 0);
+            if (!result.isNull()) {
+                result.set(std::to_string(ogrFeature->GetFieldAsInteger(fieldIdx)));
+            }
             break;
         case OFTReal:
-            result.setIsNull(false);
-            result.set(std::to_string(ogrFeature->GetFieldAsDouble(fieldIdx)));
+            result.setIsNull(ogrFeature->IsFieldSet(fieldIdx) == 0);
+            if (!result.isNull()) {
+                result.set(std::to_string(ogrFeature->GetFieldAsDouble(fieldIdx)));
+            }
             break;
         case OFTDate:
         case OFTTime:
@@ -851,7 +852,10 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
                 }
                 else {
                     result.setIsNull(true);
-                    poco_debug(logger, "field at index " + std::to_string(fieldIdx) + " is null");
+                    if (ogrFeature->IsFieldSet(fieldIdx) == 1) {
+                        poco_debug(logger, "field at index " + std::to_string(fieldIdx) + ""
+                                           " null, but also set.");
+                    }
                 }
                 break;
             }
@@ -866,7 +870,7 @@ Worker::convertToString(OGRFeature * ogrFeature, const int fieldIdx, OGRFieldTyp
 
     // sanitize invalid values - empty time types are generaly invalid and most certainly result from
     // string fields returned as empty strings
-    if (result.get().empty() && (
+    if (!result.isNull() && result.get().empty() && (
                 (pgTypeName == "timestamp") ||
                 (pgTypeName == "timestampz") ||
                 (pgTypeName == "time") ||
