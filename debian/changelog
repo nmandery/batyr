@@ -1,3 +1,22 @@
+batyr (0.2.6-0) unstable; urgency=low
+
+  * fixed bug where null values were written as empty values (0, 0.0, "", …) TRAFGDWH-18
+
+ -- Thomas Rinklin | geOps <thomas.rinklin@geops.de>  Fri, 13 May 2016 11:58:47 +0200
+
+batyr (0.2.5-0) unstable; urgency=low
+
+  * set version to 0.2.5 [c24d514]
+
+ -- Patrick Brosi <patrick.brosi@geops.de>  Thu, 19 Nov 2015 19:19:57 +0100
+
+batyr (0.2.4-0) unstable; urgency=high
+
+  * fix primary column not being recognized if stored as fid [ed47068]
+  * remove debug output which makes debug output unreadable [84e766c]
+
+ -- Patrick Brosi <patrick.brosi@geops.de>  Fri, 30 Oct 2015 17:36:00 +0100
+
 batyr (0.2.3-0) unstable; urgency=low
 
   * fix wrong returntype of getUndefinedSRIDValue and the resulting srid transformation [259d351]
@@ -22,7 +41,7 @@ batyr (0.2.1-0) unstable; urgency=low
   * support for postgis 2.0 usage of 0 for an undefined srid [a3bccd8]
 
  -- Nico Mandery <nico.mandery@geops.de>  Wed, 28 Jan 2015 08:37:27 +0100
- 
+
 
 batyr (0.2.0-0) unstable; urgency=low
 
