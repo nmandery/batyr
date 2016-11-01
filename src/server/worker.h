@@ -38,6 +38,8 @@ namespace Batyr
             void pull(Job::Ptr job);
             void removeByAttributes(Job::Ptr job);
 
+            void _syncBulk();
+
             /**
              * convert the field at the given index with the given
              * OGRFieldType to a postgresql compatible string

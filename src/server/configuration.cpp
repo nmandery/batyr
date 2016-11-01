@@ -19,7 +19,9 @@ static const char trimChars[] = "'\"\r\n\t ";
 Layer::Layer()
     :   allow_feature_deletion(false),
         ignore_failures(false),
-        enabled(true)
+        enabled(true),
+        bulk_mode(false),
+        bulk_delete_method(BULK_DELETE)
 {
 }
 
@@ -241,6 +243,21 @@ Configuration::parse(const std::string & configFile)
                                 }
                             }
                         }
+                        else if (layerValuePair.first == "bulk_mode") {
+                            GET_BOOLEAN_SETTING(layer->bulk_mode, layerValuePair.first, layerValuePair.second);
+                        }
+                        else if (layerValuePair.first == "bulk_delete_method") {
+                            std::string bulkMethodStr = StringUtils::tolower(StringUtils::trim(layerValuePair.second, trimChars));
+                            if (bulkMethodStr == "delete") {
+                                layer->bulk_delete_method = Batyr::BULK_DELETE;
+                            }
+                            else if (bulkMethodStr == "truncate") {
+                                layer->bulk_delete_method = Batyr::BULK_TRUNCATE;
+                            }
+                            else {
+                                throw ConfigurationError("Unknown bulk delete method: \"" + layerValuePair.second + "\"");
+                            }
+                        }
                         else {
                             throwUnknownSetting(layerSectionPair.first, layerValuePair.first);
                         }
@@ -264,6 +281,11 @@ Configuration::parse(const std::string & configFile)
                     }
                     else {
                         std::cout << "Layer \"" << layer->name << "\" is disabled." << std::endl;
+                    }
+
+                    if (layer->bulk_mode)
+                    {
+                        std::cout << "Bulk mode is used for layer \"" << layer->name << "\"" << std::endl;
                     }
                 }
             }
