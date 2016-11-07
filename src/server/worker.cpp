@@ -448,24 +448,38 @@ Worker::pull(Job::Ptr job)
         if (layer->bulk_mode) {
 
             //
-            // delete or truncate all records from target table
+            // Delete or truncate all records from target table.
             //
-            std::stringstream deleteStmt;
             if (layer->bulk_delete_method == BULK_TRUNCATE) {
-                deleteStmt   << "truncate " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                // Firstly count records in target table because PQcmdTuples() will not return a
+                // number of truncated records.
+                // Note: count function with primary key column should be faster than count(*) as
+                // it is an index in Postgres.
+                // Note: primaryKeyColumns[] was already checked for emptiness.
+                std::stringstream countStmt;
+                countStmt << "select count(" << primaryKeyColumns[0] << ") from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                auto countRes = transaction->exec(countStmt.str());
+                numDeleted = std::atoi(PQgetvalue(countRes.get(),0,0));
+                countRes.reset(NULL);
+                // Than truncate table.
+                std::stringstream truncateStmt;
+                truncateStmt   << "truncate " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                auto truncateRes = transaction->exec(truncateStmt.str());
+                truncateRes.reset(NULL);
             } else {
+                std::stringstream deleteStmt;
                 deleteStmt   << "delete from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                auto deleteRes = transaction->exec(deleteStmt.str());
+                numDeleted = std::atoi(PQcmdTuples(deleteRes.get()));
+                deleteRes.reset(NULL);
             }
-            auto deleteRes = transaction->exec(deleteStmt.str());
-            numDeleted = std::atoi(PQcmdTuples(deleteRes.get()));
-            deleteRes.reset(NULL);
 
             //
-            // insert all records from the temp table to the taget table
+            // Insert all records from the temp table to the taget table.
             //
             std::stringstream insertStmt;
             // Note: temp table already has the same columns structure as the target table but we need
-            // an order of columns to correctly insert data
+            // an order of columns to correctly insert data.
             // Note: insertColumns contains all columns even primary key and geometry columns.
             insertStmt   << "insert into " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
                          << " ( " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << ") "
