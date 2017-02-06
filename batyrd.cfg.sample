@@ -173,6 +173,25 @@ ignore_failures = no
 # Default: empty
 primary_key_columns = id
 
+# Enable/disable bulk mode. If bulk mode is enabled all records in the target table
+# will be deleted or truncated (depending on corresponding option) and all records 
+# from the source table will be copied to the target table. This can increase performance
+# on large datasets.
+#
+# Optional. If is not set the default behaviour for pulling tables will be used. See 
+# MANUAL.md file.
+# Type: boolean
+# Default: false
+bulk_mode = true
+
+# Which SQL command to use for the bulk mode (if bulk mode is turned on): DELETE or 
+# TRUNCATE. 
+# 
+# Optional.
+# Valid values are: "delete" and "truncate".
+# Default: "delete".
+bulk_delete_method = truncate
+
 [[dataset1]]
 description= testing different values
 

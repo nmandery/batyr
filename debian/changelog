@@ -1,3 +1,9 @@
+batyr (0.2.7) UNRELEASED; urgency=medium
+
+  * Adds bulk mode feature (implemented by nextgis)
+
+ -- Stanis Trendelenburg | geOps <stanis.trendelenburg@geops.de>  Thu, 10 Nov 2016 13:40:21 +0100
+
 batyr (0.2.6-0) unstable; urgency=low
 
   * fixed bug where null values were written as empty values (0, 0.0, "", …) TRAFGDWH-18

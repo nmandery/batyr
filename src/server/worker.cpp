@@ -444,119 +444,168 @@ Worker::pull(Job::Ptr job)
         }
         job->setStatistics(numPulled, numCreated, numUpdated, numDeleted, numIgnored);
 
-        //
-        // update the existing/target table
-        //
-        std::stringstream updateStmt;
-        updateStmt          << "update " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name) << " "
-                            << " set ";
-        for (size_t i=0; i<updateColumns.size(); i++) {
-            if (i != 0) {
-                updateStmt << ", ";
-            }
-            updateStmt  << transaction->quoteIdent(updateColumns[i]) << " = "
-                        << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << " ";
-        }
-        updateStmt          << " from " << transaction->quoteIdent(tempTableName)
-                            << " where (";
-        for (size_t i=0; i<primaryKeyColumns.size(); i++) {
-            if (i != 0) {
-                updateStmt << " and ";
-            }
-            updateStmt  << transaction->quoteAndJoinIdent(layer->target_table_name, primaryKeyColumns[i])
-                        << " is not distinct from "
-                        << transaction->quoteAndJoinIdent(tempTableName, primaryKeyColumns[i]);
-        }
-        updateStmt          << ") and (";
+        // Update data using bulk mode if according option was set.
+        if (layer->bulk_mode) {
 
-        // add more WHERE conditions to only update rows which are actually different.
-        // There is no purpose in performing updates when none of the colums changed. This will only
-        // fire eventually exisiting triggers which would make the operation more expensive
-        // ... and that should be avoided.
-        for (size_t i=0; i<updateColumns.size(); i++) {
-            if (i != 0) {
-                updateStmt << " or ";
+            //
+            // Delete or truncate all records from target table.
+            //
+            if (layer->bulk_delete_method == BULK_TRUNCATE) {
+                // Firstly count records in target table because PQcmdTuples() will not return a
+                // number of truncated records.
+                // Note: count function with primary key column should be faster than count(*) as
+                // it is an index in Postgres.
+                // Note: primaryKeyColumns[] was already checked for emptiness.
+                std::stringstream countStmt;
+                countStmt << "select count(" << primaryKeyColumns[0] << ") from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                auto countRes = transaction->exec(countStmt.str());
+                numDeleted = std::atoi(PQgetvalue(countRes.get(),0,0));
+                countRes.reset(NULL);
+                // Than truncate table.
+                std::stringstream truncateStmt;
+                truncateStmt   << "truncate " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                auto truncateRes = transaction->exec(truncateStmt.str());
+                truncateRes.reset(NULL);
+            } else {
+                std::stringstream deleteStmt;
+                deleteStmt   << "delete from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name);
+                auto deleteRes = transaction->exec(deleteStmt.str());
+                numDeleted = std::atoi(PQcmdTuples(deleteRes.get()));
+                deleteRes.reset(NULL);
             }
 
-            auto tableField = &tableFields[updateColumns[i]];
+            //
+            // Insert all records from the temp table to the taget table.
+            //
+            std::stringstream insertStmt;
+            // Note: temp table already has the same columns structure as the target table but we need
+            // an order of columns to correctly insert data.
+            // Note: insertColumns contains all columns even primary key and geometry columns.
+            insertStmt   << "insert into " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
+                         << " ( " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << ") "
+                         << " select " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << " "
+                         << " from " << transaction->quoteIdent(tempTableName);
+            auto insertRes = transaction->exec(insertStmt.str());
+            numCreated = std::atoi(PQcmdTuples(insertRes.get()));
+            insertRes.reset(NULL);
 
-            if (tableField->pgTypeName == "geometry") {
-                std::string quotedTargetGeom =  transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i]);
-                std::string quotedTempGeom = transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]);
+        // Update data in a default way.
+        } else {
 
-                // update geometries always when the srid differs or when they are collections.
-                // MEMO: geometries with different SRIDs can not be compared with the "=" operator
-                // MEMO: collections can not be compared with st_equals
-                updateStmt  << "("
-                            <<      "case when "
-                            <<          "(st_srid(" << quotedTargetGeom << ") != st_srid(" << quotedTempGeom << ")) ";
+            //
+            // update the existing/target table
+            //
+            std::stringstream updateStmt;
+            updateStmt          << "update " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name) << " "
+                                << " set ";
+            for (size_t i=0; i<updateColumns.size(); i++) {
+                if (i != 0) {
+                    updateStmt << ", ";
+                }
+                updateStmt  << transaction->quoteIdent(updateColumns[i]) << " = "
+                            << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << " ";
+            }
+            updateStmt          << " from " << transaction->quoteIdent(tempTableName)
+                                << " where (";
+            for (size_t i=0; i<primaryKeyColumns.size(); i++) {
+                if (i != 0) {
+                    updateStmt << " and ";
+                }
+                updateStmt  << transaction->quoteAndJoinIdent(layer->target_table_name, primaryKeyColumns[i])
+                            << " is not distinct from "
+                            << transaction->quoteAndJoinIdent(tempTableName, primaryKeyColumns[i]);
+            }
+            updateStmt          << ") and (";
 
-                if (std::get<0>(versionPostgis) >= 2) {
-                        // st_iscollection is only supported starting with postgis 2.0
-                        updateStmt  << " or st_iscollection(" << quotedTargetGeom << ") "
-                                    << " or st_iscollection(" << quotedTempGeom << ") ";
+            // add more WHERE conditions to only update rows which are actually different.
+            // There is no purpose in performing updates when none of the colums changed. This will only
+            // fire eventually exisiting triggers which would make the operation more expensive
+            // ... and that should be avoided.
+            for (size_t i=0; i<updateColumns.size(); i++) {
+                if (i != 0) {
+                    updateStmt << " or ";
+                }
+
+                auto tableField = &tableFields[updateColumns[i]];
+
+                if (tableField->pgTypeName == "geometry") {
+                    std::string quotedTargetGeom =  transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i]);
+                    std::string quotedTempGeom = transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]);
+
+                    // update geometries always when the srid differs or when they are collections.
+                    // MEMO: geometries with different SRIDs can not be compared with the "=" operator
+                    // MEMO: collections can not be compared with st_equals
+                    updateStmt  << "("
+                                <<      "case when "
+                                <<          "(st_srid(" << quotedTargetGeom << ") != st_srid(" << quotedTempGeom << ")) ";
+
+                    if (std::get<0>(versionPostgis) >= 2) {
+                            // st_iscollection is only supported starting with postgis 2.0
+                            updateStmt  << " or st_iscollection(" << quotedTargetGeom << ") "
+                                        << " or st_iscollection(" << quotedTempGeom << ") ";
+                    }
+                    else {
+                            updateStmt  << " or ("
+                                        <<   "st_geometrytype(" << quotedTargetGeom << ") = 'ST_GeometryCollection'"
+                                        <<   " or st_geometrytype(" << quotedTargetGeom << ") like 'ST_Multi%'"
+                                        << ") "
+                                        << " or ("
+                                        <<   "st_geometrytype(" << quotedTempGeom << ") = 'ST_GeometryCollection'"
+                                        <<   " or st_geometrytype(" << quotedTempGeom << ") like 'ST_Multi%'"
+                                        << ") ";
+                    }
+
+                    updateStmt  <<  "then "
+                                // compare using the binary representation as ST_Equals can not be used in this case
+                                <<      quotedTargetGeom << "::bytea " << " is distinct from " << quotedTempGeom << "::bytea "
+                                <<  " else "
+                                // compare using st_equals
+                                <<      "not st_equals("  << quotedTargetGeom << ", " << quotedTempGeom << ")"
+                                <<  " end "
+                                << ")";
                 }
                 else {
-                        updateStmt  << " or ("
-                                    <<   "st_geometrytype(" << quotedTargetGeom << ") = 'ST_GeometryCollection'"
-                                    <<   " or st_geometrytype(" << quotedTargetGeom << ") like 'ST_Multi%'"
-                                    << ") "
-                                    << " or ("
-                                    <<   "st_geometrytype(" << quotedTempGeom << ") = 'ST_GeometryCollection'"
-                                    <<   " or st_geometrytype(" << quotedTempGeom << ") like 'ST_Multi%'"
-                                    << ") ";
+                    updateStmt  << "(" << transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i])
+                                << " is distinct from "
+                                << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << ")";
                 }
-
-                updateStmt  <<  "then "
-                            // compare using the binary representation as ST_Equals can not be used in this case
-                            <<      quotedTargetGeom << "::bytea " << " is distinct from " << quotedTempGeom << "::bytea "
-                            <<  " else "
-                            // compare using st_equals
-                            <<      "not st_equals("  << quotedTargetGeom << ", " << quotedTempGeom << ")"
-                            <<  " end "
-                            << ")";
             }
-            else {
-                updateStmt  << "(" << transaction->quoteAndJoinIdent(layer->target_table_name, updateColumns[i])
-                            << " is distinct from "
-                            << transaction->quoteAndJoinIdent(tempTableName, updateColumns[i]) << ")";
-            }
-        }
-        updateStmt          << ")";
-        auto updateRes = transaction->exec(updateStmt.str());
-        numUpdated = std::atoi(PQcmdTuples(updateRes.get()));
-        updateRes.reset(NULL); // immediately dispose the result
+            updateStmt          << ")";
+            auto updateRes = transaction->exec(updateStmt.str());
+            numUpdated = std::atoi(PQcmdTuples(updateRes.get()));
+            updateRes.reset(NULL); // immediately dispose the result
 
-        //
-        // insert missing rows in the exisiting/target table
-        //
-        std::stringstream insertMissingStmt;
-        insertMissingStmt   << "insert into " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
-                            << " ( " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << ") "
-                            << " select " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << " "
-                            << " from " << transaction->quoteIdent(tempTableName)
-                            << " where (" << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ") << ") not in ("
-                            << " select " << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ",") << " "
-                            << "       from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
-                            << ")";
-        auto insertMissingRes = transaction->exec(insertMissingStmt.str());
-        numCreated = std::atoi(PQcmdTuples(insertMissingRes.get()));
-        insertMissingRes.reset(NULL); // immediately dispose the result
-
-        //
-        // delete deprecated rows from the exisiting/target table
-        //
-        if (allow_feature_deletion) {
-            std::stringstream deleteRemovedStmt;
-            auto quotedPrimaryKeyColumnsStr = StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ");
-            deleteRemovedStmt   << "delete from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
-                                << " where (" << quotedPrimaryKeyColumnsStr << ") not in ("
-                                << " select " << quotedPrimaryKeyColumnsStr << " "
-                                << "       from " << transaction->quoteIdent(tempTableName)
+            //
+            // insert missing rows in the exisiting/target table
+            //
+            std::stringstream insertMissingStmt;
+            insertMissingStmt   << "insert into " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
+                                << " ( " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << ") "
+                                << " select " << StringUtils::join(transaction->quoteIdent(insertColumns), ", ") << " "
+                                << " from " << transaction->quoteIdent(tempTableName)
+                                << " where (" << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ") << ") not in ("
+                                << " select " << StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ",") << " "
+                                << "       from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
                                 << ")";
-            auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
-            numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
-            deleteRemovedRes.reset(NULL); // immediately dispose the result
+            auto insertMissingRes = transaction->exec(insertMissingStmt.str());
+            numCreated = std::atoi(PQcmdTuples(insertMissingRes.get()));
+            insertMissingRes.reset(NULL); // immediately dispose the result
+
+            //
+            // delete deprecated rows from the exisiting/target table
+            //
+            if (allow_feature_deletion) {
+                std::stringstream deleteRemovedStmt;
+                auto quotedPrimaryKeyColumnsStr = StringUtils::join(transaction->quoteIdent(primaryKeyColumns), ", ");
+                deleteRemovedStmt   << "delete from " << transaction->quoteAndJoinIdent(layer->target_table_schema, layer->target_table_name)
+                                    << " where (" << quotedPrimaryKeyColumnsStr << ") not in ("
+                                    << " select " << quotedPrimaryKeyColumnsStr << " "
+                                    << "       from " << transaction->quoteIdent(tempTableName)
+                                    << ")";
+                auto deleteRemovedRes = transaction->exec(deleteRemovedStmt.str());
+                numDeleted = std::atoi(PQcmdTuples(deleteRemovedRes.get()));
+                deleteRemovedRes.reset(NULL); // immediately dispose the result
+            }
         }
 
         job->setStatus(Job::Status::FINISHED);

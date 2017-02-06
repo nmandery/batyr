@@ -24,6 +24,8 @@ The synchronization process can be divided into six steps:
 
 These six steps are performed inside a transaction and will all get rolled back in case of an error.
 
+Instead of the step-by-step synchronization described above, an alternative "bulk mode" can also be used, which simply truncates the target table and copies all data from the source. This can be useful for very large tables, if a full synchronization is too expensive.
+
 The handling of different coordinate systems relies of the PostGIS geometry_columns view or - in older versions - table. batyr will use the SRID information from there to transform incoming geometries to the coordinate system of the target table. Incoming data without coordinate system information will get this SRID assigned without an transformation.
 
 This synchronization itself is performed asynchronously. This means that after an external application sends a request to pull a layer,
@@ -253,6 +255,25 @@ The valid values for each setting are documented in the example file bellow. For
     # Type: comma-seperated list of column names
     # Default: empty
     primary_key_columns = id
+    
+    # Enable/disable bulk mode. If bulk mode is enabled all records in the target table
+    # will be deleted or truncated (depending on corresponding option) and all records 
+    # from the source table will be copied to the target table. This can increase performance
+    # on large datasets.
+    #
+    # Optional. If is not set the default behaviour for pulling tables will be used. See 
+    # MANUAL.md file.
+    # Type: boolean
+    # Default: false
+    bulk_mode = true
+    
+    # Which SQL command to use for the bulk mode (if bulk mode is turned on): DELETE or 
+    # TRUNCATE. 
+    # 
+    # Optional.
+    # Valid values are: "delete" and "truncate".
+    # Default: "delete".
+    bulk_delete_method = truncate
 
 
 

@@ -12,6 +12,12 @@
 namespace Batyr
 {
 
+    enum BulkDeleteMethod
+    {
+        BULK_DELETE,
+        BULK_TRUNCATE
+    };
+
     struct Layer
     {
         std::string name;
@@ -25,6 +31,8 @@ namespace Batyr
         bool ignore_failures;
         std::vector<std::string> primary_key_columns;
         bool enabled;
+        bool bulk_mode;
+        BulkDeleteMethod bulk_delete_method;
 
         typedef std::shared_ptr<Layer> Ptr;
 
