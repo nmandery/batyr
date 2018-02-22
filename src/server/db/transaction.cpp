@@ -117,7 +117,7 @@ Transaction::execPrepared(const std::string &stmtName, const std::vector<QueryVa
     // convert to an array of c strings
     auto params = PGParams(qValues);
 
-    PGresultPtr result = this->execPrepared(stmtName, qValues.size(), params.values(), params.valueLenghts(), NULL, 1);
+    PGresultPtr result = this->execPrepared(stmtName, params.length(), params.values(), params.valueLenghts(), NULL, 1);
 
     return std::move(result);
 }
@@ -129,7 +129,7 @@ Transaction::execParams(const std::string &_sql, const std::vector<QueryValue> &
     // convert to an array of c strings
     auto params = PGParams(qValues);
 
-    PGresultPtr result = this->execParams(_sql, qValues.size(), NULL, params.values(), params.valueLenghts(), NULL, 1);
+    PGresultPtr result = this->execParams(_sql, params.length(), NULL, params.values(), params.valueLenghts(), NULL, 1);
 
     return std::move(result);
 }
