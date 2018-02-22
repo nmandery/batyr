@@ -319,7 +319,7 @@ Worker::pull(Job::Ptr job)
                     logStream   << " contains no SRID information."
                                 << " Reprojection is impossible -> using the SRID of the geometries as they are read from the source.";
 
-                    colStream   <<  "$" << idxColumn << "::" << tableField->pgTypeName;
+                    colStream   <<  "$" << idxColumn << "::text::" << tableField->pgTypeName;
                 }
                 else {
                     // all srids smaller than 1 are treated as undefined.
@@ -328,7 +328,7 @@ Worker::pull(Job::Ptr job)
                         logStream   << " returns SRID=" << pgSrid << " (undefined)."
                                     << " Reprojection is impossible -> assigning the SRID=" << pgUndefinedSrid << " (native undefined) to the new geometries";
 
-                        colStream   << "st_setsrid($" << idxColumn << "::" << tableField->pgTypeName << ", "
+                        colStream   << "st_setsrid($" << idxColumn << "::text::" << tableField->pgTypeName << ", "
                                     << pgUndefinedSrid << ")";
                     }
                     else {
@@ -342,7 +342,7 @@ Worker::pull(Job::Ptr job)
                                     <<      "else "
                                     <<          " st_transform(foo.g, " << pgSrid << ") "
                                     <<      "end"
-                                    << " from ( select $" << idxColumn << "::" << tableField->pgTypeName << " as g "
+                                    << " from ( select $" << idxColumn << "::text::" << tableField->pgTypeName << " as g "
                                     << " ) foo)";
                     }
                 }
